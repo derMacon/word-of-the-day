@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Container from 'react-bootstrap/Container';
@@ -8,7 +7,9 @@ function App() {
     return (
         <div className="App">
             <Container fluid="md">
-                <ItemInput onSubmit={output => console.log("top level output: ", output)}/>
+                <div className='my-3 shadow bg-white rounded border-1'>
+                    <ItemInput onSubmit={output => console.log("top level output: ", output)}/>
+                </div>
             </Container>
         </div>
     );
