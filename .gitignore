@@ -355,4 +355,6 @@ img-viewer/config.properties
 frontend/node_modules/
 **/env/
 **/env/*
+**/.venv/*
+**/.venv/
 
