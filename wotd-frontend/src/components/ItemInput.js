@@ -6,7 +6,6 @@ import {FaTimes} from "react-icons/fa";
 import PropTypes from "prop-types";
 
 
-
 class ItemInput extends Component {
 
     constructor(props) {
@@ -65,8 +64,8 @@ class ItemInput extends Component {
     }
 }
 
-ItemInput.prototype = {
-    onSubmit: PropTypes.func.isRequired,
+ItemInput.propTypes = {
+    onSubmit: PropTypes.func.isRequired
 }
 
 export default ItemInput;
