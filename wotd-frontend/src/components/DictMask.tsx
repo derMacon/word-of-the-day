@@ -16,41 +16,6 @@ import SelectableTable from "./SelectableTable";
 
 class DictMask extends Component {
 
-    constructor(props) {
-        super(props);
-        this.handleOnClick = this.handleOnClick.bind(this)
-        console.log(props)
-        this.state = {
-            input: '',
-        };
-    }
-
-    handleKeyDown(e) {
-        if (e.code === 'Enter' || e.which === 13) {
-            console.log('user pressed enter, submitting: ', e.target.value);
-            const output = e.target.value;
-            this.setState({input: ''});
-            this.props.onSubmit(output);
-        } else {
-            console.log('target val: ', e.target.value);
-        }
-    }
-
-    handleOnClear(e) {
-        console.log("user cleared input")
-        this.setState({input: ''}, () => {
-            this.inputRef.current.focus(); // Set focus after state is updated
-        });
-    }
-
-    handleInputChange(e) { // Add this function
-        this.setState({input: e.target.value});
-    }
-
-    handleOnClick(e) {
-        console.log('clicked', e)
-    }
-
     render() {
 
         const testInput = ['a', 'b', 'c']
@@ -75,9 +40,5 @@ class DictMask extends Component {
 
     }
 }
-
-// TextField.propTypes = {
-//     onSubmit: PropTypes.func.isRequired
-// }
 
 export default DictMask;

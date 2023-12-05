@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum, auto
 
 from src.utils.logging_config import app_log
@@ -14,18 +15,17 @@ class Status(Enum):
     OK = auto()
 
 
+@dataclass
 class DictRequest:
-    def __init__(self, from_language: Language, to_language: Language, input: str):
-        self.from_language = from_language
-        self.to_language = to_language
-        self.input = input
+    from_language: Language
+    to_language: Language
+    input: str
 
-    def to_map(self):
-        return {
-            'from_language': self.from_language.name,
-            'to_language': self.to_language.name,
-            'input': self.input,
-        }
+@dataclass
+class Option:
+    id: int
+    input: str
+    output: str
 
 
 class DictResponseOption:

@@ -40,7 +40,7 @@ class TextField extends Component<TextFieldProps, TextFieldState> {
         }
     }
 
-    handleOnClear(e: any) {
+    handleOnClear(e: React.MouseEvent<HTMLElement, MouseEvent>) {
         console.log("user cleared input")
 
         this.setState({input: ''}, () => {
@@ -49,7 +49,7 @@ class TextField extends Component<TextFieldProps, TextFieldState> {
 
     }
 
-    handleInputChange(e: any) { // Add this function
+    handleInputChange(e: any) {
         this.setState({input: e.target.value});
     }
 
