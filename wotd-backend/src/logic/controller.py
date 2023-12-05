@@ -3,7 +3,7 @@ from dictcc import Dict
 from src.data.types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
-from src.utils.translations_utils import evaluate_status
+from src.utils.translations_utils import evaluate_status, add_id_to_tuples
 
 
 class Controller:
@@ -19,6 +19,7 @@ class Controller:
             from_language=dict_request.from_language.name.lower(),
             to_language=dict_request.to_language.name.lower()
         ).translation_tuples
+        options = add_id_to_tuples(options)
         app_log.debug(f"response options: {options}")
 
         status: Status = evaluate_status(
