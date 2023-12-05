@@ -4,15 +4,15 @@ from enum import Enum, auto
 from src.utils.logging_config import app_log
 
 
-class Language(Enum):
-    EN = auto()
-    DE = auto()
+class Language(str, Enum):
+    EN = "EN"
+    DE = "DE"
 
 
-class Status(Enum):
-    NOT_FOUND = auto()
-    MISSPELLED = auto()
-    OK = auto()
+class Status(str, Enum):
+    NOT_FOUND = 'NOT_FOUND'
+    MISSPELLED = 'MISSPELLED'
+    OK = 'OK'
 
 
 @dataclass
@@ -21,6 +21,14 @@ class DictRequest:
     to_language: Language
     input: str
 
+    # translate enums when decoding json
+    def __post_init__(self):
+        if isinstance(self.from_language, str):
+            self.from_language = Language(self.from_language.upper())
+        if isinstance(self.to_language, str):
+            self.to_language = Language(self.to_language.upper())
+
+
 @dataclass
 class Option:
     id: int
@@ -28,19 +36,11 @@ class Option:
     output: str
 
 
+@dataclass
 class DictResponseOption:
-
-    def __init__(self, dict_request: DictRequest, status: Status, options: [str]):
-        self.dict_request = dict_request
-        self.status = status
-        self.options = options
-
-    def to_map(self):
-        return {
-            'dict_request': self.dict_request.to_map(),
-            'status': self.status.name,
-            'options': str(self.options),
-        }
+    dict_request: DictRequest
+    status: Status
+    options: [Option]
 
 
 class DictResponseSelect:

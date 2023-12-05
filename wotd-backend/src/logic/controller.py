@@ -1,21 +1,24 @@
 from dictcc import Dict
 
 from src.data.types import DictRequest, DictResponseOption, Status
+from src.utils.logging_config import app_log
 
 
 class Controller:
 
     def __init__(self):
-        self.translator = Dict()
+        self.dictcc_translator = Dict()
 
     def lookup_word(self, dict_request: DictRequest) -> DictResponseOption:
-        result = self.translator.translate(
+        result = self.dictcc_translator.translate(
             dict_request.input,
             from_language=dict_request.from_language.name.lower(),
             to_language=dict_request.to_language.name.lower()
         )
 
         options = result.translation_tuples
+
+        app_log.debug(f"response options: {options}")
 
         status = Status.OK
         if not options:
@@ -30,6 +33,8 @@ class Controller:
             status=status,
             options=options
         )
+
+        # return None
 
 
 controller = Controller()

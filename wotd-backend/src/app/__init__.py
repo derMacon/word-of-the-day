@@ -1,7 +1,17 @@
 from flask import Flask
 from flask_cors import CORS
 
-from .routes import main
+# import src.app.routes
+
+# from .routes import main
+# import src.app.routes
+
+from flask import jsonify, Blueprint, request
+
+main = Blueprint('main', __name__, url_prefix='/api/v1')
+
+from . import routes
+from . import error_handler
 
 
 def create_app(debug=False):

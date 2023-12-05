@@ -1,12 +1,37 @@
-from flask import jsonify
+import json
+from dataclasses import dataclass, field, asdict
 
+from enum import Enum
 
-class TestClass:
+class Gender(Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    OTHER = "OTHER"
 
-    def __init__(self):
-        self.intTest: int = 32
-        self.textTest: str = 'test'
+@dataclass
+class Person:
+    name: str
+    gender: Gender
+    age: int
 
+    def __post_init__(self):
+        if isinstance(self.gender, str):
+            self.gender = Gender(self.gender)
 
-inst = jsonify(TestClass())
-print("inst: ", inst)
+# JSON data
+json_data = '''
+{
+    "name": "John Doe",
+    "gender": "MALE",
+    "age": 25
+}
+'''
+
+# Convert JSON to a dictionary
+data_dict = json.loads(json_data)
+
+# Convert dictionary to a Person dataclass instance
+person_instance = Person(**data_dict)
+
+print(person_instance)
+print(type(person_instance.gender))
