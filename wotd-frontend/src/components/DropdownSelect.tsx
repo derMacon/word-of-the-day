@@ -1,25 +1,28 @@
 import React, {Component} from 'react';
-import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import InputGroup from 'react-bootstrap/InputGroup';
-import {FaTimes} from "react-icons/fa";
-import PropTypes from "prop-types";
-import Table from 'react-bootstrap/Table';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
 
-class DropdownSelect extends Component {
+interface DropdownSelectProps {
+    children: string[]
+    selectedIndex?: number
+    onSelect: (input: string) => void
+}
 
-    constructor(props) {
+interface DropdownSelectState {
+    selectedElem: string
+}
+
+class DropdownSelect extends Component<DropdownSelectProps, DropdownSelectState> {
+
+    constructor(props: DropdownSelectProps) {
         super(props);
         this.handleOnClick = this.handleOnClick.bind(this)
         console.log(props)
 
         let selectedElem = '';
-        if (this.props.children !== undefined
-            && this.props.selectedIndex !== undefined
+        if (this.props.selectedIndex !== undefined
             && this.props.selectedIndex >= 0
             && this.props.selectedIndex < this.props.children.length
         ) {
@@ -33,7 +36,7 @@ class DropdownSelect extends Component {
         };
     }
 
-    handleOnClick(inputText) {
+    handleOnClick(inputText: string) {
         this.setState({selectedElem: inputText});
         this.props.onSelect(inputText)
     }
@@ -53,12 +56,6 @@ class DropdownSelect extends Component {
         );
 
     }
-}
-
-DropdownSelect.propTypes = {
-    selectedIndex: PropTypes.number,
-    onSelect: PropTypes.func.isRequired,
-    children: PropTypes.arrayOf(PropTypes.string)
 }
 
 export default DropdownSelect;
