@@ -14,33 +14,28 @@ import DropdownSelect from "./DropdownSelect";
 import SelectableTable from "./SelectableTable";
 
 
-class DictMask extends Component {
+export function DictMask() {
 
-    render() {
+    const testInput = ['a', 'b', 'c']
 
-        const testInput = ['a', 'b', 'c']
+    return (
+        <div>
 
-        return (
-            <div>
+            <Container fluid="md">
+                <div className='my-3 shadow bg-white rounded border-1'>
+                    <TextField onSubmit={output => console.log("top level output: ", output)}/>
+                </div>
+                <DropdownSelect
+                    selectedIndex={1}
+                    onSelect={e => console.log('user selected: ', e)}>
+                    {testInput}
+                </DropdownSelect>
+                <SelectableTable
+                    rows={[['test1', 'test2']]}
+                />
+                <p>works</p>
+            </Container>
+        </div>
+    );
 
-                <Container fluid="md">
-                    <div className='my-3 shadow bg-white rounded border-1'>
-                        <TextField onSubmit={output => console.log("top level output: ", output)}/>
-                    </div>
-                    <DropdownSelect
-                        selectedIndex={1}
-                        onSelect={e => console.log('user selected: ', e)}>
-                        {testInput}
-                    </DropdownSelect>
-                    <SelectableTable
-                        rows={[['test1', 'test2']]}
-                    />
-                    <p>works</p>
-                </Container>
-            </div>
-        );
-
-    }
 }
-
-export default DictMask;

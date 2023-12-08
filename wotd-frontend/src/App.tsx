@@ -1,12 +1,12 @@
 import React, {useEffect} from 'react';
 import './App.css';
-import DictMask from "./components/DictMask";
 import {apiIsHealthy} from "./logic/ApiFetcher";
+import {DictMask} from "./components/DictMask";
 
 function App() {
 
     useEffect(() => {
-        apiIsHealthy().then(isHealthy => {
+        apiIsHealthy().then((isHealthy: boolean) => {
                 if (isHealthy) {
                     console.log('API available')
                 } else {
