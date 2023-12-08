@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -10,52 +10,39 @@ interface DropdownSelectProps {
     onSelect: (input: string) => void
 }
 
-interface DropdownSelectState {
-    selectedElem: string
-}
+export function DropdownSelect(props: DropdownSelectProps) {
 
-class DropdownSelect extends Component<DropdownSelectProps, DropdownSelectState> {
-
-    constructor(props: DropdownSelectProps) {
-        super(props);
-        this.handleOnClick = this.handleOnClick.bind(this)
-        console.log(props)
-
-        let selectedElem = '';
-        if (this.props.selectedIndex !== undefined
-            && this.props.selectedIndex >= 0
-            && this.props.selectedIndex < this.props.children.length
+    const [selectedElem, setSelectedElem] = useState<string>(() => {
+        let defaultSelectedElem: string = '';
+        if (
+            props.selectedIndex !== undefined &&
+            props.selectedIndex >= 0 &&
+            props.selectedIndex < props.children.length
         ) {
-            selectedElem = this.props.children[this.props.selectedIndex]
+            defaultSelectedElem = props.children[props.selectedIndex];
         } else {
-            console.log('not able to preselect element in dropdown')
+            console.log('not able to preselect element in dropdown');
         }
+        return defaultSelectedElem;
+    });
 
-        this.state = {
-            selectedElem: selectedElem,
-        };
+    const handleOnClick = (inputText: string) => {
+        setSelectedElem(inputText);
+        props.onSelect(inputText);
     }
 
-    handleOnClick(inputText: string) {
-        this.setState({selectedElem: inputText});
-        this.props.onSelect(inputText)
-    }
 
-    render() {
+    const items = props.children.map((item, index) => (
+        <Dropdown.Item key={index} onClick={() => handleOnClick(item)}>
+            {item}
+        </Dropdown.Item>
+    ));
 
-        const items = this.props.children.map((item, index) => (
-            <Dropdown.Item key={index} onClick={() => this.handleOnClick(item)}>
-                {item}
-            </Dropdown.Item>
-        ))
-
-        return (
-            <DropdownButton title={this.state.selectedElem}>
-                {items}
-            </DropdownButton>
-        );
-
-    }
+    return (
+        <DropdownButton title={selectedElem}>
+            {items}
+        </DropdownButton>
+    );
 }
 
 export default DropdownSelect;

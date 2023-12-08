@@ -11,7 +11,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import DropdownSelect from "./DropdownSelect";
-import SelectableTable from "./SelectableTable";
+import {SelectableTable} from "./SelectableTable";
 
 
 export function DictMask() {
