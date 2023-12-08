@@ -15,7 +15,7 @@ def test_log():
     return jsonify(status), 200
 
 
-@main.route("/lookup-option", methods=['POST'])
+@main.route("/dict/lookup-option", methods=['POST'])
 def lookup_word_options():
     request_data = request.get_json()
     app_log.debug(f"request data: {request_data}")
@@ -29,7 +29,7 @@ def lookup_word_options():
 
 
 
-@main.route("/select-option", methods=['POST'])
+@main.route("/dict/select-option", methods=['POST'])
 def select_word_options():
     request_data = request.get_json()
     app_log.debug(f"request data: {request_data}")

@@ -5,6 +5,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import {FaTimes} from "react-icons/fa";
 import PropTypes from "prop-types";
 import Table from 'react-bootstrap/Table';
+import {apiIsHealthy, dictLookupWord} from "../logic/ApiFetcher";
 
 
 interface SelectableTableProps {
@@ -24,11 +25,13 @@ class SelectableTable extends Component<SelectableTableProps, SelectableTableSta
 
     handleOnClick(e: React.MouseEvent<HTMLTableRowElement>) {
         console.log(e)
+        // console.log(apiIsHealthy())
+        apiIsHealthy().then(e => console.log(e))
     }
 
     render() {
 
-        const rows = this.props.rows.map(())
+        // const rows = this.props.rows.map(())
 
         return (
             <Table striped bordered hover>

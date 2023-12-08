@@ -1,14 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect} from 'react';
 import './App.css';
 import DictMask from "./components/DictMask";
+import {apiIsHealthy} from "./logic/ApiFetcher";
 
 function App() {
-  return (
-    <div className="App">
-      <DictMask/>
-    </div>
-  );
+
+    useEffect(() => {
+        apiIsHealthy().then(isHealthy => {
+                if (isHealthy) {
+                    console.log('API available')
+                } else {
+                    alert('API not available')
+                }
+            }
+        )
+    }, []);
+
+
+    return (
+        <div className="App">
+            <DictMask/>
+        </div>
+    );
 }
 
 export default App;

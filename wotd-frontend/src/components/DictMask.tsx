@@ -32,7 +32,9 @@ class DictMask extends Component {
                         onSelect={e => console.log('user selected: ', e)}>
                         {testInput}
                     </DropdownSelect>
-                    <SelectableTable/>
+                    <SelectableTable
+                        rows={[['test1', 'test2']]}
+                    />
                     <p>works</p>
                 </Container>
             </div>
