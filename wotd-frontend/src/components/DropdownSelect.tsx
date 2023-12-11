@@ -1,45 +1,35 @@
-import React, {Component, useState} from 'react';
+import React, {Component, Key, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import {JSX} from 'react/jsx-runtime';
 
 
-interface DropdownSelectProps {
-    children: string[]
-    selectedIndex?: number
-    onSelect: (input: string) => void
+interface DropdownSelectProps<T> {
+    children: Map<T, string>
+    selectedElem: T
+    onSelect: (input: T) => void
 }
 
-export function DropdownSelect(props: DropdownSelectProps) {
+export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
 
-    const [selectedElem, setSelectedElem] = useState<string>(() => {
-        let defaultSelectedElem: string = '';
-        if (
-            props.selectedIndex !== undefined &&
-            props.selectedIndex >= 0 &&
-            props.selectedIndex < props.children.length
-        ) {
-            defaultSelectedElem = props.children[props.selectedIndex];
-        } else {
-            console.log('not able to preselect element in dropdown');
-        }
-        return defaultSelectedElem;
-    });
+    const [selectedElem, setSelectedElem] = useState<T>(props.selectedElem);
 
-    const handleOnClick = (inputText: string) => {
-        setSelectedElem(inputText);
-        props.onSelect(inputText);
+    const handleOnClick = (key: T) => {
+        setSelectedElem(key);
+        props.onSelect(key);
     }
 
 
-    const items = props.children.map((item, index) => (
-        <Dropdown.Item key={index} onClick={() => handleOnClick(item)}>
-            {item}
+    const items: JSX.Element[] = []
+    props.children.forEach((value: string, key: T) => items.push(
+        <Dropdown.Item key={key} onClick={() => handleOnClick(key)}>
+            {value}
         </Dropdown.Item>
     ));
 
     return (
-        <DropdownButton title={selectedElem}>
+        <DropdownButton title={props.children.get(selectedElem)}>
             {items}
         </DropdownButton>
     );

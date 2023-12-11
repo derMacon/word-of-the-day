@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
@@ -14,10 +14,19 @@ export function DictMask() {
 
     const testInput = ['a', 'b', 'c']
 
+    const [availLang, setAvailLang] = useState<Map<Language, string>>(new Map())
+
 
     useEffect(() => {
         dictGetAvailableLang().then((languages: Language[]) => {
-                console.log('languages: ', languages)
+                console.log('languages: ', languages.length)
+                const langMap: Map<Language, string> = new Map<Language, string>()
+                for (let i = 0; i < languages.length; i++) {
+                    console.log('lang: ', languages[i])
+                    langMap.set(languages[i], languages[i].toString())
+                }
+
+                setAvailLang(langMap)
             }
         )
     }, []);
@@ -35,9 +44,9 @@ export function DictMask() {
                     }}/>
                 </div>
                 <DropdownSelect
-                    selectedIndex={1}
+                    selectedElem={Language.EN}
                     onSelect={e => console.log('user selected: ', e)}>
-                    {testInput}
+                    {availLang}
                 </DropdownSelect>
                 <SelectableTable
                     rows={[['test1', 'test2']]}

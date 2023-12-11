@@ -1,5 +1,6 @@
 // TODO read this from props or some kind .ini, do not hardcode it
 import {Language} from "../data/Language";
+import {InfoRequestAvailLang} from "../data/InfoRequestAvailLang";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -54,9 +55,12 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
             headers: HEADERS,
         })
 
-        let data: Language[] = await out.json()
+        let data: any = await out.json() as Object
+        // let tmp =  new InfoRequestAvailLang([])
+        // tmp.copy
+        console.log('json resp: ', data)
         console.log('awaiting response: ', data)
-        return data
+        return []
 
     } catch(error) {
         console.error(error)
