@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import DropdownSelect from "./DropdownSelect";
 import {SelectableTable} from "./SelectableTable";
-import {dictLookupWord} from "../logic/ApiFetcher";
+import {apiIsHealthy, dictGetAvailableLang, dictLookupWord} from "../logic/ApiFetcher";
 import {Language} from "../data/Language";
 
 
@@ -13,6 +13,15 @@ export function DictMask() {
     // const []
 
     const testInput = ['a', 'b', 'c']
+
+
+    useEffect(() => {
+        dictGetAvailableLang().then((languages: Language[]) => {
+                console.log('languages: ', languages)
+            }
+        )
+    }, []);
+
 
     return (
         <div>

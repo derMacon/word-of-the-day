@@ -12,6 +12,9 @@ class Status(str, Enum):
     MISSPELLED = 'MISSPELLED'
     OK = 'OK'
 
+@dataclass
+class InfoRequestAvailDictLang:
+    dict_available_languages: [Language]
 
 @dataclass
 class DictRequest:

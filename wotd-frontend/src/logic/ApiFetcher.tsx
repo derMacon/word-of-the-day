@@ -45,6 +45,25 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
     return ['test']
 }
 
+export async function dictGetAvailableLang(): Promise<Language[]> {
+
+    try {
+
+        let out = await fetch(DICTIONARY_BASE + '/available-lang', {
+            method: 'GET',
+            headers: HEADERS,
+        })
+
+        let data: Language[] = await out.json()
+        console.log('awaiting response: ', data)
+        return data
+
+    } catch(error) {
+        console.error(error)
+        return []
+    }
+}
+
 export async function apiIsHealthy(): Promise<boolean> {
     try {
         return (await fetch(API_BASE + '/health')).ok
