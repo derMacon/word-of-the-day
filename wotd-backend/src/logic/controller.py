@@ -37,7 +37,10 @@ class Controller:
         )
 
         if status == Status.OK:
-            self.persistence_service.save_dict_options_response(dict_options_response)
+            self.persistence_service.save_dict_options_response(
+                entry_id=generated_id,
+                dict_options_response=dict_options_response
+            )
 
         return dict_options_response
 

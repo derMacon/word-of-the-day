@@ -23,9 +23,9 @@ def lookup_word_options():
     dict_request = DictRequest(**request_data)
     dict_response_option: DictOptionsResponse = controller.lookup_dict_word(dict_request)
 
-    output = jsonify(dataclasses.asdict(dict_response_option))
+    output = dataclasses.asdict(dict_response_option)
     app_log.debug(f"response options: {output}")
-    return output, 200
+    return jsonify(output), 200
 
 
 

@@ -1,17 +1,48 @@
 // TODO read this from props or some kind .ini, do not hardcode it
+import {Language} from "../data/Language";
+
 const HTTP_STATUS_OK: number = 200
 
 const SERVER_ADDRESS: string = 'http://localhost:5000'
 export const API_BASE: string = SERVER_ADDRESS + '/api/v1'
 export const DICTIONARY_BASE: string = API_BASE + '/dict'
 
+const HEADERS = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+}
 
-export function dictLookupWord(word: string): string {
-    fetch(API_BASE + '/health')
-        .then(data => console.log(data))
-        .catch(error => console.log(error))
 
-    return 'test'
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<string[]> {
+
+    let json = JSON.stringify({
+        input: word,
+        from_language: fromLanguage,
+        to_language: toLanguage
+    })
+
+    try {
+
+        let out = await fetch(DICTIONARY_BASE + '/lookup-option', {
+            method: 'POST',
+            headers: HEADERS,
+            body: json
+        })
+
+        console.log('awaiting response: ', await out.json())
+
+        // .then(data => {
+        //     console.log("inside lookup: ", data.body)
+        //     if (!data.ok) {
+        //         alert(data.statusText)
+        //     }
+        // })
+        // .catch(error => console.log(error))
+    } catch(error) {
+        console.error(error)
+    }
+
+    return ['test']
 }
 
 export async function apiIsHealthy(): Promise<boolean> {
@@ -21,5 +52,3 @@ export async function apiIsHealthy(): Promise<boolean> {
         return false
     }
 }
-
-dictLookupWord('test')

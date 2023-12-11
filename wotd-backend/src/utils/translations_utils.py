@@ -10,6 +10,7 @@ def evaluate_status(original_input: str, options: List[Tuple[int, str, str]]):
         # check if any lookup option is exactly equal to request input,
         # otherwise the input was misspelled
         return Status.MISSPELLED
+    return Status.OK
 
 
 def add_id_to_tuples(data: List[Tuple[str, str]]) -> List[Tuple[int, str, str]]:

@@ -1,20 +1,16 @@
-import React, {Component} from 'react';
-import Form from 'react-bootstrap/Form';
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import InputGroup from 'react-bootstrap/InputGroup';
-import {FaTimes} from "react-icons/fa";
-import PropTypes from "prop-types";
-import Table from 'react-bootstrap/Table';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import DropdownSelect from "./DropdownSelect";
 import {SelectableTable} from "./SelectableTable";
+import {dictLookupWord} from "../logic/ApiFetcher";
+import {Language} from "../data/Language";
 
 
 export function DictMask() {
+
+    // const []
 
     const testInput = ['a', 'b', 'c']
 
@@ -23,7 +19,11 @@ export function DictMask() {
 
             <Container fluid="md">
                 <div className='my-3 shadow bg-white rounded border-1'>
-                    <TextField onSubmit={output => console.log("top level output: ", output)}/>
+                    <TextField onSubmit={output => {
+                        console.log("top level before output: ", output)
+                        dictLookupWord(output, Language.DE, Language.EN)
+                        console.log("top level after output: ", output)
+                    }}/>
                 </div>
                 <DropdownSelect
                     selectedIndex={1}
