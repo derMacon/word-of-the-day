@@ -60,7 +60,7 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
         let requestWrapper: InfoRequestAvailLang = plainToClass(InfoRequestAvailLang, jsonObject)
         console.log('json resp: ', jsonObject)
         console.log('request wrapper: ', requestWrapper)
-        return requestWrapper.dict_available_languages
+        return requestWrapper.dictAvailableLanguages
 
     } catch (error) {
         console.error(error)

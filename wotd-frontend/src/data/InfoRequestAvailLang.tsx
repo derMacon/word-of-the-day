@@ -1,20 +1,22 @@
 import {Language} from "./Language";
+import {Expose} from "class-transformer";
 
 export class InfoRequestAvailLang {
-    private _dict_available_languages: Language[]
+
+    @Expose({ name: 'dict_available_languages'})
+    private _dictAvailableLanguages: Language[]
 
     constructor(
         dictAvailableLanguages: Language[],
     ) {
-        this._dict_available_languages = dictAvailableLanguages
+        this._dictAvailableLanguages = dictAvailableLanguages
     }
 
-
-    set dict_available_languages(value: Language[]) {
-        this._dict_available_languages = value;
+    set dictAvailableLanguages(value: Language[]) {
+        this._dictAvailableLanguages = value;
     }
 
-    get dict_available_languages(): Language[] {
-        return this._dict_available_languages;
+    get dictAvailableLanguages(): Language[] {
+        return this._dictAvailableLanguages;
     }
 }
