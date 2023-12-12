@@ -1,6 +1,7 @@
 // TODO read this from props or some kind .ini, do not hardcode it
 import {Language} from "../data/Language";
 import {InfoRequestAvailLang} from "../data/InfoRequestAvailLang";
+import {plainToClass} from "class-transformer";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -39,7 +40,7 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
         //     }
         // })
         // .catch(error => console.log(error))
-    } catch(error) {
+    } catch (error) {
         console.error(error)
     }
 
@@ -55,14 +56,13 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
             headers: HEADERS,
         })
 
-        let data: any = await out.json() as Object
-        // let tmp =  new InfoRequestAvailLang([])
-        // tmp.copy
-        console.log('json resp: ', data)
-        console.log('awaiting response: ', data)
-        return []
+        let jsonObject: Object = await out.json() as Object
+        let requestWrapper: InfoRequestAvailLang = plainToClass(InfoRequestAvailLang, jsonObject)
+        console.log('json resp: ', jsonObject)
+        console.log('request wrapper: ', requestWrapper)
+        return requestWrapper.dict_available_languages
 
-    } catch(error) {
+    } catch (error) {
         console.error(error)
         return []
     }

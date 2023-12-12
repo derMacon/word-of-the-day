@@ -1,15 +1,20 @@
 import {Language} from "./Language";
 
 export class InfoRequestAvailLang {
-    private readonly _dictAvailableLanguages: Language[]
+    private _dict_available_languages: Language[]
 
     constructor(
         dictAvailableLanguages: Language[],
     ) {
-        this._dictAvailableLanguages = dictAvailableLanguages
+        this._dict_available_languages = dictAvailableLanguages
     }
 
-    get dictAvailableLanguages(): Language[] {
-        return this._dictAvailableLanguages;
+
+    set dict_available_languages(value: Language[]) {
+        this._dict_available_languages = value;
+    }
+
+    get dict_available_languages(): Language[] {
+        return this._dict_available_languages;
     }
 }
