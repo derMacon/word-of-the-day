@@ -51,7 +51,7 @@ export function DictMask() {
                     {availLang}
                 </DropdownSelect>
                 {dictOptions !== undefined && (
-                    <SelectableTable options={dictOptions}/>
+                    <SelectableTable apiResponse={dictOptions}/>
                 )}
             </Container>
         </div>

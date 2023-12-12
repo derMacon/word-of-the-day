@@ -4,6 +4,8 @@ import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {plainToClass} from "class-transformer";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {DictRequest} from "../model/DictRequest";
+import {Option} from "../model/Option";
+import {type} from "os";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -38,6 +40,11 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
     console.log('awaiting response: ', jsonObject)
     let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
     let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
+
+    // let tmp: Option[] = requestWrapper.options.map<Option>(value => plainToClass(Option, value))
+    // console.log('---- tmp: ', typeof tmp[0])
+    // let options = plainToClass(Option[], requestWrapper.options)
+
     requestWrapper.dictRequest = originalRequest
 
     console.log('parsed options: ', requestWrapper)
