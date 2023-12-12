@@ -7,6 +7,9 @@ import {SelectableTable} from "./SelectableTable";
 import {dictGetAvailableLang, dictLookupWord} from "../logic/ApiFetcher";
 import {Language} from "../model/Language";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
+import {Button, ButtonGroup} from "react-bootstrap";
+import DropdownButton from "react-bootstrap/DropdownButton";
+import {FaArrowsRotate} from "react-icons/fa6";
 
 
 export function DictMask() {
@@ -30,26 +33,31 @@ export function DictMask() {
 
     // const
 
+    const handleDictLookup = async (word: string) => {
+        let apiResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
+        setDictOptions(apiResponse)
+    }
 
     return (
         <div>
 
             <Container fluid="md">
                 <div className='my-3 shadow bg-white rounded border-1'>
-                    <TextField onSubmit={async output => {
-                        console.log("top level before output: ", output)
-                        let apiResponse = await dictLookupWord(output, selectedFromLang, selectedToLang)
-                        console.log('plain api response: ', apiResponse)
-                        setDictOptions(apiResponse)
-                        // console.log('api response: ', dictOptions!.dictRequest)
-                        console.log("top level after output: ", output)
-                    }}/>
+                    <TextField onSubmit={handleDictLookup}/>
                 </div>
-                <DropdownSelect
-                    selectedElem={selectedFromLang}
-                    onSelect={setSelectedFromLang}>
-                    {availLang}
-                </DropdownSelect>
+                <ButtonGroup>
+                    <DropdownSelect
+                        selectedElem={selectedFromLang}
+                        onSelect={setSelectedFromLang}>
+                        {availLang}
+                    </DropdownSelect>
+                    <Button><FaArrowsRotate className='mb-1'/></Button>
+                    <DropdownSelect
+                        selectedElem={selectedToLang}
+                        onSelect={setSelectedToLang}>
+                        {availLang}
+                    </DropdownSelect>
+                </ButtonGroup>
                 {dictOptions !== undefined && (
                     <SelectableTable apiResponse={dictOptions}/>
                 )}

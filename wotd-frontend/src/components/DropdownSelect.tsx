@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import {JSX} from 'react/jsx-runtime';
+import {ButtonGroup} from "react-bootstrap";
 
 
 interface DropdownSelectProps<T> {
@@ -29,7 +30,7 @@ export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
     ));
 
     return (
-        <DropdownButton title={props.children.get(selectedElem)}>
+        <DropdownButton as={ButtonGroup} title={props.children.get(selectedElem)}>
             {items}
         </DropdownButton>
     );
