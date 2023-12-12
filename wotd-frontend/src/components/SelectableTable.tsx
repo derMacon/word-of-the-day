@@ -2,10 +2,11 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
 import {apiIsHealthy} from "../logic/ApiFetcher";
+import {DictOptionsResponse} from "../model/DictOptionsResponse";
 
 
 interface SelectableTableProps {
-    rows: [string, string][]
+    options: DictOptionsResponse
 }
 
 export function SelectableTable(props: SelectableTableProps) {
@@ -16,12 +17,14 @@ export function SelectableTable(props: SelectableTableProps) {
         apiIsHealthy().then(e => console.log(e))
     }
 
+    console.log('in table options: ', props.options.dictRequest)
+
     return (
         <Table striped bordered hover>
             <thead>
             <tr>
-                <th>Last Name</th>
-                <th>Username</th>
+                <th>{props.options.dictRequest.fromLanguage.toString()}</th>
+                <th>{props.options.dictRequest.toLanguage.toString()}</th>
             </tr>
             </thead>
             <tbody>

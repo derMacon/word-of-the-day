@@ -1,7 +1,9 @@
 // TODO read this from props or some kind .ini, do not hardcode it
-import {Language} from "../data/Language";
-import {InfoRequestAvailLang} from "../data/InfoRequestAvailLang";
+import {Language} from "../model/Language";
+import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {plainToClass} from "class-transformer";
+import {DictOptionsResponse} from "../model/DictOptionsResponse";
+import {DictRequest} from "../model/DictRequest";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -15,7 +17,7 @@ const HEADERS = {
 }
 
 
-export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<string[]> {
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
 
     let json = JSON.stringify({
         input: word,
@@ -23,28 +25,31 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
         to_language: toLanguage
     })
 
-    try {
+    // try {
 
-        let out = await fetch(DICTIONARY_BASE + '/lookup-option', {
-            method: 'POST',
-            headers: HEADERS,
-            body: json
-        })
+    let out = await fetch(DICTIONARY_BASE + '/lookup-option', {
+        method: 'POST',
+        headers: HEADERS,
+        body: json
+    })
 
-        console.log('awaiting response: ', await out.json())
+    let jsonObject: Object = await out.json() as Object
 
-        // .then(data => {
-        //     console.log("inside lookup: ", data.body)
-        //     if (!data.ok) {
-        //         alert(data.statusText)
-        //     }
-        // })
-        // .catch(error => console.log(error))
-    } catch (error) {
-        console.error(error)
-    }
+    console.log('awaiting response: ', jsonObject)
+    let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
+    let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
+    requestWrapper.dictRequest = originalRequest
 
-    return ['test']
+    console.log('parsed options: ', requestWrapper)
+    console.log('parsed request: ', originalRequest)
+
+    return requestWrapper
+
+    // } catch (error) {
+    //     console.error(error)
+    // }
+
+    // return new DictOptionsResponse(-1, undefined, )
 }
 
 export async function dictGetAvailableLang(): Promise<Language[]> {
