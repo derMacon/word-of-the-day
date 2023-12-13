@@ -9,7 +9,7 @@ import {type} from "os";
 
 const HTTP_STATUS_OK: number = 200
 
-const SERVER_ADDRESS: string = 'http://localhost:5000'
+const SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
 export const API_BASE: string = SERVER_ADDRESS + '/api/v1'
 export const DICTIONARY_BASE: string = API_BASE + '/dict'
 

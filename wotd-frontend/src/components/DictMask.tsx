@@ -7,9 +7,12 @@ import {SelectableTable} from "./SelectableTable";
 import {dictGetAvailableLang, dictLookupWord} from "../logic/ApiFetcher";
 import {Language} from "../model/Language";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
-import {Button, ButtonGroup} from "react-bootstrap";
+import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import {FaArrowsRotate} from "react-icons/fa6";
+import InputGroup from "react-bootstrap/InputGroup";
+import Form from "react-bootstrap/Form";
+import {FaTimes} from "react-icons/fa";
 
 
 export function DictMask() {
@@ -31,7 +34,12 @@ export function DictMask() {
         )
     }, []);
 
-    // const
+    const handleLanguageSwitch = () => {
+        console.log('switching lang')
+        let tmp: Language = selectedFromLang
+        setSelectedFromLang(selectedToLang)
+        setSelectedToLang(tmp)
+    }
 
     const handleDictLookup = async (word: string) => {
         let apiResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
@@ -41,28 +49,70 @@ export function DictMask() {
     return (
         <div>
 
+
             <Container fluid="md">
-                <div className='my-3 shadow bg-white rounded border-1'>
-                    <TextField onSubmit={handleDictLookup}/>
+                <div className='sticky pt-3 pb-3 bg-white white-shadow'>
+                    <Row>
+                        <Col xs={12} md={9} className='mb-2'>
+                            <TextField onSubmit={handleDictLookup}/>
+                        </Col>
+                        <Col xs={12} md={3}>
+                            <ButtonGroup className='nopadding w-100'>
+                                <DropdownSelect
+                                    selectedElem={selectedFromLang}
+                                    onSelect={setSelectedFromLang}>
+                                    {availLang}
+                                </DropdownSelect>
+                                <Button variant='light' onClick={handleLanguageSwitch}><FaArrowsRotate
+                                    className='mb-1'/></Button>
+                                <DropdownSelect
+                                    selectedElem={selectedToLang}
+                                    onSelect={setSelectedToLang}>
+                                    {availLang}
+                                </DropdownSelect>
+                            </ButtonGroup>
+                        </Col>
+                    </Row>
                 </div>
-                <ButtonGroup>
-                    <DropdownSelect
-                        selectedElem={selectedFromLang}
-                        onSelect={setSelectedFromLang}>
-                        {availLang}
-                    </DropdownSelect>
-                    <Button><FaArrowsRotate className='mb-1'/></Button>
-                    <DropdownSelect
-                        selectedElem={selectedToLang}
-                        onSelect={setSelectedToLang}>
-                        {availLang}
-                    </DropdownSelect>
-                </ButtonGroup>
+
+                {/*<table className="table">*/}
+                {/*    <colgroup>*/}
+                {/*        <col className="bg-success"></col>*/}
+                {/*        <col className="bg-info"></col>*/}
+                {/*        <col className="bg-danger"></col>*/}
+                {/*    </colgroup>*/}
+                {/*    <thead>*/}
+                {/*    <tr>*/}
+                {/*        <th scope="col" className='bg-primary'>ID</th>*/}
+                {/*        <th scope="col">Name</th>*/}
+                {/*        <th scope="col">Age</th>*/}
+                {/*    </tr>*/}
+                {/*    </thead>*/}
+                {/*    <tbody>*/}
+                {/*    <tr>*/}
+                {/*        <td className="bg-primary">1</td>*/}
+                {/*        <td>John</td>*/}
+                {/*        <td>25</td>*/}
+                {/*    </tr>*/}
+                {/*    <tr className="highlight bg-primary">*/}
+                {/*        <td>2</td>*/}
+                {/*        <td>Jane</td>*/}
+                {/*        <td>30</td>*/}
+                {/*    </tr>*/}
+                {/*    <tr style={{backgroundColor: '#930000'}}>*/}
+                {/*        <td>3</td>*/}
+                {/*        <td>Bob</td>*/}
+                {/*        <td>22</td>*/}
+                {/*    </tr>*/}
+                {/*    </tbody>*/}
+                {/*</table>*/}
+
                 {dictOptions !== undefined && (
-                    <SelectableTable apiResponse={dictOptions}/>
+                    <div className='mt-2'>
+                        <SelectableTable apiResponse={dictOptions}/>
+                    </div>
                 )}
             </Container>
         </div>
     );
-
 }

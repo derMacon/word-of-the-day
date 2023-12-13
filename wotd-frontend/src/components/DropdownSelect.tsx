@@ -30,7 +30,11 @@ export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
     ));
 
     return (
-        <DropdownButton as={ButtonGroup} title={props.children.get(selectedElem)}>
+        <DropdownButton
+            as={ButtonGroup}
+            variant='light'
+            className='w-50'
+            title={props.children.get(selectedElem)}>
             {items}
         </DropdownButton>
     );
