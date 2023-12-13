@@ -44,9 +44,8 @@ export function DictMask() {
 
     return (
         <div>
-
-
             <Container fluid="md">
+
                 <div className='sticky pt-3 pb-3 bg-white white-shadow'>
                     <Row>
                         <Col xs={12} md={9} className='mb-2'>
@@ -71,43 +70,12 @@ export function DictMask() {
                     </Row>
                 </div>
 
-                {/*<table className="table">*/}
-                {/*    <colgroup>*/}
-                {/*        <col className="bg-success"></col>*/}
-                {/*        <col className="bg-info"></col>*/}
-                {/*        <col className="bg-danger"></col>*/}
-                {/*    </colgroup>*/}
-                {/*    <thead>*/}
-                {/*    <tr>*/}
-                {/*        <th scope="col" className='bg-primary'>ID</th>*/}
-                {/*        <th scope="col">Name</th>*/}
-                {/*        <th scope="col">Age</th>*/}
-                {/*    </tr>*/}
-                {/*    </thead>*/}
-                {/*    <tbody>*/}
-                {/*    <tr>*/}
-                {/*        <td className="bg-primary">1</td>*/}
-                {/*        <td>John</td>*/}
-                {/*        <td>25</td>*/}
-                {/*    </tr>*/}
-                {/*    <tr className="highlight bg-primary">*/}
-                {/*        <td>2</td>*/}
-                {/*        <td>Jane</td>*/}
-                {/*        <td>30</td>*/}
-                {/*    </tr>*/}
-                {/*    <tr style={{backgroundColor: '#930000'}}>*/}
-                {/*        <td>3</td>*/}
-                {/*        <td>Bob</td>*/}
-                {/*        <td>22</td>*/}
-                {/*    </tr>*/}
-                {/*    </tbody>*/}
-                {/*</table>*/}
-
                 {dictOptions !== undefined && (
                     <div className='mt-2'>
                         <SelectableTable apiResponse={dictOptions}/>
                     </div>
                 )}
+
             </Container>
         </div>
     );

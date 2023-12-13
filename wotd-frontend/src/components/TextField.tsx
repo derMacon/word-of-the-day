@@ -18,14 +18,9 @@ interface TextFieldState {
 export function TextField(props: TextFieldProps) {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
-
     const [input, setInput] = useState('')
 
 
-    // TODO why is this not working
-    // useEffect(() => {
-    //     inputRef.current!.focus();
-    // }, []);
 
     const handleKeyDown = (e: any) => {
         console.log(typeof (e))
@@ -34,7 +29,8 @@ export function TextField(props: TextFieldProps) {
             const output = e.target.value;
             props.onSubmit(output);
             inputRef.current!.blur()
-            inputRef.current!.scrollTo(0, 0)
+            // src: https://stackoverflow.com/questions/11845371/window-scrollto-is-not-working-in-mobile-phones
+            setTimeout(() => window.scrollTo(0, 0),100);
         } else {
             console.log('target val: ', e.target.value);
         }
