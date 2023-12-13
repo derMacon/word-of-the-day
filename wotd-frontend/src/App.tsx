@@ -7,9 +7,7 @@ function App() {
 
     useEffect(() => {
         apiIsHealthy().then((isHealthy: boolean) => {
-                if (isHealthy) {
-                    console.log('API available')
-                } else {
+                if (!isHealthy) {
                     alert('API not available')
                 }
             }

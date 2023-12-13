@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
 import {apiIsHealthy} from "../logic/ApiFetcher";
@@ -22,26 +22,19 @@ export function SelectableTable(props: SelectableTableProps) {
     });
 
     const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement>, selectedOption: Option) => {
-        console.log(e)
         apiIsHealthy().then(e => {
-            console.log(selectedOption)
             let state: boolean = !highlight.get(selectedOption.id)
             setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.id, state));
         })
     }
 
-    console.log('in table options: ', props.apiResponse.options)
-
     const items: JSX.Element[] = []
     props.apiResponse.options.forEach((option: Option) => items.push(
-        <tr onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleOnClick(e, option)}>
+        <tr key={option.id} onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleOnClick(e, option)}>
             <td className={`w-50 ${highlight.get(option.id) ? 'text-bg-dark bg-secondary' : ''}`}>{option.input}</td>
             <td className={`w-50 ${highlight.get(option.id) ? 'text-bg-dark bg-secondary' : ''}`}>{option.output}</td>
-            {/*<td className='w-25 bg-warning-subtle'>{option.output}</td>*/}
         </tr>
     ))
-
-    console.log('--------------- hightlights: ', highlight)
 
     return (
         <Table striped bordered hover className='table-fixed'>

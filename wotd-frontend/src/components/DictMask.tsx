@@ -20,7 +20,6 @@ export function DictMask() {
 
     useEffect(() => {
         dictGetAvailableLang().then((languages: Language[]) => {
-                console.log('languages: ', languages.length)
                 const langMap: Map<Language, string> = new Map<Language, string>()
                 for (let i = 0; i < languages.length; i++) {
                     langMap.set(languages[i], languages[i].toString())

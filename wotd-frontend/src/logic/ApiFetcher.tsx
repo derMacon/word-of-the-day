@@ -27,8 +27,6 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
         to_language: toLanguage
     })
 
-    // try {
-
     let out = await fetch(DICTIONARY_BASE + '/lookup-option', {
         method: 'POST',
         headers: HEADERS,
@@ -37,26 +35,15 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
 
     let jsonObject: Object = await out.json() as Object
 
-    console.log('awaiting response: ', jsonObject)
     let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
     let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
 
-    // let tmp: Option[] = requestWrapper.options.map<Option>(value => plainToClass(Option, value))
-    // console.log('---- tmp: ', typeof tmp[0])
-    // let options = plainToClass(Option[], requestWrapper.options)
-
     requestWrapper.dictRequest = originalRequest
 
-    console.log('parsed options: ', requestWrapper)
-    console.log('parsed request: ', originalRequest)
+    // console.log('parsed options: ', requestWrapper)
+    // console.log('parsed request: ', originalRequest)
 
     return requestWrapper
-
-    // } catch (error) {
-    //     console.error(error)
-    // }
-
-    // return new DictOptionsResponse(-1, undefined, )
 }
 
 export async function dictGetAvailableLang(): Promise<Language[]> {
@@ -70,8 +57,7 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
 
         let jsonObject: Object = await out.json() as Object
         let requestWrapper: InfoRequestAvailLang = plainToClass(InfoRequestAvailLang, jsonObject)
-        console.log('json resp: ', jsonObject)
-        console.log('request wrapper: ', requestWrapper)
+
         return requestWrapper.dictAvailableLanguages
 
     } catch (error) {
