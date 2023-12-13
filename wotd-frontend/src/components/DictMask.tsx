@@ -8,11 +8,7 @@ import {dictGetAvailableLang, dictLookupWord} from "../logic/ApiFetcher";
 import {Language} from "../model/Language";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
-import DropdownButton from "react-bootstrap/DropdownButton";
 import {FaArrowsRotate} from "react-icons/fa6";
-import InputGroup from "react-bootstrap/InputGroup";
-import Form from "react-bootstrap/Form";
-import {FaTimes} from "react-icons/fa";
 
 
 export function DictMask() {
@@ -35,10 +31,10 @@ export function DictMask() {
     }, []);
 
     const handleLanguageSwitch = () => {
-        console.log('switching lang')
-        let tmp: Language = selectedFromLang
-        setSelectedFromLang(selectedToLang)
-        setSelectedToLang(tmp)
+        let fromLangNewInstance: Language = selectedFromLang.toString() as Language
+        let toLangNewInstance: Language = selectedToLang.toString() as Language
+        setSelectedFromLang(toLangNewInstance)
+        setSelectedToLang(fromLangNewInstance)
     }
 
     const handleDictLookup = async (word: string) => {

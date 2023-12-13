@@ -14,10 +14,10 @@ interface DropdownSelectProps<T> {
 
 export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
 
-    const [selectedElem, setSelectedElem] = useState<T>(props.selectedElem);
+    // const [selectedElem, setSelectedElem] = useState<T>(props.selectedElem);
 
     const handleOnClick = (key: T) => {
-        setSelectedElem(key);
+        // setSelectedElem(key);
         props.onSelect(key);
     }
 
@@ -34,7 +34,8 @@ export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
             as={ButtonGroup}
             variant='light'
             className='w-50'
-            title={props.children.get(selectedElem)}>
+            title={props.children.get(props.selectedElem)}>
+            {/*title={props.children.get(selectedElem)}>*/}
             {items}
         </DropdownButton>
     );
