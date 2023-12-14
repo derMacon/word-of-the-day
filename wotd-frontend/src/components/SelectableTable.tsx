@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {apiIsHealthy} from "../logic/ApiFetcher";
+import {apiIsHealthy, pushSelectedOption} from "../logic/ApiFetcher";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {Option} from "../model/Option";
 import './SelectableTable.css';
@@ -18,19 +18,33 @@ export function SelectableTable(props: SelectableTableProps) {
         props.apiResponse.options.forEach((option) => {
             initialHighlight.set(option.id, false);
         });
+
         return initialHighlight;
     });
 
-    const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement>, selectedOption: Option) => {
+    useEffect(() => {
+        // preselect first entry
+        if (props.apiResponse.options.length > 0) {
+            handleSelection(props.apiResponse.options[0])
+        }
+    }, []);
+
+    const handleSelection = (selectedOption: Option) => {
         apiIsHealthy().then(e => {
             let state: boolean = !highlight.get(selectedOption.id)
-            setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.id, state));
+            setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.id, state))
+
+            if (highlight.get(selectedOption.id)) {
+                // TODO unselect
+            } else {
+                pushSelectedOption(props.apiResponse.id, selectedOption)
+            }
         })
     }
 
     const items: JSX.Element[] = []
     props.apiResponse.options.forEach((option: Option) => items.push(
-        <tr key={option.id} onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleOnClick(e, option)}>
+        <tr key={option.id} onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleSelection(option)}>
             <td className={`w-50 ${highlight.get(option.id) ? 'text-bg-dark bg-secondary' : ''}`}>{option.input}</td>
             <td className={`w-50 ${highlight.get(option.id) ? 'text-bg-dark bg-secondary' : ''}`}>{option.output}</td>
         </tr>

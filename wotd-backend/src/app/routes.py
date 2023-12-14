@@ -42,11 +42,11 @@ def select_word_options():
 
     option_select_request = OptionSelectRequest(**request_data)
 
-    output = jsonify({
+    output = {
         'select_successful': controller.select_dict_word(option_select_request)
-    })
+    }
 
     app_log.debug(f"json output: {output}")
-    return output, 200
+    return jsonify(output), 200
 
 

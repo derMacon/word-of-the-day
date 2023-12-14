@@ -21,6 +21,8 @@ const HEADERS = {
 
 export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
 
+    // TODO use special type instead of json
+
     let json = JSON.stringify({
         input: word,
         from_language: fromLanguage,
@@ -72,4 +74,24 @@ export async function apiIsHealthy(): Promise<boolean> {
     } catch (error) {
         return false
     }
+}
+
+export async function pushSelectedOption(batchId: number, option: Option) {
+    console.log('pushing selected option: ', option)
+
+    // TODO create / use special type
+
+    let json = JSON.stringify({
+        options_response_id: batchId,
+        selected_option_id: option.id
+    })
+
+    let out = await fetch(DICTIONARY_BASE + '/select-option', {
+        method: 'POST',
+        headers: HEADERS,
+        body: json
+    })
+
+    let jsonObject: Object = await out.json() as Object
+    console.log("select out: ", jsonObject)
 }

@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import DropdownSelect from "./DropdownSelect";
 import {SelectableTable} from "./SelectableTable";
-import {dictGetAvailableLang, dictLookupWord} from "../logic/ApiFetcher";
+import {dictGetAvailableLang, dictLookupWord, pushSelectedOption} from "../logic/ApiFetcher";
 import {Language} from "../model/Language";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
@@ -44,6 +44,7 @@ export function DictMask() {
     return (
         <div>
             <Container fluid="md">
+                <div className="custom-max-width">
 
                 <div className='sticky pt-3 pb-3 bg-white white-shadow'>
                     <Row>
@@ -74,6 +75,7 @@ export function DictMask() {
                         <SelectableTable apiResponse={dictOptions}/>
                     </div>
                 )}
+                </div>
 
             </Container>
         </div>
