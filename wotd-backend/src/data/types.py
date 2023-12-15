@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-class Language(str, Enum):
+class LanguageShort(str, Enum):
     EN = "EN"
+    # ENG = "ENG"
     DE = "DE"
 
 
@@ -12,22 +13,36 @@ class Status(str, Enum):
     MISSPELLED = 'MISSPELLED'
     OK = 'OK'
 
+
+@dataclass
+class Language:
+    language_id: int
+    name: str
+    abbreviation: LanguageShort
+
+    # translate enums when decoding json
+    def __post_init__(self):
+        if isinstance(self.abbreviation, str):
+            self.from_language = LanguageShort(self.abbreviation.upper())
+
+
 @dataclass
 class InfoRequestAvailDictLang:
-    dict_available_languages: [Language]
+    dict_available_languages: [LanguageShort]
+
 
 @dataclass
 class DictRequest:
-    from_language: Language
-    to_language: Language
+    from_language: LanguageShort
+    to_language: LanguageShort
     input: str
 
     # translate enums when decoding json
     def __post_init__(self):
         if isinstance(self.from_language, str):
-            self.from_language = Language(self.from_language.upper())
+            self.from_language = LanguageShort(self.from_language.upper())
         if isinstance(self.to_language, str):
-            self.to_language = Language(self.to_language.upper())
+            self.to_language = LanguageShort(self.to_language.upper())
 
 
 @dataclass
@@ -53,5 +68,5 @@ class OptionSelectRequest:
 
 @dataclass
 class DefRequest:
-    language: Language
+    language: LanguageShort
     word: str

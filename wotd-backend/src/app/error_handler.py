@@ -1,10 +1,7 @@
+from flask import jsonify
+
 from src.app import main
-import dataclasses
-
-from flask import jsonify, Blueprint, request
-
-import json
-from types import SimpleNamespace
+from src.data.error.database_error import DatabaseError
 
 
 @main.errorhandler(ValueError)
@@ -15,3 +12,8 @@ def handle_value_error(error):
 @main.errorhandler(AttributeError)
 def handle_attribute_error(error):
     return jsonify({'attribute_error': f"internal server error: {error}"}), 500
+
+
+@main.errorhandler(DatabaseError)
+def handle_attribute_error(error):
+    return jsonify({'database_error': f"internal server error: {error}"}), 500

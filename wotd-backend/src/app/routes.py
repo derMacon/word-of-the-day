@@ -3,7 +3,7 @@ import dataclasses
 from flask import jsonify, request
 
 from src.app import main
-from src.data.types import DictOptionsResponse, DictRequest, OptionSelectRequest, Language, InfoRequestAvailDictLang
+from src.data.types import DictOptionsResponse, DictRequest, OptionSelectRequest, LanguageShort, InfoRequestAvailDictLang
 from src.logic.controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log

@@ -2,8 +2,9 @@ import os
 
 import psycopg2
 
-from src.data.types import DictRequest, DictOptionsResponse, Language
+from src.data.types import DictRequest, DictOptionsResponse, LanguageShort, Language
 from src.utils.logging_config import app_log
+from src.data.error.database_error import DatabaseError
 
 
 class PersistenceService:
@@ -99,15 +100,25 @@ class PersistenceService:
         self._cursor.close()
         self._connection.close()
 
-    def get_available_languages(self) -> [Language]:
-        self.cursor.execute("SELECT * FROM students;")
-        print(type(self.cursor.fetchall()[0]))
+    def get_available_languages(self) -> [LanguageShort]:
+        try:
+            self.cursor.execute("SELECT * FROM language;")
+            languages: [Language] = []
+            for entry in self.cursor.fetchall():
+                languages.append(Language(*entry))
 
-        # available_languages: [Language] = []
-        # app_log.debug(f"available languages{available_languages}")
-        # pass
+            print(type(languages[0].abbreviation))
+            print(languages[0].abbreviation)
 
-        return [Language.DE]
+            # available_languages: [Language] = []
+            # app_log.debug(f"available languages{available_languages}")
+            # pass
+
+        except Exception as e:
+            app_log.error(f"{e}")
+            raise DatabaseError(e, e)
+
+        return languages
 
     def save_dict_request(self, dict_request: DictRequest) -> int:
         # TODO
