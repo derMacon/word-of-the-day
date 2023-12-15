@@ -1,37 +1,23 @@
-import json
-from dataclasses import dataclass, field, asdict
+import os
+import psycopg2
 
-from enum import Enum
+ENV_PASSWORD = 'POSTGRES_PASSWORD'
+ENV_USER = 'POSTGRES_USER'
+ENV_DB_NAME = 'POSTGRES_DB'
 
-class Gender(Enum):
-    MALE = "MALE"
-    FEMALE = "FEMALE"
-    OTHER = "OTHER"
+if (ENV_PASSWORD not in os.environ) \
+        or (ENV_USER not in os.environ) \
+        or (ENV_DB_NAME not in os.environ):
+    # if ENV_PASSWORD or ENV_USER or ENV_DB_NAME not in os.environ:
+    print('invalid environment - shutting down')
+    exit(1)
 
-@dataclass
-class Person:
-    name: str
-    gender: Gender
-    age: int
+conn = psycopg2.connect(database=os.environ[ENV_DB_NAME],
+                        host="localhost",
+                        user=os.environ[ENV_USER],
+                        password=os.environ[ENV_PASSWORD],
+                        port="5432")
 
-    def __post_init__(self):
-        if isinstance(self.gender, str):
-            self.gender = Gender(self.gender)
-
-# JSON data
-json_data = '''
-{
-    "name": "John Doe",
-    "gender": "MALE",
-    "age": 25
-}
-'''
-
-# Convert JSON to a dictionary
-data_dict = json.loads(json_data)
-
-# Convert dictionary to a Person dataclass instance
-person_instance = Person(**data_dict)
-
-print(person_instance)
-print(type(person_instance.gender))
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM students;")
+print(cursor.fetchall())

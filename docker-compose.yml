@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:alpine3.19
+    ports: 
+      - 5432:5432
+    volumes:
+      - ./wotd-db/volume:/var/lib/postgresql/data
+      - ./wotd-db/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - ./wotd-db/config/.env
+
+  # backend:
+  #   image: "dermacon/checklist-paste-bin_backend:1.0"
+  #   build: ./backend/
+  #   ports:
+  #     - "8081:5000"
+  #   volumes:
+  #     - ./tmp-checklist/:/app/tmp/
+  # frontend:
+  #   depends_on:
+  #       - backend
+  #   image: "dermacon/checklist-paste-bin_frontend:1.0"
+  #   build: ./frontend/
+  #   ports:
+  #     - "8080:80"

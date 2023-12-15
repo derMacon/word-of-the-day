@@ -5,6 +5,7 @@ from flask import jsonify, request
 from src.app import main
 from src.data.types import DictOptionsResponse, DictRequest, OptionSelectRequest, Language, InfoRequestAvailDictLang
 from src.logic.controller import controller
+from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
 
 
@@ -16,7 +17,7 @@ def test_log():
 
 @main.route("/dict/available-lang")
 def dict_available_languages():
-    available_lang = [l for l in Language]
+    available_lang = persistence_service.get_available_languages()
     app_log.debug(f"user queries available languages: {available_lang}")
     return jsonify(InfoRequestAvailDictLang(available_lang)), 200
 

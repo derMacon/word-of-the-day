@@ -1,10 +1,16 @@
-import random
-from src.utils.logging_config import app_log
+import os
 
-from src.data.types import DictRequest, DictOptionsResponse
+import psycopg2
+
+from src.data.types import DictRequest, DictOptionsResponse, Language
+from src.utils.logging_config import app_log
 
 
 class PersistenceService:
+    ENV_PASSWORD = 'POSTGRES_PASSWORD'
+    ENV_USER = 'POSTGRES_USER'
+    ENV_DB_NAME = 'POSTGRES_DB'
+
     # SQLITE_FILE = './tmp/db/checklist-items.db'
     # SQLITE_SCHEMA = './res/db/checklist-schema.sql'
     #
@@ -70,6 +76,39 @@ class PersistenceService:
     #     self._cursor.close()
     #     self._connection.close()
 
+    def __init__(self):
+        if (PersistenceService.ENV_PASSWORD not in os.environ) \
+                or (PersistenceService.ENV_USER not in os.environ) \
+                or (PersistenceService.ENV_DB_NAME not in os.environ):
+            print('invalid environment - shutting down')
+            # TODO handle this differently
+            exit(1)
+
+        self.conn = psycopg2.connect(
+            database=os.environ[PersistenceService.ENV_DB_NAME],
+            host="localhost",
+            user=os.environ[PersistenceService.ENV_USER],
+            password=os.environ[PersistenceService.ENV_PASSWORD],
+            port="5432"
+        )
+
+        self.cursor = self.conn.cursor()
+
+    def teardown(self):
+        self._connection.commit()
+        self._cursor.close()
+        self._connection.close()
+
+    def get_available_languages(self) -> [Language]:
+        self.cursor.execute("SELECT * FROM students;")
+        print(type(self.cursor.fetchall()[0]))
+
+        # available_languages: [Language] = []
+        # app_log.debug(f"available languages{available_languages}")
+        # pass
+
+        return [Language.DE]
+
     def save_dict_request(self, dict_request: DictRequest) -> int:
         # TODO
         app_log.debug(f"save_dict_request: {dict_request}")
@@ -78,3 +117,6 @@ class PersistenceService:
 
     def save_dict_options_response(self, entry_id: int, dict_options_response: DictOptionsResponse):
         print(f"TOOD do not generate new id use: {dict_options_response.id}")
+
+
+persistence_service = PersistenceService()
