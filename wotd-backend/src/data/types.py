@@ -23,7 +23,7 @@ class Language:
     # translate enums when decoding json
     def __post_init__(self):
         if isinstance(self.abbreviation, str):
-            self.from_language = LanguageShort(self.abbreviation.upper())
+            self.abbreviation = LanguageShort(self.abbreviation.upper())
 
 
 @dataclass

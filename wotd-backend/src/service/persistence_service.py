@@ -2,9 +2,9 @@ import os
 
 import psycopg2
 
+from src.data.error.database_error import DatabaseError
 from src.data.types import DictRequest, DictOptionsResponse, LanguageShort, Language
 from src.utils.logging_config import app_log
-from src.data.error.database_error import DatabaseError
 
 
 class PersistenceService:
@@ -95,37 +95,41 @@ class PersistenceService:
 
         self.cursor = self.conn.cursor()
 
+    # src: https://stackoverflow.com/questions/1263451/python-decorators-in-classes
+    def _database_error_decorator(foo):
+        def decorate(self, *args, **kwargs):
+            try:
+                return foo(self, *args, **kwargs)
+            except Exception as e:
+                app_log.error(f"{e}")
+                raise DatabaseError(e, e)
+                print("end magic")
+
+        return decorate
+
     def teardown(self):
         self._connection.commit()
         self._cursor.close()
         self._connection.close()
 
+    @_database_error_decorator
     def get_available_languages(self) -> [LanguageShort]:
-        try:
-            self.cursor.execute("SELECT * FROM language;")
-            languages: [Language] = []
-            for entry in self.cursor.fetchall():
-                languages.append(Language(*entry))
+        self.cursor.execute("SELECT * FROM language;")
 
-            print(type(languages[0].abbreviation))
-            print(languages[0].abbreviation)
-
-            # available_languages: [Language] = []
-            # app_log.debug(f"available languages{available_languages}")
-            # pass
-
-        except Exception as e:
-            app_log.error(f"{e}")
-            raise DatabaseError(e, e)
+        languages: [Language] = []
+        for entry in self.cursor.fetchall():
+            languages.append(Language(*entry))
 
         return languages
 
+    @_database_error_decorator
     def save_dict_request(self, dict_request: DictRequest) -> int:
         # TODO
         app_log.debug(f"save_dict_request: {dict_request}")
         # return random.randint(0, 10000)
         return 42
 
+    @_database_error_decorator
     def save_dict_options_response(self, entry_id: int, dict_options_response: DictOptionsResponse):
         print(f"TOOD do not generate new id use: {dict_options_response.id}")
 

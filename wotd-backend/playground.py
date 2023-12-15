@@ -1,23 +1,19 @@
-import os
-import psycopg2
+class Test(object):
 
-ENV_PASSWORD = 'POSTGRES_PASSWORD'
-ENV_USER = 'POSTGRES_USER'
-ENV_DB_NAME = 'POSTGRES_DB'
+    def __init__(self, msg: str):
+        self.msg = msg
 
-if (ENV_PASSWORD not in os.environ) \
-        or (ENV_USER not in os.environ) \
-        or (ENV_DB_NAME not in os.environ):
-    # if ENV_PASSWORD or ENV_USER or ENV_DB_NAME not in os.environ:
-    print('invalid environment - shutting down')
-    exit(1)
+    def _decorator(foo):
+        def magic( self ) :
+            print("start magic")
+            foo( self )
+            print("end magic")
+        return magic
 
-conn = psycopg2.connect(database=os.environ[ENV_DB_NAME],
-                        host="localhost",
-                        user=os.environ[ENV_USER],
-                        password=os.environ[ENV_PASSWORD],
-                        port="5432")
+    @_decorator
+    def bar( self ) :
+        print(f"normal call: {self.msg}")
 
-cursor = conn.cursor()
-cursor.execute("SELECT * FROM students;")
-print(cursor.fetchall())
+test = Test('testtest')
+
+test.bar()
