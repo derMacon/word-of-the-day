@@ -3,7 +3,7 @@ import os
 import psycopg2
 
 from src.data.error.database_error import DatabaseError
-from src.data.types import DictRequest, DictOptionsResponse, LanguageShort, Language, InfoRequestDefaultDictLang
+from src.data.types import DictRequest, DictOptionsResponse, LanguageUUID, Language, InfoRequestDefaultDictLang
 from src.utils.logging_config import app_log
 
 
@@ -85,7 +85,7 @@ class PersistenceService:
             # TODO handle this differently
             exit(1)
 
-        self.conn = psycopg2.connect(
+        self._conn = psycopg2.connect(
             database=os.environ[PersistenceService.ENV_DB_NAME],
             host="localhost",
             user=os.environ[PersistenceService.ENV_USER],
@@ -93,7 +93,7 @@ class PersistenceService:
             port="5432"
         )
 
-        self.cursor = self.conn.cursor()
+        self._cursor = self._conn.cursor()
 
     # src: https://stackoverflow.com/questions/1263451/python-decorators-in-classes
     def _database_error_decorator(foo):
@@ -113,24 +113,24 @@ class PersistenceService:
         self._connection.close()
 
     @_database_error_decorator
-    def get_available_languages(self) -> [LanguageShort]:
-        self.cursor.execute("SELECT * FROM language;")
+    def get_available_languages(self) -> [LanguageUUID]:
+        self._cursor.execute("SELECT * FROM language;")
 
         languages: [Language] = []
-        for entry in self.cursor.fetchall():
+        for entry in self._cursor.fetchall():
             languages.append(Language(*entry))
 
         return languages
 
     @_database_error_decorator
     def get_default_languages(self) -> InfoRequestDefaultDictLang:
-        self.cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_from_language_id;")
-        entry = self.cursor.fetchone()
+        self._cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_from_language_id;")
+        entry = self._cursor.fetchone()
         app_log.debug(f"get_default_languages: {entry}")
         dict_default_from_language = Language(*entry)
 
-        self.cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_to_language_id;")
-        entry = self.cursor.fetchone()
+        self._cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_to_language_id;")
+        entry = self._cursor.fetchone()
         dict_default_to_language = Language(*entry)
 
         req = InfoRequestDefaultDictLang(
@@ -141,11 +141,24 @@ class PersistenceService:
         return req
 
     @_database_error_decorator
-    def save_dict_request(self, dict_request: DictRequest) -> int:
+    def save_dict_request(self, dict_request: DictRequest) -> DictRequest:
         # TODO
         app_log.debug(f"save_dict_request: {dict_request}")
-        # return random.randint(0, 10000)
-        return 42
+
+        sql_insert_string:str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input) VALUES (\
+            '{dict_request.from_language_uuid}', '{dict_request.to_language_uuid}', '{dict_request.input}');"
+        app_log.debug(f"sql string: {sql_insert_string}")
+        self._cursor.execute(sql_insert_string)
+        self._conn.commit()
+
+        sql_select_string:str = f"SELECT * FROM dict_request WHERE input = '{dict_request.input}'"
+        self._cursor.execute(sql_select_string)
+        entry = self._cursor.fetchone()
+        app_log.debug(f"entry: {entry}")
+        instance_with_id = DictRequest(*entry)
+        app_log.debug(f"instance with id: {instance_with_id}")
+
+        return instance_with_id
 
     @_database_error_decorator
     def save_dict_options_response(self, entry_id: int, dict_options_response: DictOptionsResponse):

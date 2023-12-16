@@ -3,7 +3,7 @@ import dataclasses
 from flask import jsonify, request
 
 from src.app import main
-from src.data.types import DictOptionsResponse, DictRequest, OptionSelectRequest, LanguageShort, InfoRequestAvailDictLang
+from src.data.types import DictOptionsResponse, DictRequest, OptionSelectRequest, InfoRequestAvailDictLang
 from src.logic.controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
@@ -14,6 +14,7 @@ def test_log():
     status = {'status': 'running'}
     app_log.debug(f"health: {status}")
     return jsonify(status), 200
+
 
 @main.route("/dict/available-lang")
 def dict_available_languages():
@@ -35,12 +36,12 @@ def lookup_word_options():
     app_log.debug(f"request data: {request_data}")
 
     dict_request = DictRequest(**request_data)
+    app_log.debug(f"dict request: {dict_request}")
     dict_response_option: DictOptionsResponse = controller.lookup_dict_word(dict_request)
 
     output = dataclasses.asdict(dict_response_option)
     app_log.debug(f"response options: {output}")
     return jsonify(output), 200
-
 
 
 @main.route("/dict/select-option", methods=['POST'])
@@ -56,5 +57,3 @@ def select_word_options():
 
     app_log.debug(f"json output: {output}")
     return jsonify(output), 200
-
-

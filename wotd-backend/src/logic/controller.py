@@ -15,9 +15,9 @@ class Controller:
     def lookup_dict_word(self, dict_request: DictRequest) -> DictOptionsResponse:
 
         response_tuples = self.dictcc_translator.translate(
-            dict_request.input,
-            from_language=dict_request.from_language.name.lower(),
-            to_language=dict_request.to_language.name.lower()
+            word=dict_request.input,
+            from_language=dict_request.from_language_uuid.name.lower(),
+            to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
         options: [Option] = add_id_to_tuples(response_tuples)
         app_log.debug(f"response options: {options}")
@@ -27,10 +27,10 @@ class Controller:
             options=options
         )
 
-        generated_id = self.persistence_service.save_dict_request(dict_request)
+        dict_request = self.persistence_service.save_dict_request(dict_request)
 
         dict_options_response = DictOptionsResponse(
-            id=generated_id,
+            id=dict_request.dict_request_id,
             dict_request=dict_request,
             status=status,
             options=options
@@ -38,7 +38,7 @@ class Controller:
 
         if status == Status.OK:
             self.persistence_service.save_dict_options_response(
-                entry_id=generated_id,
+                entry_id=dict_request.dict_request_id,
                 dict_options_response=dict_options_response
             )
 
