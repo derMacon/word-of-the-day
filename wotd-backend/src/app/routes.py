@@ -22,6 +22,13 @@ def dict_available_languages():
     return jsonify(InfoRequestAvailDictLang(available_lang)), 200
 
 
+@main.route("/dict/default-lang")
+def dict_default_languages():
+    default_lang = persistence_service.get_default_languages()
+    app_log.debug(f"user queries default languages: {default_lang}")
+    return jsonify(InfoRequestAvailDictLang(default_lang)), 200
+
+
 @main.route("/dict/lookup-option", methods=['POST'])
 def lookup_word_options():
     request_data = request.get_json()

@@ -27,8 +27,16 @@ class Language:
 
 
 @dataclass
+# TODO wouldn't the correct name be InfoResponseAvailDictLang
 class InfoRequestAvailDictLang:
     dict_available_languages: [LanguageShort]
+
+
+@dataclass
+# TODO wouldn't the correct name be InfoResponseDefaultDictLang
+class InfoRequestDefaultDictLang:
+    dict_default_from_language: LanguageShort
+    dict_default_to_language: LanguageShort
 
 
 @dataclass

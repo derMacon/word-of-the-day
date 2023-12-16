@@ -3,7 +3,7 @@ import os
 import psycopg2
 
 from src.data.error.database_error import DatabaseError
-from src.data.types import DictRequest, DictOptionsResponse, LanguageShort, Language
+from src.data.types import DictRequest, DictOptionsResponse, LanguageShort, Language, InfoRequestDefaultDictLang
 from src.utils.logging_config import app_log
 
 
@@ -121,6 +121,24 @@ class PersistenceService:
             languages.append(Language(*entry))
 
         return languages
+
+    @_database_error_decorator
+    def get_default_languages(self) -> InfoRequestDefaultDictLang:
+        self.cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_from_language_id;")
+        entry = self.cursor.fetchone()
+        app_log.debug(f"get_default_languages: {entry}")
+        dict_default_from_language = Language(*entry)
+
+        self.cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_to_language_id;")
+        entry = self.cursor.fetchone()
+        dict_default_to_language = Language(*entry)
+
+        req = InfoRequestDefaultDictLang(
+            dict_default_to_language=dict_default_to_language,
+            dict_default_from_language=dict_default_from_language
+        )
+
+        return req
 
     @_database_error_decorator
     def save_dict_request(self, dict_request: DictRequest) -> int:
