@@ -1,10 +1,12 @@
+import json
 import os
 from typing import List, Callable
 
 import psycopg2
 
 from src.data.error.database_error import DatabaseError
-from src.data.data_types import DictRequest, DictOptionsResponse, Language, InfoRequestDefaultDictLang, LanguageUUID
+from src.data.data_types import DictRequest, DictOptionsResponse, Language, InfoRequestDefaultDictLang, LanguageUUID, \
+    Status, DictOptionsItem
 from src.utils.logging_config import app_log
 
 
@@ -13,70 +15,6 @@ class PersistenceService:
     ENV_USER = 'POSTGRES_USER'
     ENV_DB_NAME = 'POSTGRES_DB'
 
-    # SQLITE_FILE = './tmp/db/checklist-items.db'
-    # SQLITE_SCHEMA = './res/db/checklist-schema.sql'
-    #
-    # def __init__(self):
-    #     create_parent_dir(PersistenceService.SQLITE_FILE)
-    #     self._connection = sqlite3.connect(PersistenceService.SQLITE_FILE)
-    #     # self._connection.set_trace_callback(sql_log.debug)
-    #     self._cursor = self._connection.cursor()
-    #
-    #     with open(PersistenceService.SQLITE_SCHEMA, 'r') as sql_schema:
-    #         sql_commands = sql_schema.read()
-    #         self._cursor.executescript(sql_commands)
-    #
-    # def set_items(self, checklist_name: str, item_list: [str]):
-    #     app_log.debug(f"setting items for checklist {checklist_name}: {item_list}")
-    #     checklist_id = self._translate_checklist_name(checklist_name)
-    #
-    #     self._cursor.execute(f"DELETE FROM Item WHERE ChecklistId = {checklist_id}")
-    #     app_log.debug(f"inserting {item_list} into Item table")
-    #     for curr_item in item_list:
-    #         self._cursor.execute(f"INSERT INTO Item (ItemName, ChecklistId) VALUES ('{curr_item}', {checklist_id})")
-    #
-    #     self._connection.commit()
-    #
-    # def get_items(self, checklist_name: str):
-    #     print(f"get items for {checklist_name}")
-    #     app_log.debug(f"get items for {checklist_name}")
-    #     checklist_id = self._translate_checklist_name(checklist_name)
-    #     self._cursor.execute(f"SELECT ItemName FROM Item WHERE ChecklistId = {checklist_id}")
-    #     item_names = self._unwrap_multiple_values()
-    #     app_log.debug(f"items in checklist with id {checklist_id}: {item_names}")
-    #     return item_names
-    #
-    # def _translate_checklist_name(self, checklist_name: str) -> int:
-    #     self._cursor.execute(f"SELECT ChecklistId FROM Checklist WHERE ChecklistName = '{checklist_name}'")
-    #     checklist_id = self._unwrap_single_value()
-    #     app_log.debug(f"first check if checklist already present {checklist_id}")
-    #
-    #     if not checklist_id:
-    #         # app_log.debug(f"creating new checklist with name {checklist_name}")
-    #         self._cursor.execute(f"INSERT INTO Checklist (ChecklistName) VALUES ('{checklist_name}')")
-    #         self._cursor.execute(f"SELECT ChecklistId FROM Checklist WHERE ChecklistName = '{checklist_name}'")
-    #         checklist_id = self._unwrap_single_value()
-    #
-    #     app_log.debug(f"checklist_id {checklist_id} for checklist_name {checklist_name}")
-    #     assert checklist_id
-    #     return checklist_id
-    #
-    # def _unwrap_multiple_values(self):
-    #     result = self._cursor.fetchall()
-    #     if result:
-    #         return [item[0] for item in result]
-    #     return []
-    #
-    # def _unwrap_single_value(self):
-    #     result = self._cursor.fetchmany(1)
-    #     if result:
-    #         return result[0][0]
-    #     return None
-    #
-    # def teardown(self):
-    #     self._connection.commit()
-    #     self._cursor.close()
-    #     self._connection.close()
 
     def __init__(self):
         if (PersistenceService.ENV_PASSWORD not in os.environ) \
@@ -109,9 +47,9 @@ class PersistenceService:
         return decorate
 
     def teardown(self):
-        self._connection.commit()
+        self._conn.commit()
         self._cursor.close()
-        self._connection.close()
+        self._conn.close()
 
     @_database_error_decorator  # type: ignore
     def get_available_languages(self) -> List[Language]:
@@ -145,8 +83,12 @@ class PersistenceService:
         return req
 
     @_database_error_decorator  # type: ignore
-    def save_dict_request(self, request: DictRequest) -> DictRequest:
-        # TODO
+    def save_dict_unique_request(self, request: DictRequest) -> DictRequest:
+        duplicate: DictRequest | None = self.find_duplicate(request)
+        if duplicate:
+            app_log.debug(f"found duplicate: {duplicate}")
+            return duplicate
+
         app_log.debug(f"save_dict_request: {request}")
 
         sql_insert_string: str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input, ts) VALUES (\
@@ -164,9 +106,63 @@ class PersistenceService:
 
         return instance_with_id
 
+    def find_duplicate(self, request: DictRequest) -> DictRequest | None:
+        sql_select_clause: str = (f"SELECT * FROM dict_request "
+                                  f"WHERE input = '{request.input.upper()}' "
+                                  f"and from_language_uuid = '{request.from_language_uuid}' "
+                                  f"and to_language_uuid = '{request.to_language_uuid}';")
+        app_log.debug(f'sql clause {sql_select_clause}')
+        self._cursor.execute(sql_select_clause)
+        sql_out = self._cursor.fetchone()
+        if sql_out:
+            return DictRequest(*sql_out)
+        return None
+
     @_database_error_decorator  # type: ignore
-    def save_dict_options_response(self, entry_id: int, dict_options_response: DictOptionsResponse):
-        print(f"TOOD do not generate new id use: {dict_options_response.id}")
+    def save_dict_options_response(self, dict_options_response: DictOptionsResponse):
+        dict_options_response = self._update_plain_response(dict_options_response)
+        dict_options_response = self._update_plain_options(dict_options_response)
+        return dict_options_response
+
+
+    def _update_plain_response(self, dict_options_response: DictOptionsResponse) -> DictOptionsResponse:
+        """
+        saves the wrapper object into the db and fetches the generated id into a new object
+        """
+        sql_insert = (f"INSERT INTO dict_options_response (dict_request_id, status, options_response_ts) VALUES ("
+                      f"{dict_options_response.dict_request.dict_request_id}, "
+                      f"'{dict_options_response.status.name.upper()}', "
+                      f"'{dict_options_response.options_response_ts}' "
+                      f") RETURNING dict_options_response_id;")
+        self._cursor.execute(sql_insert)
+        out = self._cursor.fetchone()[0]
+        dict_options_response.dict_options_response_id = out
+        self._conn.commit()
+
+        return dict_options_response
+
+    def _update_plain_options(self, dict_options_response: DictOptionsResponse) -> DictOptionsResponse:
+        """
+        saves the option objects into the db and fetches the generated id into a new object
+        """
+        response_id: int = dict_options_response.dict_options_response_id
+        options: List[DictOptionsItem] = dict_options_response.options
+
+        for curr_opt in options:
+            sql_insert = (f"INSERT INTO dict_options_item (dict_options_response_id, input, output) VALUES ("
+                          f"'{response_id}' ,"
+                          f"'{curr_opt.input}' ,"
+                          f"'{curr_opt.output}'"
+                          f");")
+            self._cursor.execute(sql_insert)
+
+        sql_select = f"SELECT * FROM dict_options_item WHERE dict_options_response_id = {response_id};"
+        self._cursor.execute(sql_select)
+        updated_options = self._cursor.fetchall()
+        self._conn.commit()
+
+        dict_options_response.options = updated_options
+        return dict_options_response
 
 
 persistence_service = PersistenceService()

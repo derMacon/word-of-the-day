@@ -20,12 +20,27 @@ INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VA
   ('EN', 'DE');
 
 
-CREATE TABLE dict_request (
+CREATE TABLE IF NOT EXISTS dict_request (
   dict_request_id SERIAL PRIMARY KEY,
   from_language_uuid VARCHAR(50) NOT NULL,
   to_language_uuid VARCHAR(50) NOT NULL,
-  input varchar(100) NOT NULL UNIQUE,
+  input varchar(100) NOT NULL,
   ts timestamp, 
   FOREIGN KEY (from_language_uuid) REFERENCES language(language_uuid),
   FOREIGN KEY (to_language_uuid) REFERENCES language(language_uuid)
+);
+
+CREATE TABLE IF NOT EXISTS dict_options_response (
+  dict_options_response_id SERIAL PRIMARY KEY,
+  dict_request_id INTEGER,
+  status VARCHAR(100),
+  options_response_ts timestamp
+);
+
+CREATE TABLE IF NOT EXISTS dict_options_item (
+  dict_options_item_id SERIAL PRIMARY KEY,
+  dict_options_response_id INTEGER NOT NULL,
+  input VARCHAR(100),
+  output VARCHAR(100),
+  FOREIGN KEY (dict_options_response_id) REFERENCES dict_options_response(dict_options_response_id)
 );

@@ -2,10 +2,10 @@ from typing import List
 
 from dictcc import Dict
 
-from src.data.data_types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest, Option
+from src.data.data_types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest, DictOptionsItem
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
-from src.utils.translations_utils import evaluate_status, add_id_to_tuples
+from src.utils.translations_utils import evaluate_status
 
 
 class Controller:
@@ -21,28 +21,23 @@ class Controller:
             from_language=dict_request.from_language_uuid.name.lower(),
             to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
-        options: List[Option] = add_id_to_tuples(response_tuples)
-        app_log.debug(f"response options: {options}")
+        options: List[DictOptionsItem] = [DictOptionsItem(*curr_tuple) for curr_tuple in response_tuples]
 
         status: Status = evaluate_status(
             original_input=dict_request.input,
             options=options
         )
 
-        dict_request = self.persistence_service.save_dict_request(dict_request)
+        dict_request = self.persistence_service.save_dict_unique_request(dict_request)
+        app_log.debug(f"updated request: {dict_request}")
 
         dict_options_response = DictOptionsResponse(
-            id=dict_request.dict_request_id,
             dict_request=dict_request,
             status=status,
             options=options
         )
 
-        if status == Status.OK:
-            self.persistence_service.save_dict_options_response(
-                entry_id=dict_request.dict_request_id,
-                dict_options_response=dict_options_response
-            )
+        dict_options_response = self.persistence_service.save_dict_options_response(dict_options_response)
 
         return dict_options_response
 

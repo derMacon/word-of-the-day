@@ -24,23 +24,31 @@ export async function dictLookupWord(word: string, fromLanguage: LanguageUUID, t
 
     let input: DictRequest = new DictRequest(fromLanguage, toLanguage, word)
 
-    let output = await fetch(DICTIONARY_BASE + '/lookup-option', {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(instanceToPlain(input))
-    })
 
-    let jsonObject: Object = await output.json() as Object
+    try {
 
-    let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
-    let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
+        let output = await fetch(DICTIONARY_BASE + '/lookup-option', {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify(instanceToPlain(input))
+        })
 
-    requestWrapper.dictRequest = originalRequest
+        let jsonObject: Object = await output.json() as Object
 
-    // console.log('parsed options: ', requestWrapper)
-    // console.log('parsed request: ', originalRequest)
+        let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
+        let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
 
-    return requestWrapper
+        requestWrapper.dictRequest = originalRequest
+
+        // console.log('parsed options: ', requestWrapper)
+        // console.log('parsed request: ', originalRequest)
+
+        return requestWrapper
+
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
 }
 
 export async function dictGetAvailableLang(): Promise<Language[]> {
