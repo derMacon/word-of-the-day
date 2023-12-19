@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from src.utils.logging_config import app_log
+
 
 class LanguageUUID(str, Enum):
     EN = "EN"
@@ -50,6 +52,7 @@ class DictRequest:
             self.from_language_uuid = LanguageUUID(from_language_uuid.upper())
             self.to_language_uuid = LanguageUUID(to_language_uuid.upper())
         else:
+            app_log.debug(f"constructor kwargs: {kwargs}")
             self.dict_request_id = None
             self.from_language_uuid = LanguageUUID(kwargs['from_language_uuid'].upper())
             self.to_language_uuid = LanguageUUID(kwargs['to_language_uuid'].upper())

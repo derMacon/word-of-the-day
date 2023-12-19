@@ -25,8 +25,8 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
 
     let json = JSON.stringify({
         input: word,
-        from_language: fromLanguage,
-        to_language: toLanguage
+        from_language_uuid: fromLanguage,
+        to_language_uuid: toLanguage
     })
 
     let out = await fetch(DICTIONARY_BASE + '/lookup-option', {
