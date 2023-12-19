@@ -22,10 +22,11 @@ INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VA
 
 CREATE TABLE IF NOT EXISTS dict_request (
   dict_request_id SERIAL PRIMARY KEY,
+  user_id VARCHAR(50) NOT NULL,
   from_language_uuid VARCHAR(50) NOT NULL,
   to_language_uuid VARCHAR(50) NOT NULL,
   input varchar(100) NOT NULL,
-  ts timestamp, 
+  dict_request_ts timestamp, 
   FOREIGN KEY (from_language_uuid) REFERENCES language(language_uuid),
   FOREIGN KEY (to_language_uuid) REFERENCES language(language_uuid)
 );

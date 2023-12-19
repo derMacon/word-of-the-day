@@ -1,2 +1,3 @@
-test = "'book {adj} [attr.] [e.g. artist, cover, illustrator, page, review]'"
-print(test.replace("'", ''))
+import re
+pattern = re.compile("Buch")
+pattern.match("Buchhuelle")

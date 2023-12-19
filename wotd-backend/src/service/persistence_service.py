@@ -1,12 +1,13 @@
-import json
 import os
-from typing import List, Callable
+from typing import List
+
+import os
+from typing import List
 
 import psycopg2
 
+from src.data.data_types import DictRequest, DictOptionsResponse, Language, InfoRequestDefaultDictLang, DictOptionsItem
 from src.data.error.database_error import DatabaseError
-from src.data.data_types import DictRequest, DictOptionsResponse, Language, InfoRequestDefaultDictLang, LanguageUUID, \
-    Status, DictOptionsItem
 from src.utils.logging_config import app_log
 
 
@@ -14,7 +15,6 @@ class PersistenceService:
     ENV_PASSWORD = 'POSTGRES_PASSWORD'
     ENV_USER = 'POSTGRES_USER'
     ENV_DB_NAME = 'POSTGRES_DB'
-
 
     def __init__(self):
         if (PersistenceService.ENV_PASSWORD not in os.environ) \
@@ -91,8 +91,13 @@ class PersistenceService:
 
         app_log.debug(f"save_dict_request: {request}")
 
-        sql_insert_string: str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input, ts) VALUES (\
-            '{request.from_language_uuid}', '{request.to_language_uuid}', '{request.input}', '{request.ts}');"
+        sql_insert_string: str = (
+            f"INSERT INTO dict_Request (user_id, from_language_uuid, to_language_uuid, input, ts) VALUES ("
+            f"'{request.user_id}', "
+            f"'{request.from_language_uuid}', "
+            f"'{request.to_language_uuid}', "
+            f"'{request.input}', "
+            f"'{request.dict_request_ts}');")
         app_log.debug(f"sql string: {sql_insert_string}")
         self._cursor.execute(sql_insert_string)
         self._conn.commit()
@@ -109,6 +114,7 @@ class PersistenceService:
     def find_duplicate(self, request: DictRequest) -> DictRequest | None:
         sql_select_clause: str = (f"SELECT * FROM dict_request "
                                   f"WHERE input = '{request.input.upper()}' "
+                                  f"and user_id = '{request.user_id}' "
                                   f"and from_language_uuid = '{request.from_language_uuid}' "
                                   f"and to_language_uuid = '{request.to_language_uuid}';")
         app_log.debug(f'sql clause {sql_select_clause}')
@@ -123,7 +129,6 @@ class PersistenceService:
         dict_options_response = self._update_plain_response(dict_options_response)
         dict_options_response = self._update_plain_options(dict_options_response)
         return dict_options_response
-
 
     def _update_plain_response(self, dict_options_response: DictOptionsResponse) -> DictOptionsResponse:
         """
