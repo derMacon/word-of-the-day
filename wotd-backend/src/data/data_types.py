@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 from src.utils.logging_config import app_log
 
@@ -29,14 +30,14 @@ class Language:
 @dataclass
 # TODO wouldn't the correct name be InfoResponseAvailDictLang
 class InfoRequestAvailDictLang:
-    dict_available_languages: [LanguageUUID]
+    dict_available_languages: List[Language]
 
 
 @dataclass
 # TODO wouldn't the correct name be InfoResponseDefaultDictLang
 class InfoRequestDefaultDictLang:
-    dict_default_from_language: LanguageUUID
-    dict_default_to_language: LanguageUUID
+    dict_default_from_language: Language
+    dict_default_to_language: Language
 
 
 @dataclass
@@ -72,7 +73,7 @@ class DictOptionsResponse:
     id: int
     dict_request: DictRequest
     status: Status
-    options: [Option]
+    options: List[Option]
 
 
 @dataclass

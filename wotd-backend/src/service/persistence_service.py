@@ -1,9 +1,10 @@
 import os
+from typing import List, Callable
 
 import psycopg2
 
 from src.data.error.database_error import DatabaseError
-from src.data.types import DictRequest, DictOptionsResponse, LanguageUUID, Language, InfoRequestDefaultDictLang
+from src.data.data_types import DictRequest, DictOptionsResponse, Language, InfoRequestDefaultDictLang, LanguageUUID
 from src.utils.logging_config import app_log
 
 
@@ -112,24 +113,27 @@ class PersistenceService:
         self._cursor.close()
         self._connection.close()
 
-    @_database_error_decorator
-    def get_available_languages(self) -> [LanguageUUID]:
+    @_database_error_decorator  # type: ignore
+    def get_available_languages(self) -> List[Language]:
         self._cursor.execute("SELECT * FROM language;")
 
-        languages: [Language] = []
+        languages: List[Language] = []
         for entry in self._cursor.fetchall():
             languages.append(Language(*entry))
 
         return languages
 
-    @_database_error_decorator
+    @_database_error_decorator  # type: ignore
     def get_default_languages(self) -> InfoRequestDefaultDictLang:
-        self._cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_from_language_id;")
+        self._cursor.execute(
+            "SELECT language.* FROM language "
+            "INNER JOIN language_default ON language.language_id=language_default.dict_from_language_id;")
         entry = self._cursor.fetchone()
         app_log.debug(f"get_default_languages: {entry}")
         dict_default_from_language = Language(*entry)
 
-        self._cursor.execute("SELECT language.* FROM language INNER JOIN language_default ON language.language_id=language_default.dict_to_language_id;")
+        self._cursor.execute("SELECT language.* FROM language "
+                             "INNER JOIN language_default ON language.language_id=language_default.dict_to_language_id;")
         entry = self._cursor.fetchone()
         dict_default_to_language = Language(*entry)
 
@@ -140,18 +144,18 @@ class PersistenceService:
 
         return req
 
-    @_database_error_decorator
+    @_database_error_decorator  # type: ignore
     def save_dict_request(self, dict_request: DictRequest) -> DictRequest:
         # TODO
         app_log.debug(f"save_dict_request: {dict_request}")
 
-        sql_insert_string:str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input) VALUES (\
+        sql_insert_string: str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input) VALUES (\
             '{dict_request.from_language_uuid}', '{dict_request.to_language_uuid}', '{dict_request.input}');"
         app_log.debug(f"sql string: {sql_insert_string}")
         self._cursor.execute(sql_insert_string)
         self._conn.commit()
 
-        sql_select_string:str = f"SELECT * FROM dict_request WHERE input = '{dict_request.input}'"
+        sql_select_string: str = f"SELECT * FROM dict_request WHERE input = '{dict_request.input}'"
         self._cursor.execute(sql_select_string)
         entry = self._cursor.fetchone()
         app_log.debug(f"entry: {entry}")

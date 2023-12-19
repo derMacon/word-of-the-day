@@ -1,5 +1,5 @@
-import {Language} from "./Language";
 import {Expose} from "class-transformer";
+import {Language} from "./Language";
 
 export class InfoRequestAvailLang {
 

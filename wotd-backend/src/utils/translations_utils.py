@@ -1,6 +1,6 @@
 from typing import Tuple, List
 
-from src.data.types import Status, Option
+from src.data.data_types import Status, Option
 
 
 def evaluate_status(original_input: str, options: List[Option]):

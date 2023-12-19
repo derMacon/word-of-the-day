@@ -1,4 +1,4 @@
-from src.data.types import Language, LanguageUUID
+from src.data.data_types import Language, LanguageUUID
 
 lang = LanguageUUID('EN')
 print(lang)

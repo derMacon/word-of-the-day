@@ -1,4 +1,4 @@
-import {Language} from "./Language";
+import {LanguageUUID} from "./LanguageUUID";
 import {Expose, Type} from "class-transformer";
 import {DictRequest} from "./DictRequest";
 import {Status} from "./Status";

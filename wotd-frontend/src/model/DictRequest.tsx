@@ -1,4 +1,4 @@
-import {Language} from "./Language";
+import {LanguageUUID} from "./LanguageUUID";
 import {Expose} from "class-transformer";
 import {Simulate} from "react-dom/test-utils";
 import input = Simulate.input;
@@ -6,17 +6,17 @@ import input = Simulate.input;
 export class DictRequest {
 
     @Expose({name: 'from_language_uuid'})
-    private _fromLanguageUuid: Language
+    private _fromLanguageUuid: LanguageUUID
 
     @Expose({name: 'to_language_uuid'})
-    private _toLanguageUuid: Language
+    private _toLanguageUuid: LanguageUUID
 
     @Expose({name: 'input'})
     private _input: string
 
     constructor(
-        fromLanguage: Language,
-        toLanguage: Language,
+        fromLanguage: LanguageUUID,
+        toLanguage: LanguageUUID,
         input: string
     ) {
         this._fromLanguageUuid = fromLanguage
@@ -25,11 +25,11 @@ export class DictRequest {
     }
 
 
-    get fromLanguageUuid(): Language {
+    get fromLanguageUuid(): LanguageUUID {
         return this._fromLanguageUuid;
     }
 
-    get toLanguageUuid(): Language {
+    get toLanguageUuid(): LanguageUUID {
         return this._toLanguageUuid;
     }
 
@@ -37,11 +37,11 @@ export class DictRequest {
         return this._input;
     }
 
-    set fromLanguageUuid(value: Language) {
+    set fromLanguageUuid(value: LanguageUUID) {
         this._fromLanguageUuid = value;
     }
 
-    set toLanguageUuid(value: Language) {
+    set toLanguageUuid(value: LanguageUUID) {
         this._toLanguageUuid = value;
     }
 

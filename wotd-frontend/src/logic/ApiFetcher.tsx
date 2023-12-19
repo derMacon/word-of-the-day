@@ -1,11 +1,12 @@
 // TODO read this from props or some kind .ini, do not hardcode it
-import {Language} from "../model/Language";
+import {LanguageUUID} from "../model/LanguageUUID";
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {instanceToPlain, plainToClass, serialize} from "class-transformer";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {DictRequest} from "../model/DictRequest";
 import {Option} from "../model/Option";
 import {type} from "os";
+import {Language} from "../model/Language";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -19,7 +20,7 @@ const HEADERS = {
 }
 
 
-export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
+export async function dictLookupWord(word: string, fromLanguage: LanguageUUID, toLanguage: LanguageUUID): Promise<DictOptionsResponse> {
 
     let input: DictRequest = new DictRequest(fromLanguage, toLanguage, word)
 

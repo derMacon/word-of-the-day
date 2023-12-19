@@ -1,4 +1,4 @@
-import {Language} from "./Language";
+import {LanguageUUID} from "./LanguageUUID";
 import {Expose} from "class-transformer";
 import {Simulate} from "react-dom/test-utils";
 

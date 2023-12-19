@@ -1,6 +1,6 @@
 from dictcc import Dict
 
-from src.data.types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest, Option
+from src.data.data_types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest, Option
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import evaluate_status, add_id_to_tuples

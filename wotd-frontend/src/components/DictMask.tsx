@@ -5,24 +5,25 @@ import TextField from "./TextField";
 import DropdownSelect from "./DropdownSelect";
 import {SelectableTable} from "./SelectableTable";
 import {dictGetAvailableLang, dictLookupWord, pushSelectedOption} from "../logic/ApiFetcher";
-import {Language} from "../model/Language";
+import {LanguageUUID} from "../model/LanguageUUID";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate} from "react-icons/fa6";
+import {Language} from "../model/Language";
 
 
 export function DictMask() {
 
-    const [selectedFromLang, setSelectedFromLang] = useState<Language>(Language.EN) // TODO use cookie values here
-    const [selectedToLang, setSelectedToLang] = useState<Language>(Language.DE) // TODO use cookie values here
-    const [availLang, setAvailLang] = useState<Map<Language, string>>(new Map())
+    const [selectedFromLang, setSelectedFromLang] = useState<LanguageUUID>(LanguageUUID.EN) // TODO use cookie values here
+    const [selectedToLang, setSelectedToLang] = useState<LanguageUUID>(LanguageUUID.DE) // TODO use cookie values here
+    const [availLang, setAvailLang] = useState<Map<LanguageUUID, string>>(new Map())
     const [dictOptions, setDictOptions] = useState<DictOptionsResponse>()
 
     useEffect(() => {
         dictGetAvailableLang().then((languages: Language[]) => {
-                const langMap: Map<Language, string> = new Map<Language, string>()
+                const langMap: Map<LanguageUUID, string> = new Map<LanguageUUID, string>()
                 for (let i = 0; i < languages.length; i++) {
-                    langMap.set(languages[i], languages[i].toString())
+                    langMap.set(languages[i].language_uuid, languages[i].name)
                 }
                 setAvailLang(langMap)
             }
@@ -30,8 +31,8 @@ export function DictMask() {
     }, []);
 
     const handleLanguageSwitch = () => {
-        let fromLangNewInstance: Language = selectedFromLang.toString() as Language
-        let toLangNewInstance: Language = selectedToLang.toString() as Language
+        let fromLangNewInstance: LanguageUUID = selectedFromLang.toString() as LanguageUUID
+        let toLangNewInstance: LanguageUUID = selectedToLang.toString() as LanguageUUID
         setSelectedFromLang(toLangNewInstance)
         setSelectedToLang(fromLangNewInstance)
     }
