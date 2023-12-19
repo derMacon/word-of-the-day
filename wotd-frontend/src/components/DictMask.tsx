@@ -23,18 +23,7 @@ export function DictMask() {
     const [dictOptions, setDictOptions] = useState<DictOptionsResponse>()
 
     useEffect(() => {
-        // TODO delete this
-        // dictGetAvailableLang().then((languages: Language[]) => {
-        //         const langMap: Map<LanguageUUID, string> = new Map<LanguageUUID, string>()
-        //         for (let i = 0; i < languages.length; i++) {
-        //             langMap.set(languages[i].language_uuid, languages[i].name)
-        //         }
-        //         setAvailLang(langMap)
-        //     }
-        // )
-
         dictGetAvailableLang().then(setAvailLang)
-
     }, []);
 
     const handleLanguageSwitch = () => {
