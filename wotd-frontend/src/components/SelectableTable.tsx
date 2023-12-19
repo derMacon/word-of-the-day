@@ -5,18 +5,19 @@ import {apiIsHealthy, pushSelectedOption} from "../logic/ApiFetcher";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {Option} from "../model/Option";
 import './SelectableTable.css';
+import {DictOptionsItem} from "../model/DictOptionsItem";
 
 
 interface SelectableTableProps {
     apiResponse: DictOptionsResponse
 }
 
-export function SelectableTable(props: SelectableTableProps) {
+export function SelectableTable(props: Readonly<SelectableTableProps>) {
 
     const [highlight, setHighlight] = useState<Map<number, boolean>>(() => {
         const initialHighlight = new Map();
-        props.apiResponse.options.forEach((option) => {
-            initialHighlight.set(option.id, false);
+        props.apiResponse.options.forEach((option: DictOptionsItem) => {
+            initialHighlight.set(option.dictOptionsItemId, false);
         });
 
         return initialHighlight;
@@ -29,24 +30,24 @@ export function SelectableTable(props: SelectableTableProps) {
         }
     }, []);
 
-    const handleSelection = (selectedOption: Option) => {
+    const handleSelection = (selectedOption: DictOptionsItem) => {
         apiIsHealthy().then(e => {
-            let state: boolean = !highlight.get(selectedOption.id)
-            setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.id, state))
+            let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
+            setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
 
-            if (highlight.get(selectedOption.id)) {
+            if (highlight.get(selectedOption.dictOptionsItemId)) {
                 // TODO unselect
             } else {
-                pushSelectedOption(props.apiResponse.id, selectedOption)
+                pushSelectedOption(selectedOption)
             }
         })
     }
 
     const items: JSX.Element[] = []
-    props.apiResponse.options.forEach((option: Option) => items.push(
-        <tr key={option.id} onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleSelection(option)}>
-            <td className={`w-50 ${highlight.get(option.id) ? 'text-bg-dark bg-secondary' : ''}`}>{option.input}</td>
-            <td className={`w-50 ${highlight.get(option.id) ? 'text-bg-dark bg-secondary' : ''}`}>{option.output}</td>
+    props.apiResponse.options.forEach((option: DictOptionsItem) => items.push(
+        <tr key={option.dictOptionsItemId} onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleSelection(option)}>
+            <td className={`w-50 ${highlight.get(option.dictOptionsItemId) ? 'text-bg-dark bg-secondary' : ''}`}>{option.input}</td>
+            <td className={`w-50 ${highlight.get(option.dictOptionsItemId) ? 'text-bg-dark bg-secondary' : ''}`}>{option.output}</td>
         </tr>
     ))
 

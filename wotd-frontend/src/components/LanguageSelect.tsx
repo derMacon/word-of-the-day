@@ -4,24 +4,25 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import {JSX} from 'react/jsx-runtime';
 import {ButtonGroup} from "react-bootstrap";
+import {Language} from "../model/Language";
 
 
-interface DropdownSelectProps<T> {
-    children: Map<T, string>
-    selectedElem: T
-    onSelect: (input: T) => void
+interface DropdownSelectProps {
+    availableLanguages: Language[]
+    selectedElem: Language
+    onSelect: (input: Language) => void
 }
 
-export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
+export function LanguageSelect(props: Readonly<DropdownSelectProps>) {
 
     const items: JSX.Element[] = []
-    props.children.forEach((value: string, key: T) => items.push(
-        <Dropdown.Item key={key} onClick={() => props.onSelect(key)}>
-            {value}
+    props.availableLanguages.forEach((language: Language) => items.push(
+        <Dropdown.Item key={language.language_uuid} onClick={() => props.onSelect(language)}>
+            {language.name}
         </Dropdown.Item>
     ));
 
-    const title: string = props.children.get(props.selectedElem) || ''
+    const title: string = props.selectedElem.language_uuid
 
     return (
         <DropdownButton
@@ -34,4 +35,4 @@ export function DropdownSelect<T extends Key>(props: DropdownSelectProps<T>) {
     );
 }
 
-export default DropdownSelect;
+export default LanguageSelect;

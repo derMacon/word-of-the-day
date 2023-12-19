@@ -8,6 +8,7 @@ from src.data.data_types import DictOptionsResponse, DictRequest, OptionSelectRe
 from src.logic.controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
+from src.utils.translations_utils import asdict_nested
 
 
 @main.route("/health")
@@ -38,9 +39,9 @@ def lookup_word_options() -> Tuple[Response, int]:
 
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
-    dict_response_option: DictOptionsResponse = controller.lookup_dict_word(dict_request)
+    dict_options_response: DictOptionsResponse = controller.lookup_dict_word(dict_request)
 
-    output = dataclasses.asdict(dict_response_option)
+    output = dataclasses.asdict(dict_options_response)
     app_log.debug(f"response options: {output}")
     return jsonify(output), 200
 

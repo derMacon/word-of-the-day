@@ -158,15 +158,19 @@ class PersistenceService:
                           f"'{response_id}' ,"
                           f"'{curr_opt.input}' ,"
                           f"'{curr_opt.output}'"
-                          f");")
+                          f") RETURNING dict_options_item_id;")
             self._cursor.execute(sql_insert)
+            curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
+            curr_opt.dict_options_response_id = response_id
 
-        sql_select = f"SELECT * FROM dict_options_item WHERE dict_options_response_id = {response_id};"
-        self._cursor.execute(sql_select)
-        updated_options = self._cursor.fetchall()
+
+        # sql_select = f"SELECT * FROM dict_options_item WHERE dict_options_response_id = {response_id};"
+        # self._cursor.execute(sql_select)
+        # updated_options = self._cursor.fetchall()
         self._conn.commit()
 
-        dict_options_response.options = updated_options
+        # dict_options_response.options = updated_options
+        # [DictOptionsItem(*curr_tuple) for curr_tuple in response_tuples]
         return dict_options_response
 
 

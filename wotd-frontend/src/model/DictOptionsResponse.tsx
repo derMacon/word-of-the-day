@@ -1,61 +1,70 @@
-import {LanguageUUID} from "./LanguageUUID";
-import {Expose, Type} from "class-transformer";
+import {Expose} from "class-transformer";
 import {DictRequest} from "./DictRequest";
 import {Status} from "./Status";
-import {Option} from "./Option";
+import {DictOptionsItem} from "./DictOptionsItem";
 
 export class DictOptionsResponse {
 
-    private _id: number
+    @Expose({name: 'dict_options_response_id'})
+    private _dictOptionsResponseId: number
 
     @Expose({name: 'dict_request'})
     private _dictRequest: DictRequest
 
     private _status: Status
 
-    private _options: Option[]
+    private _options: DictOptionsItem[]
 
-    constructor(
-        id: number,
-        dictRequest: DictRequest,
-        status: Status,
-        options: Option[]
-    ) {
-        this._id = id
-        this._dictRequest = dictRequest
-        this._status = status
-        this._options = options
+    @Expose({name: 'options_request_ts'})
+    private _optionsResponseTs: string
+
+
+    constructor(dictOptionsResponseId: number, dictRequest: DictRequest, status: Status, options: DictOptionsItem[], optionsResponseTs: string) {
+        this._dictOptionsResponseId = dictOptionsResponseId;
+        this._dictRequest = dictRequest;
+        this._status = status;
+        this._options = options;
+        this._optionsResponseTs = optionsResponseTs;
     }
 
-    get id(): number {
-        return this._id;
+
+    get dictOptionsResponseId(): number {
+        return this._dictOptionsResponseId;
+    }
+
+    set dictOptionsResponseId(value: number) {
+        this._dictOptionsResponseId = value;
     }
 
     get dictRequest(): DictRequest {
         return this._dictRequest;
     }
 
-    get status(): Status {
-        return this._status;
-    }
-
-    get options(): Option[] {
-        return this._options;
-    }
-
-    set id(value: number) {
-        this._id = value;
-    }
-
     set dictRequest(value: DictRequest) {
         this._dictRequest = value;
+    }
+
+    get status(): Status {
+        return this._status;
     }
 
     set status(value: Status) {
         this._status = value;
     }
 
-    set options(value: Option[]) {
+    get options(): DictOptionsItem[] {
+        return this._options;
+    }
+
+    set options(value: DictOptionsItem[]) {
         this._options = value;
+    }
+
+    get optionsResponseTs(): string {
+        return this._optionsResponseTs;
+    }
+
+    set optionsResponseTs(value: string) {
+        this._optionsResponseTs = value;
     }
 }

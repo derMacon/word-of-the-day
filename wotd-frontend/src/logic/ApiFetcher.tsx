@@ -7,6 +7,8 @@ import {DictRequest} from "../model/DictRequest";
 import {Option} from "../model/Option";
 import {type} from "os";
 import {Language} from "../model/Language";
+import {getPrincipal} from "./AuthService";
+import {DictOptionsItem} from "../model/DictOptionsItem";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -20,10 +22,10 @@ const HEADERS = {
 }
 
 
-export async function dictLookupWord(word: string, fromLanguage: LanguageUUID, toLanguage: LanguageUUID): Promise<DictOptionsResponse> {
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
 
-    let input: DictRequest = new DictRequest(fromLanguage, toLanguage, word)
-
+    let input: DictRequest = new DictRequest(getPrincipal(), fromLanguage.language_uuid, toLanguage.language_uuid, word)
+    console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
 
     try {
 
@@ -36,9 +38,16 @@ export async function dictLookupWord(word: string, fromLanguage: LanguageUUID, t
         let jsonObject: Object = await output.json() as Object
 
         let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
-        let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
+        let originalRequest: DictRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
+
+        let optionsUpdated: DictOptionsItem[] = []
+        for (let i = 0; i < requestWrapper.options.length; i++) {
+            let curr = requestWrapper.options[i] as Object
+            optionsUpdated.push(plainToClass(DictOptionsItem, curr))
+        }
 
         requestWrapper.dictRequest = originalRequest
+        requestWrapper.options = optionsUpdated
 
         // console.log('parsed options: ', requestWrapper)
         // console.log('parsed request: ', originalRequest)
@@ -79,14 +88,14 @@ export async function apiIsHealthy(): Promise<boolean> {
     }
 }
 
-export async function pushSelectedOption(batchId: number, option: Option) {
+export async function pushSelectedOption(option: DictOptionsItem) {
     console.log('pushing selected option: ', option)
 
     // TODO create / use special type
 
     let json = JSON.stringify({
-        options_response_id: batchId,
-        selected_option_id: option.id
+        options_response_id: option.dictOptionsResponseId,
+        selected_option_id: option.dictOptionsItemId
     })
 
     let out = await fetch(DICTIONARY_BASE + '/select-option', {

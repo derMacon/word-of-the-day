@@ -71,7 +71,7 @@ class DictRequest:
     def generate_fields(self, kwargs):
         app_log.debug(f"constructor kwargs: {kwargs}")
         self.dict_request_id = None
-        self.user_id = kwargs['username'].lower()
+        self.user_id = kwargs['user_id'].lower()
         self.from_language_uuid = LanguageUUID(kwargs['from_language_uuid'].upper())
         self.to_language_uuid = LanguageUUID(kwargs['to_language_uuid'].upper())
         self.input = kwargs['input'].upper()
@@ -89,8 +89,8 @@ class DictOptionsItem:
                  input: str,
                  output: str,
                  dict_options_response_id: int = -1,
-                 option_id: int = -1):
-        self.option_id = option_id
+                 dict_options_item_id: int = -1):
+        self.dict_options_item_id = dict_options_item_id
         self.dict_options_response_id = dict_options_response_id
         self.input = input.replace("'", "")
         self.output = output.replace("'", "")
