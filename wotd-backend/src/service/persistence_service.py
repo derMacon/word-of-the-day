@@ -145,17 +145,17 @@ class PersistenceService:
         return req
 
     @_database_error_decorator  # type: ignore
-    def save_dict_request(self, dict_request: DictRequest) -> DictRequest:
+    def save_dict_request(self, request: DictRequest) -> DictRequest:
         # TODO
-        app_log.debug(f"save_dict_request: {dict_request}")
+        app_log.debug(f"save_dict_request: {request}")
 
-        sql_insert_string: str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input) VALUES (\
-            '{dict_request.from_language_uuid}', '{dict_request.to_language_uuid}', '{dict_request.input}');"
+        sql_insert_string: str = f"INSERT INTO dict_Request (from_language_uuid, to_language_uuid, input, ts) VALUES (\
+            '{request.from_language_uuid}', '{request.to_language_uuid}', '{request.input}', '{request.ts}');"
         app_log.debug(f"sql string: {sql_insert_string}")
         self._cursor.execute(sql_insert_string)
         self._conn.commit()
 
-        sql_select_string: str = f"SELECT * FROM dict_request WHERE input = '{dict_request.input}'"
+        sql_select_string: str = f"SELECT * FROM dict_request WHERE input = '{request.input}'"
         self._cursor.execute(sql_select_string)
         entry = self._cursor.fetchone()
         app_log.debug(f"entry: {entry}")
@@ -164,7 +164,7 @@ class PersistenceService:
 
         return instance_with_id
 
-    @_database_error_decorator
+    @_database_error_decorator  # type: ignore
     def save_dict_options_response(self, entry_id: int, dict_options_response: DictOptionsResponse):
         print(f"TOOD do not generate new id use: {dict_options_response.id}")
 

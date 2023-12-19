@@ -1,8 +1,13 @@
+from datetime import datetime, timezone, timedelta
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
 from src.utils.logging_config import app_log
+
+DATETIME_FORMAT_STRING = '%Y-%m-%d %H:%M:%S'
+BERLIN_TIMEZONE = timezone(timedelta(hours=1))
 
 
 class LanguageUUID(str, Enum):
@@ -46,19 +51,24 @@ class DictRequest:
     from_language_uuid: LanguageUUID
     to_language_uuid: LanguageUUID
     input: str
+    ts: str
 
     def __init__(self, *args, **kwargs):
         app_log.debug(f"args {args}")
         if args:
-            self.dict_request_id, from_language_uuid, to_language_uuid, self.input = args
+            self.dict_request_id, from_language_uuid, to_language_uuid, self.input, self.ts = args
             self.from_language_uuid = LanguageUUID(from_language_uuid.upper())
             self.to_language_uuid = LanguageUUID(to_language_uuid.upper())
         else:
-            app_log.debug(f"constructor kwargs: {kwargs}")
-            self.dict_request_id = None
-            self.from_language_uuid = LanguageUUID(kwargs['from_language_uuid'].upper())
-            self.to_language_uuid = LanguageUUID(kwargs['to_language_uuid'].upper())
-            self.input = kwargs['input']
+            self.generate_fields(kwargs)
+
+    def generate_fields(self, kwargs):
+        app_log.debug(f"constructor kwargs: {kwargs}")
+        self.dict_request_id = None
+        self.from_language_uuid = LanguageUUID(kwargs['from_language_uuid'].upper())
+        self.to_language_uuid = LanguageUUID(kwargs['to_language_uuid'].upper())
+        self.input = kwargs['input']
+        self.ts = datetime.now(BERLIN_TIMEZONE).strftime(DATETIME_FORMAT_STRING)
 
 
 @dataclass

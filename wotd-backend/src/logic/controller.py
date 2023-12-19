@@ -1,3 +1,5 @@
+from typing import List
+
 from dictcc import Dict
 
 from src.data.data_types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest, Option
@@ -19,7 +21,7 @@ class Controller:
             from_language=dict_request.from_language_uuid.name.lower(),
             to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
-        options: [Option] = add_id_to_tuples(response_tuples)
+        options: List[Option] = add_id_to_tuples(response_tuples)
         app_log.debug(f"response options: {options}")
 
         status: Status = evaluate_status(
