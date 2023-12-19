@@ -47,6 +47,7 @@ class DictRequest:
     input: str
 
     def __init__(self, *args, **kwargs):
+        app_log.debug(f"args {args}")
         if args:
             self.dict_request_id, from_language_uuid, to_language_uuid, self.input = args
             self.from_language_uuid = LanguageUUID(from_language_uuid.upper())

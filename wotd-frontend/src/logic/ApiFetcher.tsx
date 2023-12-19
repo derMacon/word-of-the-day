@@ -1,7 +1,7 @@
 // TODO read this from props or some kind .ini, do not hardcode it
 import {Language} from "../model/Language";
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
-import {plainToClass} from "class-transformer";
+import {instanceToPlain, plainToClass, serialize} from "class-transformer";
 import {DictOptionsResponse} from "../model/DictOptionsResponse";
 import {DictRequest} from "../model/DictRequest";
 import {Option} from "../model/Option";
@@ -21,21 +21,15 @@ const HEADERS = {
 
 export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
 
-    // TODO use special type instead of json
+    let input: DictRequest = new DictRequest(fromLanguage, toLanguage, word)
 
-    let json = JSON.stringify({
-        input: word,
-        from_language_uuid: fromLanguage,
-        to_language_uuid: toLanguage
-    })
-
-    let out = await fetch(DICTIONARY_BASE + '/lookup-option', {
+    let output = await fetch(DICTIONARY_BASE + '/lookup-option', {
         method: 'POST',
         headers: HEADERS,
-        body: json
+        body: JSON.stringify(instanceToPlain(input))
     })
 
-    let jsonObject: Object = await out.json() as Object
+    let jsonObject: Object = await output.json() as Object
 
     let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
     let originalRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
