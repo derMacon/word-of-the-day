@@ -5,7 +5,7 @@ from flask import jsonify, request, Response
 
 from src.app import main
 from src.data.data_types import DictOptionsResponse, DictRequest, OptionSelectRequest, InfoRequestAvailDictLang
-from src.logic.controller import controller
+from src.logic.web_controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import asdict_nested

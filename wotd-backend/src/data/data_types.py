@@ -8,8 +8,10 @@ from src.utils.logging_config import app_log
 DATETIME_FORMAT_STRING = '%Y-%m-%d %H:%M:%S'
 BERLIN_TIMEZONE = timezone(timedelta(hours=1))
 
+
 def now():
     return datetime.now(BERLIN_TIMEZONE).strftime(DATETIME_FORMAT_STRING)
+
 
 class LanguageUUID(str, Enum):
     EN = "EN"
@@ -95,6 +97,7 @@ class DictOptionsItem:
         self.input = input.replace("'", "")
         self.output = output.replace("'", "")
 
+
 @dataclass
 class DictOptionsResponse:
     dict_options_response_id: int
@@ -115,10 +118,11 @@ class DictOptionsResponse:
         self.options: List[DictOptionsItem] = options
         self.options_response_ts: str = ts
 
+
 @dataclass
 class OptionSelectRequest:
-    options_response_id: int
-    selected_option_id: int
+    selected_dict_options_item_id: int
+
 
 @dataclass
 class DefRequest:

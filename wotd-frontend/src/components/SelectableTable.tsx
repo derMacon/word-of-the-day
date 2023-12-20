@@ -38,7 +38,7 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
             if (highlight.get(selectedOption.dictOptionsItemId)) {
                 // TODO unselect
             } else {
-                pushSelectedOption(selectedOption)
+                pushSelectedOption(selectedOption.dictOptionsItemId)
             }
         })
     }

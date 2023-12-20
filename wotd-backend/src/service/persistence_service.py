@@ -84,7 +84,7 @@ class PersistenceService:
 
     @_database_error_decorator  # type: ignore
     def save_dict_unique_request(self, request: DictRequest) -> DictRequest:
-        duplicate: DictRequest | None = self.find_duplicate(request)
+        duplicate: DictRequest | None = self.find_duplicate_dict_request(request)
         if duplicate:
             app_log.debug(f"found duplicate: {duplicate}")
             return duplicate
@@ -111,8 +111,21 @@ class PersistenceService:
 
         return instance_with_id
 
-    def find_duplicate(self, request: DictRequest) -> DictRequest | None:
+    def find_duplicate_dict_request(self, request: DictRequest) -> DictRequest | None:
         sql_select_clause: str = (f"SELECT * FROM dict_request "
+                                  f"WHERE input = '{request.input.upper()}' "
+                                  f"and user_id = '{request.user_id}' "
+                                  f"and from_language_uuid = '{request.from_language_uuid}' "
+                                  f"and to_language_uuid = '{request.to_language_uuid}';")
+        app_log.debug(f'sql clause {sql_select_clause}')
+        self._cursor.execute(sql_select_clause)
+        sql_out = self._cursor.fetchone()
+        if sql_out:
+            return DictRequest(*sql_out)
+        return None
+
+    def find_duplicate_dict_options_response(self, request: DictRequest) -> DictOptionsResponse | None:
+        sql_select_clause: str = (f"SELECT * FROM dict_options_response "
                                   f"WHERE input = '{request.input.upper()}' "
                                   f"and user_id = '{request.user_id}' "
                                   f"and from_language_uuid = '{request.from_language_uuid}' "

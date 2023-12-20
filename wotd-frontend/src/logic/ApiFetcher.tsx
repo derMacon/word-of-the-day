@@ -88,14 +88,13 @@ export async function apiIsHealthy(): Promise<boolean> {
     }
 }
 
-export async function pushSelectedOption(option: DictOptionsItem) {
-    console.log('pushing selected option: ', option)
+export async function pushSelectedOption(dictOptionsItemId: number) {
+    console.log('pushing selected option: ', dictOptionsItemId)
 
     // TODO create / use special type
 
     let json = JSON.stringify({
-        options_response_id: option.dictOptionsResponseId,
-        selected_option_id: option.dictOptionsItemId
+        selected_dict_options_item_id: dictOptionsItemId
     })
 
     let out = await fetch(DICTIONARY_BASE + '/select-option', {

@@ -8,7 +8,7 @@ from src.utils.logging_config import app_log
 from src.utils.translations_utils import evaluate_status
 
 
-class Controller:
+class WebController:
 
     def __init__(self):
         self.dictcc_translator = Dict()
@@ -47,4 +47,4 @@ class Controller:
         return True
 
 
-controller = Controller()
+controller = WebController()
