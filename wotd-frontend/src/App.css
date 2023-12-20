@@ -64,7 +64,8 @@
 
 .min-height {
     /*border: 2px solid purple;*/
-    min-height: 200px;
+    /*min-height: 200px;*/
+    min-height: 33vh;
 }
 
 .footer {

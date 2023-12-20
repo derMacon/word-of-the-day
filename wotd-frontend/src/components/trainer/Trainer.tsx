@@ -4,6 +4,8 @@ import Container from "react-bootstrap/Container";
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
+import {Col, Row} from "react-bootstrap";
+import ListGroup from 'react-bootstrap/ListGroup';
 
 
 export function Trainer() {
@@ -12,19 +14,16 @@ export function Trainer() {
     return (
         <div>
             <Container fluid="md">
-                <div className="custom-max-width min-height">
+                <div className="custom-max-width">
 
                     <Card border='light' className=''>
-                        <Card.Text className='min-height'>
-                            front
-                        </Card.Text>
-
-                        <Card.Text className='min-height'>
-                            back
-                        </Card.Text>
+                        <ListGroup variant="flush">
+                            <ListGroup.Item>Front</ListGroup.Item>
+                            <ListGroup.Item>Back</ListGroup.Item>
+                        </ListGroup>
 
 
-                        <div className=''>
+                        <div className='min-height'>
                             <ButtonGroup className='w-100' aria-label="Basic example">
                                 <Button variant="light text-muted">Very Hard</Button>
                                 <Button variant="light text-muted">Hard</Button>
