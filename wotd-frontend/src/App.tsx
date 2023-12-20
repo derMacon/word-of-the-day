@@ -1,7 +1,8 @@
 import React, {useEffect} from 'react';
 import './App.css';
 import {apiIsHealthy} from "./logic/ApiFetcher";
-import {DictMask} from "./components/DictMask";
+import {DictMask} from "./components/dict_input/DictMask";
+import {Trainer} from "./components/trainer/Trainer";
 
 function App() {
 
@@ -17,7 +18,8 @@ function App() {
 
     return (
         <div className="App">
-            <DictMask/>
+            {/*<DictMask/>*/}
+            <Trainer/>
         </div>
     );
 }

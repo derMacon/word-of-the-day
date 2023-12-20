@@ -4,7 +4,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import {JSX} from 'react/jsx-runtime';
 import {ButtonGroup} from "react-bootstrap";
-import {Language} from "../model/Language";
+import {Language} from "../../model/Language";
 
 
 interface DropdownSelectProps {

@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {apiIsHealthy, pushSelectedOption} from "../logic/ApiFetcher";
-import {DictOptionsResponse} from "../model/DictOptionsResponse";
-import {Option} from "../model/Option";
+import {apiIsHealthy, pushSelectedOption} from "../../logic/ApiFetcher";
+import {DictOptionsResponse} from "../../model/DictOptionsResponse";
+import {Option} from "../../model/Option";
 import './SelectableTable.css';
-import {DictOptionsItem} from "../model/DictOptionsItem";
+import {DictOptionsItem} from "../../model/DictOptionsItem";
 
 
 interface SelectableTableProps {

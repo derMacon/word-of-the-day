@@ -4,12 +4,12 @@ import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
 import {SelectableTable} from "./SelectableTable";
-import {dictGetAvailableLang, dictLookupWord} from "../logic/ApiFetcher";
-import {LanguageUUID} from "../model/LanguageUUID";
-import {DictOptionsResponse} from "../model/DictOptionsResponse";
+import {dictGetAvailableLang, dictLookupWord} from "../../logic/ApiFetcher";
+import {LanguageUUID} from "../../model/LanguageUUID";
+import {DictOptionsResponse} from "../../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate} from "react-icons/fa6";
-import {Language} from "../model/Language";
+import {Language} from "../../model/Language";
 
 
 export function DictMask() {
