@@ -1,12 +1,13 @@
 import os
 from typing import List
 
-import os
-from typing import List
-
 import psycopg2
 
-from src.data.data_types import DictRequest, DictOptionsResponse, Language, InfoRequestDefaultDictLang, DictOptionsItem
+from src.data.dict_input.dict_options_item import DictOptionsItem
+from src.data.dict_input.dict_options_response import DictOptionsResponse
+from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
+from src.data.dict_input.language import Language
 from src.data.error.database_error import DatabaseError
 from src.utils.logging_config import app_log
 
@@ -175,7 +176,6 @@ class PersistenceService:
             self._cursor.execute(sql_insert)
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
             curr_opt.dict_options_response_id = response_id
-
 
         # sql_select = f"SELECT * FROM dict_options_item WHERE dict_options_response_id = {response_id};"
         # self._cursor.execute(sql_select)

@@ -4,11 +4,13 @@ from typing import Tuple
 from flask import jsonify, request, Response
 
 from src.app import main
-from src.data.data_types import DictOptionsResponse, DictRequest, OptionSelectRequest, InfoRequestAvailDictLang
+from src.data.dict_input.dict_options_response import DictOptionsResponse
+from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
+from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.logic.web_controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
-from src.utils.translations_utils import asdict_nested
 
 
 @main.route("/health")

@@ -1,12 +1,10 @@
+from flask import Blueprint
 from flask import Flask
 from flask_cors import CORS
 
 # import src.app.routes
-
 # from .routes import main
 # import src.app.routes
-
-from flask import jsonify, Blueprint, request
 
 main = Blueprint('main', __name__, url_prefix='/api/v1')
 

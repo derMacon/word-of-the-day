@@ -2,7 +2,11 @@ from typing import List
 
 from dictcc import Dict
 
-from src.data.data_types import DictRequest, DictOptionsResponse, Status, OptionSelectRequest, DictOptionsItem
+from src.data.dict_input.dict_options_item import DictOptionsItem
+from src.data.dict_input.dict_options_response import DictOptionsResponse
+from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.option_select_request import OptionSelectRequest
+from src.data.dict_input.status import Status
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import evaluate_status
@@ -15,7 +19,6 @@ class WebController:
         self.persistence_service = PersistenceService()
 
     def lookup_dict_word(self, dict_request: DictRequest) -> DictOptionsResponse:
-
         response_tuples = self.dictcc_translator.translate(
             word=dict_request.input,
             from_language=dict_request.from_language_uuid.name.lower(),

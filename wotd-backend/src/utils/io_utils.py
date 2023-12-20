@@ -22,6 +22,7 @@ def remove_file(path):
         app_log.error('teardown incomplete - error removing %s', path)
         app_log.error('%s', e)
 
+
 def create_parent_dir(path):
     parent_dir = os.path.dirname(path)
     if not os.path.exists(parent_dir):

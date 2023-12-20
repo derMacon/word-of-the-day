@@ -1,7 +1,9 @@
 import dataclasses
-from typing import Tuple, List
+from typing import List
 
-from src.data.data_types import Status, DictOptionsItem, DictOptionsResponse
+from src.data.dict_input.dict_options_item import DictOptionsItem
+from src.data.dict_input.dict_options_response import DictOptionsResponse
+from src.data.dict_input.status import Status
 
 
 def evaluate_status(original_input: str, options: List[DictOptionsItem]):
@@ -20,6 +22,7 @@ def get_first_word_or_whole_text(text):
         return words[0]
     else:
         return text
+
 
 def asdict_nested(dict_options_response: DictOptionsResponse):
     options = []
