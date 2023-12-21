@@ -37,6 +37,12 @@
     }
 }
 
+@media (display-mode: standalone) or (display-mode: minimal-ui) {
+    .custom-min-height {
+        min-height: 100vh;
+    }
+}
+
 /*.vertical-center {*/
 /*  margin: 0;*/
 /*  position: absolute;*/

@@ -8,9 +8,20 @@ import {Col, Row} from "react-bootstrap";
 import ListGroup from 'react-bootstrap/ListGroup';
 import Stack from 'react-bootstrap/Stack';
 
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+
+import Offcanvas from 'react-bootstrap/Offcanvas';
+import {useState} from 'react';
+
 
 export function Trainer() {
 
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     return (
         // <div>
@@ -46,13 +57,40 @@ export function Trainer() {
         // </div>
 
 
-        <div>
-            <div className="custom-max-width custom-min-height">
+        <div className='custom-min-height'>
+
+            {/*<Navbar expand="lg" className="bg-body-tertiary">*/}
+            {/*    <Container>*/}
+            {/*        <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>*/}
+            {/*        <Navbar.Toggle aria-controls="basic-navbar-nav"/>*/}
+            {/*        <Navbar.Collapse id="basic-navbar-nav">*/}
+            {/*            <Nav className="me-auto">*/}
+            {/*                <Nav.Link href="#home">Home</Nav.Link>*/}
+            {/*                <Nav.Link href="#link">Link</Nav.Link>*/}
+            {/*                <NavDropdown title="Dropdown" id="basic-nav-dropdown">*/}
+            {/*                    <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>*/}
+            {/*                    <NavDropdown.Item href="#action/3.2">*/}
+            {/*                        Another action*/}
+            {/*                    </NavDropdown.Item>*/}
+            {/*                    <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>*/}
+            {/*                    <NavDropdown.Divider/>*/}
+            {/*                    <NavDropdown.Item href="#action/3.4">*/}
+            {/*                        Separated link*/}
+            {/*                    </NavDropdown.Item>*/}
+            {/*                </NavDropdown>*/}
+            {/*            </Nav>*/}
+            {/*        </Navbar.Collapse>*/}
+            {/*    </Container>*/}
+            {/*</Navbar>*/}
+
+            <div className="custom-max-width">
+
+
                 <div className="card d-flex flex-column custom-min-height">
-                    <div>
-                        <p>This is the second child div.</p>
-                    </div>
-                    <hr className="my-1"/>
+                    <Button variant="light" onClick={handleShow}>
+                        Launch
+                    </Button>
+                    <hr className="my-0"/>
 
                     <div className="d-flex justify-content-center align-items-center flex-grow-1">
                         Front
@@ -77,6 +115,33 @@ export function Trainer() {
 
                 </div>
             </div>
+
+
+            <Offcanvas show={show} onHide={handleClose} className="w-100">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+
+                    <p>Explanation: asdf asdf a sdf asdf asd fsad f sadf asdf asd fasd f asdf sdf</p>
+
+                    <br/>
+                    <p>Input</p>
+                    <ListGroup>
+                        <ListGroup.Item>Dictionary</ListGroup.Item>
+                        <ListGroup.Item disabled>Duden</ListGroup.Item>
+                    </ListGroup>
+
+                    <br/>
+
+                    <p>Word Vaults</p>
+                    <ListGroup>
+                        <ListGroup.Item>English Dictionary</ListGroup.Item>
+                        <ListGroup.Item disabled>German Duden Definitions</ListGroup.Item>
+                    </ListGroup>
+
+                </Offcanvas.Body>
+            </Offcanvas>
         </div>
 
 
