@@ -1,5 +1,5 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'bootstrap/dist/css/bootstrap.min.css'
 import Container from "react-bootstrap/Container";
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -17,6 +17,16 @@ import {useState} from 'react';
 
 
 export function Trainer() {
+
+    const GRAY_LIGHT: any = {
+        backgroundColor: "#f3f3f3",
+        // borderColor: "white"
+    }
+
+    const GRAY_MIDDLE: any = {
+        backgroundColor: "#9d9d9d",
+        // borderColor: "white"
+    }
 
     const [show, setShow] = useState(false);
 
@@ -87,26 +97,53 @@ export function Trainer() {
 
 
                 <div className="card d-flex flex-column custom-min-height">
-                    <Button variant="light" onClick={handleShow}>
-                        Launch
-                    </Button>
-                    <hr className="my-0"/>
 
-                    <div className="d-flex justify-content-center align-items-center flex-grow-1">
-                        Front
+
+                    <div
+                        onClick={handleShow}
+                        style={GRAY_MIDDLE}
+                        className="text-sm-start px-3 py-2">
+                        Launch test deck
                     </div>
+
+                    {/*<hr className="my-0"/>*/}
+
+                    <div className="px-1 progress">25</div>
+
+                    <ButtonGroup size="sm" className="px-1" style={GRAY_LIGHT}>
+                        <div className="px-1 text-decoration-underline text-xs">25</div>
+                        <div className="px-1 text-decoration-underline">54</div>
+                        {/*<div className="px-1 text-decoration-underlinexs">54</div>*/}
+                        {/*<div className="px-1 text-decoration-underlinexs">184</div>*/}
+                    </ButtonGroup>
+
+                    {/*<ButtonGroup size="sm">*/}
+                    {/*    <Button>Left</Button>*/}
+                    {/*    <Button>Middle</Button>*/}
+                    {/*    <Button>Right</Button>*/}
+                    {/*</ButtonGroup>*/}
+
+                    {/*<hr className="my-0"/>*/}
+
+                    {/*<div className="d-flex justify-content-center align-items-center flex-grow-1">*/}
+                    {/*    Front*/}
+                    {/*</div>*/}
+
+                    <div>Front</div>
 
                     <hr className="my-1 mx-2"/>
 
-                    <div className="d-flex justify-content-center align-items-center flex-grow-1">
+                    <div className="d-flex justify-content-center flex-grow-1">
                         Back
                     </div>
+
+                    {/*<div>Front</div>*/}
 
                     <hr className='my-0'/>
 
                     <div>
                         <ButtonGroup className="w-100" aria-label="Basic example">
-                            <Button variant="light text-muted">Very Hard</Button>
+                            <Button>Very Hard</Button>
                             <Button variant="light text-muted">Hard</Button>
                             <Button variant="light text-muted">Easy</Button>
                             <Button variant="light text-muted">Very Easy</Button>
@@ -142,6 +179,7 @@ export function Trainer() {
 
                 </Offcanvas.Body>
             </Offcanvas>
+
         </div>
 
 

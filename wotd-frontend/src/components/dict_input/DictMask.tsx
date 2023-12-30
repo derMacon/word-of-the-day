@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'
 import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";

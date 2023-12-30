@@ -1,3 +1,6 @@
+/*@import url('bootstrap/dist/css/bootstrap.min.css');*/
+@import '~bootstrap/dist/css/bootstrap.min.css';
+
 .App {
     text-align: center;
 }
@@ -111,5 +114,15 @@
 }
 
 .flexitem {
-  flex-grow: 4; /* default 0 */
+    flex-grow: 4; /* default 0 */
 }
+
+.progress {
+    /*font-size: 15px;*/
+    @extend .px-3;
+    /*composes: ;*/
+}
+
+/*.link-primary {*/
+/*    text*/
+/*}*/
