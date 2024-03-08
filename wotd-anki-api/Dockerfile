@@ -24,12 +24,12 @@ RUN mkdir __logger
 
 RUN wget https://bootstrap.pypa.io/get-pip.py
 RUN python3 get-pip.py
-RUN python3 -m pip install selenium
+RUN python3 -m pip install logic
 
 # RUN pip install --upgrade pip
 
 # RUN pip install -r requirements.txt
-#RUN pip install selenium
+#RUN pip install logic
 
 #CMD ["python", "./test.py"]
 CMD tail -f /dev/null

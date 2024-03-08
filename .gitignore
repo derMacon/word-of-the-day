@@ -358,3 +358,4 @@ frontend/node_modules/
 **/.venv/*
 **/.venv/
 **/volume/
+**/auth_cookies.db
