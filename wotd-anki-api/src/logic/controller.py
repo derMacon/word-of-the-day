@@ -85,6 +85,7 @@ class Controller:
 
         self._driver.delete_all_cookies()
         self._driver.get("https://ankiweb.net/account/login")
+        # self._driver.get('https://ankiweb.net/add')
         cookies = self._cookie_manager.read_data(token_type=token_type, key=token)
 
         if cookies is None:
@@ -93,20 +94,50 @@ class Controller:
             for cookie in cookies:
                 self._driver.add_cookie(cookie)
 
+    def set_cookies2(self, token_type: TokenType):
+        token = extract_client_token(token_type)
+
+        log.debug(f"token: {token}")
+
+        self._driver.delete_all_cookies()
+        # self._driver.get("https://ankiweb.net/account/login")
+        self._driver.get('https://ankiweb.net/add')
+        cookies = self._cookie_manager.read_data(token_type=token_type, key=token)
+        log.debug(cookies)
+
+        if cookies is None:
+            log.error(f'cookies not readable for token: {token}')
+        else:
+            for cookie in cookies:
+                self._driver.add_cookie(cookie)
+
     def list_decks(self):
-        self.set_cookies(TokenType.MAINTOKEN)
         self._driver.get('https://ankiweb.net/decks')
+        self.set_cookies(TokenType.MAINTOKEN)
         # sleep(100)  # TODO delete this sleep
         main_elems = grab_main_elements(self._driver)
         return filter_deck_names(main_elems)
 
     def add_card(self, deck, front, back):
-        self.set_cookies()
-        sleep(3)
+        self.set_cookies(TokenType.MAINTOKEN)
+        self._driver.get('https://ankiweb.net/decks')
+        # sleep(4)
+        # self._driver.coo
+        try:
+            self.set_cookies2(TokenType.CARDTOKEN)
+        except Exception as e:
+            pass
+        sleep(2)
+        self._driver.get('https://ankiweb.net/add')
+        try:
+            self.set_cookies2(TokenType.CARDTOKEN)
+        except Exception as e:
+            pass
+        self._driver.get('https://ankiweb.net/add')
+
         # self.login('spam.sh@gmx.de', 'admin')
         # self._driver.get('https://ankiweb.net/decks')
-        # self._driver.get('https://ankiweb.net/add')
-        self._driver.get('https://ankiweb.net/account/settings')
+        # self._driver.get('https://ankiweb.net/account/settings')
         sleep(100)
         select_dropdown(self._driver, 'Deck', deck)
         insert_text(self._driver, 'Front', front)
