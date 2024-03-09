@@ -17,12 +17,12 @@ def login():
     password = request.json.get('password')
     log.debug('username: %s', username)
 
-    token = controller.login(username, password)
+    main_token, card_token = controller.login(username, password)
 
     resp = Response()
-    resp.headers['token'] = token
+    resp.headers['main_token'] = main_token
+    resp.headers['card_token'] = card_token
     return resp
-    # resp.headers['Authorization'] = f'Bearer {token}'
 
 
 

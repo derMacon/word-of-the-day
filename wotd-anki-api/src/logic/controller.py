@@ -1,5 +1,3 @@
-import os
-
 from flask import request
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -7,29 +5,23 @@ from selenium.webdriver.common.keys import Keys
 
 from src.logic.persistence_manager import PersistenceManager
 from src.logic.selenium_utils import *
+from src.types.token_type import TokenType
 from src.utils.logging_config import log
 
 
-def extract_bearer_token():
-    if 'DEBUG_TOKEN' in os.environ:
-        token = os.environ['DEBUG_TOKEN']
-        log.debug("using debug token: %s", token)
-        return token
+def extract_client_token(token_type: TokenType):
+    # TODO - delte whole method if the debug routine is obsolete
+    # if 'DEBUG_TOKEN' in os.environ:
+    #     token = os.environ['DEBUG_TOKEN']
+    #     log.debug("using debug token: %s", token)
+    #     return token
 
-    authorization_header = request.headers.get('Authorization')
+    token = request.headers.get(token_type.name)
+    log.debug(f'extracted client token for type {token_type}: {token}')
 
-    out = None
-    if authorization_header and authorization_header.startswith('Bearer '):
-        # Extract the token by removing the 'Bearer ' prefix
-        bearer_token = authorization_header[len('Bearer '):]
+    # TODO check that output is None if not existent - log this
 
-        # Now 'bearer_token' contains the Bearer token
-        log.debug(f"Bearer Token: {bearer_token}")
-        out = bearer_token
-    else:
-        log.error("No Bearer token found in the Authorization header")
-
-    return out
+    return token
 
 
 class Controller:
@@ -43,43 +35,58 @@ class Controller:
         self._cookie_manager = PersistenceManager()
 
     def login(self, email, password):
+        self._insert_credentials(email, password)
+        main_token = self._persist_main_token()
+        card_token = self._persist_card_token()
+        return main_token, card_token
+
+    def _insert_credentials(self, email: str, password: str):
         log.debug("inside controller login")
         self._driver.get("https://ankiweb.net/account/login")
         insert_text(self._driver, "Email", email)
         insert_text(self._driver, "Password", password)
         self._driver.switch_to.active_element.send_keys(Keys.ENTER)
 
-        token = retrieve_token(self._driver, TIMEOUT_SEC)
-        log.debug("main token: %s", token)
-        if token is None:
+    def _persist_main_token(self):
+        main_token = retrieve_token(self._driver, TIMEOUT_SEC)
+        log.debug("main token: %s", main_token)
+        if main_token is None:
             log.error('no auth flag retrieved - TODO throw exception')
             # TODO exception + handler
 
         cookies = self._driver.get_cookies()
-        self._cookie_manager.insert_data(key=token, data=cookies)
+        self._cookie_manager.insert_data(token_type=TokenType.MAINTOKEN, key=main_token, data=cookies)
 
+        return main_token
+
+    def _persist_card_token(self, ):
         self._driver.get("https://ankiweb.net/add")
 
+        old_token = self._driver.get_cookie('ankiweb')
+
+        # wait until new cookie values get grabbed / or wait a defined maximum number of ms
         ms_passed = 0
         offset = 0.05
-        while self._driver.get_cookie('ankiweb') == token or ms_passed > 500:
+        while self._driver.get_cookie('ankiweb') == old_token or ms_passed > 500:
             sleep(offset)
             ms_passed = ms_passed + offset
 
-        sleep(3)
         cookies = self._driver.get_cookies()
-        token = retrieve_token(self._driver)
-        log.debug("card token: %s", token)
+        card_token = retrieve_token(self._driver)
 
-        sleep(10)
-        return token
+        log.debug("card token: %s", card_token)
+        self._cookie_manager.insert_data(token_type=TokenType.CARDTOKEN, key=card_token, data=cookies)
+        return card_token
 
-    def set_cookies(self):
-        token = extract_bearer_token()
+    def set_cookies(self, token_type: TokenType):
+        token = extract_client_token(token_type)
+
         log.debug(f"token: {token}")
+
         self._driver.delete_all_cookies()
         self._driver.get("https://ankiweb.net/account/login")
-        cookies = self._cookie_manager.read_data(token)
+        cookies = self._cookie_manager.read_data(token_type=token_type, key=token)
+
         if cookies is None:
             log.error(f'cookies not readable for token: {token}')
         else:
@@ -87,9 +94,9 @@ class Controller:
                 self._driver.add_cookie(cookie)
 
     def list_decks(self):
-        self.set_cookies()
+        self.set_cookies(TokenType.MAINTOKEN)
         self._driver.get('https://ankiweb.net/decks')
-        sleep(100) # TODO delete this sleep
+        # sleep(100)  # TODO delete this sleep
         main_elems = grab_main_elements(self._driver)
         return filter_deck_names(main_elems)
 

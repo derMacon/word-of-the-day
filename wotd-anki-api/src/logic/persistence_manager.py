@@ -1,31 +1,27 @@
 import sqlite3
 import pickle
-from enum import Enum
 
+from src.types.token_type import TokenType
 from src.utils.logging_config import log
 
 
 class PersistenceManager:
 
-    class TokenType(str, Enum):
-        MAIN = 'pickled_main_token'
-        CARD = 'pickled_card_token'
-
     def __init__(self):
         self._conn = sqlite3.connect('auth_cookies.db', check_same_thread=False)
-        for member in PersistenceManager.TokenType:
-            self._conn.execute(f'CREATE TABLE IF NOT EXISTS {member.value} (id TEXT PRIMARY KEY, data BLOB)')
+        for member in TokenType:
+            self._conn.execute(f'CREATE TABLE IF NOT EXISTS {member.name} (id TEXT PRIMARY KEY, data BLOB)')
 
     def insert_data(self, token_type: TokenType, key: str, data):
         log.debug('inserting blob for key: %s', key)
         pickled_data = pickle.dumps(data)
-        self._conn.execute(f'INSERT INTO {token_type.value} (id, data) VALUES (?, ?)',
+        self._conn.execute(f'INSERT INTO {token_type.name} (id, data) VALUES (?, ?)',
                            (key, sqlite3.Binary(pickled_data)))
         self._conn.commit()
 
     def read_data(self, token_type: TokenType, key: str):
         log.debug('reading blob for key: %s', key)
-        cursor = self._conn.execute(f'SELECT data FROM {token_type.value} WHERE id = ?', (key,))
+        cursor = self._conn.execute(f'SELECT data FROM {token_type.name} WHERE id = ?', (key,))
         result = cursor.fetchone()
         out = None
 
@@ -42,4 +38,3 @@ class PersistenceManager:
             # TODO exception
 
         return out
-

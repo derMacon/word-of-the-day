@@ -31,7 +31,7 @@ def retrieve_token(driver, timeout=None):
     while not check_complete:
 
         for cookie in driver.get_cookies():
-            print(f"cookie: {cookie}")
+            # print(f"cookie: {cookie}")
             if cookie['name'] == 'ankiweb':
                 token = cookie['value']
 
@@ -39,11 +39,11 @@ def retrieve_token(driver, timeout=None):
             sleep(1)
             sec = sec + 1
 
-        check_complete = check_complete or sec >= timeout or token is not None
+        check_complete = (timeout is None or sec >= timeout
+                          or token is not None or check_complete)
 
-        print('wait')
-    print('after eval')
     return token
+
 
 def insert_text(driver, label: str, input_text: str):
     element = WebDriverWait(driver, 10).until(
