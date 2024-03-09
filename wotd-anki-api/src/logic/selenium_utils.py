@@ -59,6 +59,10 @@ def insert_text(driver, label: str, input_text: str):
     field.find_element(By.XPATH, "./child::input").send_keys(input_text)
 
 
+def select_dropdown(driver, label: str, option: str):
+    pass
+
+
 def grab_main_elements(driver):
     element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//main"))

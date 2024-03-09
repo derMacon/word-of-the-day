@@ -3,11 +3,10 @@ from flask_cors import cross_origin
 
 from src.logic import controller
 from src.logic.controller import Controller
-from src.utils.io_utils import extract_bearer_token
 from src.utils.logging_config import log
 
 main = Blueprint('main', __name__, url_prefix='/api/v1')
-con = Controller()
+controller = Controller()
 
 
 @main.route("/login", methods=['POST'])
@@ -18,24 +17,45 @@ def login():
     password = request.json.get('password')
     log.debug('username: %s', username)
 
-    cont = Controller()
-    token = cont.login(username, password)
+    token = controller.login(username, password)
 
     resp = Response()
     resp.headers['token'] = token
     return resp
+    # resp.headers['Authorization'] = f'Bearer {token}'
 
+
+
+@main.route("/health")
+@cross_origin()
+def health():
+    log.debug("api healthy")
+    return 'running'
 
 @main.route("/list-decks")
 @cross_origin()
 def list_decks():
     log.debug("user called list decks endpoint")
-    token = extract_bearer_token(request)
-    log.debug(f"token: {token}")
-    return con.list_decks(token)
+    return controller.list_decks()
 
 
 def add_deck():
     pass
     # new_deckname = request.json.get('deckname')
     # log.debug('check if deck with name %s already exists', new_deckname)
+
+
+@main.route("/add-card")
+@cross_origin()
+def add_card():
+    deck = request.json.get('deck')
+    front = request.json.get('front')
+    back = request.json.get('back')
+
+    log.debug('deck: %s', deck)
+    log.debug('front: %s', front)
+    log.debug('back: %s', back)
+
+    controller.add_card(deck, front, back)
+    # TODO exception / error handler
+    return 200
