@@ -1,10 +1,12 @@
-import datetime
+from enum import Enum
+from collections import namedtuple
 
-from src.types.token_type import TokenType
+TokenInfo = namedtuple('TokenInfo', ['name', 'id'])
 
-# timestamp = 1744494996
-# expiry_date = datetime.datetime.utcfromtimestamp(timestamp)
-# print(expiry_date)
+class TokenType(Enum):
+    MAINTOKEN = TokenInfo('main_token', 1)
+    CARDTOKEN = TokenInfo('card_token', 2)
 
-
-print(TokenType.MAINTOKEN.name)
+# Accessing values
+print(TokenType.MAINTOKEN.value.name)  # 'main_token'
+print(TokenType.MAINTOKEN.value.id)    # 1
