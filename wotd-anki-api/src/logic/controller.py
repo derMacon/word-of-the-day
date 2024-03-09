@@ -50,14 +50,28 @@ class Controller:
         self._driver.switch_to.active_element.send_keys(Keys.ENTER)
 
         token = retrieve_token(self._driver, TIMEOUT_SEC)
-        log.debug("token: %s", token)
+        log.debug("main token: %s", token)
         if token is None:
             log.error('no auth flag retrieved - TODO throw exception')
             # TODO exception + handler
 
         cookies = self._driver.get_cookies()
-        log.debug("cookies: %s", cookies)
         self._cookie_manager.insert_data(key=token, data=cookies)
+
+        self._driver.get("https://ankiweb.net/add")
+
+        ms_passed = 0
+        offset = 0.05
+        while self._driver.get_cookie('ankiweb') == token or ms_passed > 500:
+            sleep(offset)
+            ms_passed = ms_passed + offset
+
+        sleep(3)
+        cookies = self._driver.get_cookies()
+        token = retrieve_token(self._driver)
+        log.debug("card token: %s", token)
+
+        sleep(10)
         return token
 
     def set_cookies(self):
@@ -75,13 +89,17 @@ class Controller:
     def list_decks(self):
         self.set_cookies()
         self._driver.get('https://ankiweb.net/decks')
-        sleep(1) # TODO delete this sleep
+        sleep(100) # TODO delete this sleep
         main_elems = grab_main_elements(self._driver)
         return filter_deck_names(main_elems)
 
     def add_card(self, deck, front, back):
         self.set_cookies()
-        self._driver.get('https://ankiweb.net/add')
+        sleep(3)
+        # self.login('spam.sh@gmx.de', 'admin')
+        # self._driver.get('https://ankiweb.net/decks')
+        # self._driver.get('https://ankiweb.net/add')
+        self._driver.get('https://ankiweb.net/account/settings')
         sleep(100)
         select_dropdown(self._driver, 'Deck', deck)
         insert_text(self._driver, 'Front', front)
