@@ -5,6 +5,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from src.utils.logging_config import log
+
 TIMEOUT_SEC = 3
 
 
@@ -23,7 +25,7 @@ def set_chrome_options() -> Options:
 
 
 def retrieve_token(driver, timeout=None):
-    print('check if logged in')
+    log.debug('check if logged in, timeout: %s', timeout)
     sec = 0
     check_complete = False
     token = None
@@ -31,7 +33,6 @@ def retrieve_token(driver, timeout=None):
     while not check_complete:
 
         for cookie in driver.get_cookies():
-            # print(f"cookie: {cookie}")
             if cookie['name'] == 'ankiweb':
                 token = cookie['value']
 
@@ -64,9 +65,11 @@ def select_dropdown(driver, label: str, option: str):
 
 
 def grab_main_elements(driver):
+    sleep(.1)
     element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//main"))
     )
+    sleep(.1)
     return element.find_elements(By.XPATH, "./child::*")
 
 
@@ -75,3 +78,5 @@ def filter_deck_names(main_elements):
     for curr_elem in main_elements[:-2]:
         out.append(curr_elem.text.split('\n')[0].strip())
     return out
+
+

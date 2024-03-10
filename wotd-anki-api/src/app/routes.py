@@ -3,6 +3,7 @@ from flask_cors import cross_origin
 
 from src.logic import controller
 from src.logic.controller import Controller
+from src.types.token_type import TokenType
 from src.utils.logging_config import log
 
 main = Blueprint('main', __name__, url_prefix='/api/v1')
@@ -20,8 +21,8 @@ def login():
     main_token, card_token = controller.login(username, password)
 
     resp = Response()
-    resp.headers['main_token'] = main_token
-    resp.headers['card_token'] = card_token
+    resp.headers[TokenType.MAIN.value.header_key] = main_token
+    resp.headers[TokenType.CARD.value.header_key] = card_token
     return resp
 
 
