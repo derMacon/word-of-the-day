@@ -2,7 +2,9 @@ from time import sleep
 
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from src.utils.logging_config import log
@@ -59,20 +61,70 @@ def insert_text_by_placeholder(driver, placeholder: str, input_text: str):
 
     field.find_element(By.XPATH, "./child::input").send_keys(input_text)
 
+
 def insert_text_by_label(driver, label: str, input_text: str):
     label_elem = find_label(driver, label)
-    print(label_elem)
+    sibling = find_next_sibling(label_elem)
+    text_box = find_first_child(sibling)
+    text_box.send_keys(input_text)
 
 
-def find_label(driver, text:str):
+def find_label(driver, text: str):
     span_xpath = f"//span[text()='{text}']"
     return WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, span_xpath))
     )
 
 
+def find_next_sibling(elem: WebElement):
+    return elem.find_element(By.XPATH, './following-sibling::*')
+
+
+def find_first_child(elem: WebElement):
+    out = elem.find_elements(By.XPATH, './child::*')
+    if out:
+        return out[0]
+    log.error(f"no child element found for: {elem}")
+    return None
+
+
 def select_dropdown(driver, label: str, option: str):
-    pass
+    label_elem = find_label(driver, label)
+    sibling = find_next_sibling(label_elem)
+
+    # sibling.click()
+    # sleep(.2)
+
+
+    dropdown_element = sibling.find_element(By.CLASS_NAME, "svelte-select")
+
+    # Click on the dropdown to open it
+    dropdown_element.click()
+
+    # Wait for the dropdown options to be visible (adjust the timeout as needed)
+    wait = WebDriverWait(driver, 10)
+    dropdown_options = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'svelte-select-list')))
+    fst = dropdown_options[0]
+    fstout = fst.find_elements(By.XPATH, './child::*')[1]
+    fstout.click()
+    sleep(2)
+    # log.debug(f"dropdown for {label} has the following options: {dropdown_options}")
+    # # Select the second option (index 1, as indexing is zero-based)
+    # second_option = dropdown_options[1]
+    # second_option.click()
+
+
+    # select = Select(find_nth_child(sibling, 1))
+    # options = select.options
+
+
+def find_nth_child(elem: WebElement, n: int):
+    out = elem.find_elements(By.XPATH, './child::*')
+    if out and len(out) > n:
+        return out[n]
+    log.error(f"no child element found for n = {n} in: {elem}")
+    return None
+
 
 def grab_main_elements(driver):
     sleep(.1)
@@ -88,5 +140,3 @@ def filter_deck_names(main_elements):
     for curr_elem in main_elements[:-2]:
         out.append(curr_elem.text.split('\n')[0].strip())
     return out
-
-

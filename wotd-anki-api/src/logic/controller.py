@@ -132,9 +132,9 @@ class Controller:
         self.setting_cookie_from_protected_domain(TokenType.CARD)
         # sleep(.1)
         insert_text_by_label(self._driver, 'Front', front)
-        sleep(100)
         insert_text_by_label(self._driver, 'Back', back)
         select_dropdown(self._driver, 'Deck', deck)
+        sleep(100)
 
     def tear_down(self):
         self._driver.quit()
