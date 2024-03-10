@@ -129,12 +129,12 @@ class Controller:
         return filter_deck_names(main_elems)
 
     def add_card(self, deck, front, back):
+        # TODO check deck exists
         self.setting_cookie_from_protected_domain(TokenType.CARD)
-        # sleep(.1)
         insert_text_by_label(self._driver, 'Front', front)
         insert_text_by_label(self._driver, 'Back', back)
         select_dropdown(self._driver, 'Deck', deck)
-        sleep(100)
+        click_button(self._driver, 'Add')
 
     def tear_down(self):
         self._driver.quit()

@@ -4,7 +4,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from src.utils.logging_config import log
@@ -88,34 +87,29 @@ def find_first_child(elem: WebElement):
     return None
 
 
-def select_dropdown(driver, label: str, option: str):
+def select_dropdown(driver, label: str, option_title: str):
     label_elem = find_label(driver, label)
     sibling = find_next_sibling(label_elem)
-
-    # sibling.click()
-    # sleep(.2)
-
-
     dropdown_element = sibling.find_element(By.CLASS_NAME, "svelte-select")
-
-    # Click on the dropdown to open it
     dropdown_element.click()
 
     # Wait for the dropdown options to be visible (adjust the timeout as needed)
     wait = WebDriverWait(driver, 10)
-    dropdown_options = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'svelte-select-list')))
-    fst = dropdown_options[0]
-    fstout = fst.find_elements(By.XPATH, './child::*')[1]
-    fstout.click()
-    sleep(2)
-    # log.debug(f"dropdown for {label} has the following options: {dropdown_options}")
-    # # Select the second option (index 1, as indexing is zero-based)
-    # second_option = dropdown_options[1]
-    # second_option.click()
+    dropdown_options = (wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'svelte-select-list')))[0]
+                        .find_elements(By.XPATH, './child::*'))
+    option_str = [opt.text for opt in dropdown_options]
+    log.debug(f"dropdown for {label} has the following options: {option_str}")
+
+    option_idx = option_str.index(option_title)
+    dropdown_options[option_idx].click()
 
 
-    # select = Select(find_nth_child(sibling, 1))
-    # options = select.options
+def click_button(driver, title: str):
+    available_buttons = driver.find_elements(By.XPATH, '//button')
+    options = [btn.text for btn in available_buttons]
+    log.debug(f'searching button with title {title} in available buttons: {options}')
+    btn_idx = options.index(title)
+    available_buttons[btn_idx].click()
 
 
 def find_nth_child(elem: WebElement, n: int):
