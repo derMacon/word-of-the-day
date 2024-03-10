@@ -45,6 +45,10 @@ export function DictMask() {
         setDictOptions(apiResponse)
     }
 
+    const handleAnkiLoginUsername = (word: string) => {
+        console.log('anki sync login username: ', word)
+    }
+
     return (
         <div>
             <Container fluid="md">
@@ -104,11 +108,12 @@ export function DictMask() {
                             <Form>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Email address</Form.Label>
-                                    <Form.Control type="email" placeholder="name@example.com"/>
+                                    {/*<Form.Control type="email" placeholder="name@example.com"/>*/}
+                                    <TextField type="email" placeholder="name@example.com" onSubmit={handleAnkiLoginUsername}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Password</Form.Label>
-                                    <Form.Control type="password" placeholder="Password"/>
+                                    <TextField type='password' placeholder="password" onSubmit={handleAnkiLoginUsername}/>
                                 </Form.Group>
                             </Form>
 

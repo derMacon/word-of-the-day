@@ -7,6 +7,8 @@ import {FaTimes} from "react-icons/fa";
 
 interface TextFieldProps {
     onSubmit: (input: string) => void
+    type?: string
+    placeholder?: string
 }
 
 export function TextField(props: TextFieldProps) {
@@ -41,7 +43,8 @@ export function TextField(props: TextFieldProps) {
                     className="shadow-none"
                     autoFocus
                     ref={inputRef}
-                    type="text"
+                    type={props.type || 'text'}
+                    placeholder={props.placeholder || ''}
                     value={input}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
