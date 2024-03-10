@@ -47,8 +47,8 @@ class Controller:
     def _insert_credentials(self, email: str, password: str):
         log.debug("inside controller login")
         self._driver.get(AnkiWebEndpoints.LOGIN.value)
-        insert_text(self._driver, "Email", email)
-        insert_text(self._driver, "Password", password)
+        insert_text_by_placeholder(self._driver, "Email", email)
+        insert_text_by_placeholder(self._driver, "Password", password)
         self._driver.switch_to.active_element.send_keys(Keys.ENTER)
 
     def _persist_main_token(self):
@@ -130,14 +130,11 @@ class Controller:
 
     def add_card(self, deck, front, back):
         self.setting_cookie_from_protected_domain(TokenType.CARD)
-
-        # self.login('spam.sh@gmx.de', 'admin')
-        # self._driver.get('https://ankiweb.net/decks')
-        # self._driver.get('https://ankiweb.net/account/settings')
+        # sleep(.1)
+        insert_text_by_label(self._driver, 'Front', front)
         sleep(100)
+        insert_text_by_label(self._driver, 'Back', back)
         select_dropdown(self._driver, 'Deck', deck)
-        insert_text(self._driver, 'Front', front)
-        insert_text(self._driver, 'Back', back)
 
     def tear_down(self):
         self._driver.quit()

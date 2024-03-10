@@ -46,23 +46,33 @@ def retrieve_token(driver, timeout=None):
     return token
 
 
-def insert_text(driver, label: str, input_text: str):
+def insert_text_by_placeholder(driver, placeholder: str, input_text: str):
     element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//form"))
     )
     form_elems = element.find_elements(By.XPATH, "./child::*")
-    field = next(filter(lambda elem: elem.text == label, form_elems), None)
+    field = next(filter(lambda elem: elem.text == placeholder, form_elems), None)
 
     if not field:
-        print(f'not able to find {label} field')
+        print(f'not able to find {placeholder} field')
         # TODO throw exception
 
     field.find_element(By.XPATH, "./child::input").send_keys(input_text)
 
+def insert_text_by_label(driver, label: str, input_text: str):
+    label_elem = find_label(driver, label)
+    print(label_elem)
+
+
+def find_label(driver, text:str):
+    span_xpath = f"//span[text()='{text}']"
+    return WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, span_xpath))
+    )
+
 
 def select_dropdown(driver, label: str, option: str):
     pass
-
 
 def grab_main_elements(driver):
     sleep(.1)
