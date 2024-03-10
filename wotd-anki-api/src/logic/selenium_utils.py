@@ -1,6 +1,7 @@
 from time import sleep
 
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -104,10 +105,16 @@ def select_dropdown(driver, label: str, option_title: str):
     dropdown_options[option_idx].click()
 
 
+def insert_text_in_alert(driver, text: str):
+    alert = Alert(driver)
+    alert.send_keys(text)
+    alert.accept()
+
+
 def click_button(driver, title: str):
     available_buttons = driver.find_elements(By.XPATH, '//button')
     options = [btn.text for btn in available_buttons]
-    log.debug(f'searching button with title {title} in available buttons: {options}')
+    log.debug(f"searching button with title '{title}' in available buttons: {options}")
     btn_idx = options.index(title)
     available_buttons[btn_idx].click()
 

@@ -40,11 +40,13 @@ def list_decks():
     return controller.list_decks()
 
 
+@main.route("/add-deck")
+@cross_origin()
 def add_deck():
-    pass
-    # new_deckname = request.json.get('deckname')
-    # log.debug('check if deck with name %s already exists', new_deckname)
-
+    deck = request.json.get('deck')
+    log.debug(f"creating new deck with name: '{deck}'")
+    controller.create_deck(deck)
+    return ''
 
 @main.route("/add-card")
 @cross_origin()
@@ -59,4 +61,4 @@ def add_card():
 
     controller.add_card(deck, front, back)
     # TODO exception / error handler
-    return 200
+    return '', 200

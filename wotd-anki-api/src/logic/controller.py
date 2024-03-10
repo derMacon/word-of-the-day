@@ -128,8 +128,27 @@ class Controller:
         log.debug(main_elems)
         return filter_deck_names(main_elems)
 
+    def create_deck(self, deck_name: str):
+        available_decks = self.list_decks()
+        if deck_name in available_decks:
+            log.error(f"deck name '{deck_name}' already present in available decks: {available_decks}")
+            # TODO throw exception
+        else:
+            # WebDriverWait(self._driver, 10).until(
+            #     EC.presence_of_element_located((By.XPATH, "//main//button"))
+            # )
+            self._driver.get(AnkiWebEndpoints.DECKS.value)
+            sleep(.1)
+            click_button(self._driver, 'Create Deck')
+            insert_text_in_alert(self._driver, deck_name)
+
+
+
     def add_card(self, deck, front, back):
-        # TODO check deck exists
+        available_decks = self.list_decks()
+        if deck not in available_decks:
+            log.error(f"deck '{deck}' not present in available decks, creating new one: {available_decks}")
+            self.create_deck(deck)
         self.setting_cookie_from_protected_domain(TokenType.CARD)
         insert_text_by_label(self._driver, 'Front', front)
         insert_text_by_label(self._driver, 'Back', back)
