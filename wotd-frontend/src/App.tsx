@@ -19,8 +19,8 @@ function App() {
 
     return (
         <div className="App">
-            {/*<DictMask/>*/}
-            <Trainer/>
+            <DictMask/>
+            {/*<Trainer/>*/}
         </div>
     );
 }
