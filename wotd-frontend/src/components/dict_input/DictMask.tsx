@@ -12,6 +12,7 @@ import {Language} from "../../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import ListGroup from "react-bootstrap/ListGroup";
 import Form from 'react-bootstrap/Form';
+import AnkiSyncLogin from "./AnkiSyncLogin";
 
 
 export function DictMask() {
@@ -40,13 +41,14 @@ export function DictMask() {
     }
 
     const handleDictLookup = async (word: string) => {
-        let apiResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
+        let apiResponse: DictOptionsResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
         console.log('api resp options: ', apiResponse)
         setDictOptions(apiResponse)
     }
 
-    const handleAnkiLoginUsername = (word: string) => {
-        console.log('anki sync login username: ', word)
+    const handleAnkiSyncLogin = (email: string, password: string) => {
+        console.log('user logged into anki with email: ', email)
+        console.log('user logged into anki with pass: ', password)
     }
 
     return (
@@ -92,44 +94,9 @@ export function DictMask() {
 
 
             <Offcanvas show={show} onHide={handleClose} className="w-100">
-
-                <Container fluid="md">
-                    <div className="custom-max-width">
-                        <Offcanvas.Header closeButton>
-                            <Offcanvas.Title>Anki Sync</Offcanvas.Title>
-                        </Offcanvas.Header>
-                        <Offcanvas.Body>
-
-                            <p>You are currently not logged into your anki account.
-                                In order to sync the dictionary searches with anki web please log in.</p>
-
-                            <br/>
-
-                            <Form>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Email address</Form.Label>
-                                    {/*<Form.Control type="email" placeholder="name@example.com"/>*/}
-                                    <TextField type="email" placeholder="name@example.com" onSubmit={handleAnkiLoginUsername}/>
-                                </Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Password</Form.Label>
-                                    <TextField type='password' placeholder="password" onSubmit={handleAnkiLoginUsername}/>
-                                </Form.Group>
-                            </Form>
-
-                            <Button variant="light">Login</Button>
-
-
-                            {/*<p>Word Vaults</p>*/}
-                            {/*<ListGroup>*/}
-                            {/*    <ListGroup.Item>English Dictionary</ListGroup.Item>*/}
-                            {/*    <ListGroup.Item disabled>German Duden Definitions</ListGroup.Item>*/}
-                            {/*</ListGroup>*/}
-
-                        </Offcanvas.Body>
-                    </div>
-                </Container>
+                <AnkiSyncLogin handleAnkiLogin={handleAnkiSyncLogin} />
             </Offcanvas>
+
         </div>
     );
 }
