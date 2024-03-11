@@ -6,8 +6,9 @@ from selenium.webdriver.common.keys import Keys
 
 from src.logic.persistence_manager import PersistenceManager
 from src.logic.selenium_utils import *
-from src.types.anki_web_endpoints import AnkiWebEndpoints
-from src.types.token_type import TokenType
+from src.types.const.anki_web_endpoints import AnkiWebEndpoints
+from src.types.const.token_type import TokenType
+from src.types.error.unauthorized_access_error import UnauthorizedAccessError
 from src.utils.logging_config import log
 
 
@@ -39,10 +40,15 @@ class Controller:
         self._cookie_manager = PersistenceManager()
 
     def login(self, email, password):
+        self._logout_previous_session()
         self._insert_credentials(email, password)
         main_token = self._persist_main_token()
         card_token = self._persist_card_token()
         return main_token, card_token
+
+    def _logout_previous_session(self):
+        self._driver.delete_all_cookies()
+        self._driver.get(AnkiWebEndpoints.LOGIN)
 
     def _insert_credentials(self, email: str, password: str):
         log.debug("inside controller login")
@@ -55,8 +61,8 @@ class Controller:
         main_token = retrieve_token(self._driver, TIMEOUT_SEC)
         log.debug("main token: %s", main_token)
         if main_token is None:
-            log.error('no auth flag retrieved - TODO throw exception')
-            # TODO exception + handler
+            log.error('no auth flag retrieved - invalid credentials, no main token')
+            raise UnauthorizedAccessError('invalid credentials - no main token')
 
         cookies = self._driver.get_cookies()
         self._cookie_manager.insert_data(token_type=TokenType.MAIN, key=main_token, data=cookies)
@@ -77,6 +83,10 @@ class Controller:
 
         cookies = self._driver.get_cookies()
         card_token = retrieve_token(self._driver)
+
+        if card_token is None:
+            log.error('no auth flag retrieved - invalid credentials, no card token')
+            raise UnauthorizedAccessError('invalid credentials - no card token')
 
         log.debug("card token: %s", card_token)
         self._cookie_manager.insert_data(token_type=TokenType.CARD, key=card_token, data=cookies)
@@ -141,8 +151,6 @@ class Controller:
             sleep(.1)
             click_button(self._driver, 'Create Deck')
             insert_text_in_alert(self._driver, deck_name)
-
-
 
     def add_card(self, deck, front, back):
         available_decks = self.list_decks()

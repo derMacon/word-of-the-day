@@ -1,10 +1,10 @@
 from flask import Flask
+import src.app
 
-from src.app.routes import main
+# from src.app.routes import main
 
-app = Flask(__name__)
-app.debug = False
-app.register_blueprint(main)
+app = src.app.create_app(debug=True)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4000)

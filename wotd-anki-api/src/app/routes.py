@@ -1,12 +1,12 @@
-from flask import Blueprint, request, Response
+from flask import request, Response
 from flask_cors import cross_origin
 
-from src.logic import controller
+from src.app import main
 from src.logic.controller import Controller
-from src.types.token_type import TokenType
+from src.types.const.token_type import TokenType
+from src.types.error.unauthorized_access_error import UnauthorizedAccessError
 from src.utils.logging_config import log
 
-main = Blueprint('main', __name__, url_prefix='/api/v1')
 controller = Controller()
 
 
@@ -26,12 +26,13 @@ def login():
     return resp
 
 
-
 @main.route("/health")
 @cross_origin()
 def health():
+    raise UnauthorizedAccessError('test')
     log.debug("api healthy")
     return 'running'
+
 
 @main.route("/list-decks")
 @cross_origin()
@@ -47,6 +48,7 @@ def add_deck():
     log.debug(f"creating new deck with name: '{deck}'")
     controller.create_deck(deck)
     return ''
+
 
 @main.route("/add-card")
 @cross_origin()

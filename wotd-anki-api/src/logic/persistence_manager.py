@@ -1,7 +1,7 @@
 import sqlite3
 import pickle
 
-from src.types.token_type import TokenType
+from src.types.const.token_type import TokenType
 from src.utils.logging_config import log
 
 

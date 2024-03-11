@@ -120,7 +120,7 @@ export async function pushSelectedOption(dictOptionsItemId: number) {
 
 // ------------------- Anki API ------------------- //
 
-export async function ankiApiLogin(email: string, password: string): Promise<void> {
+export async function ankiApiLogin(email: string, password: string): Promise<boolean> {
 
     let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
     console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
@@ -128,14 +128,16 @@ export async function ankiApiLogin(email: string, password: string): Promise<voi
     try {
         // return (await fetch(ANKI_API_BASE + '/login')).ok
 
-        let output = await fetch(ANKI_API_BASE + '/login', {
+        return (await fetch(ANKI_API_BASE + '/login', {
             method: 'POST',
             headers: HEADERS,
             body: JSON.stringify(instanceToPlain(input))
-        })
+        })).ok
+
     } catch (error) {
         console.error('anki login did not succeed')
-        // return false
+        return false
     }
+
 }
 

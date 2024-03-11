@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from src.utils.logging_config import log
 
-TIMEOUT_SEC = 3
+TIMEOUT_SEC = 1
 
 
 def set_chrome_options() -> Options:
@@ -29,6 +29,7 @@ def set_chrome_options() -> Options:
 def retrieve_token(driver, timeout=None):
     log.debug('check if logged in, timeout: %s', timeout)
     sec = 0
+    offset = .2
     check_complete = False
     token = None
 
@@ -39,8 +40,8 @@ def retrieve_token(driver, timeout=None):
                 token = cookie['value']
 
         if timeout is not None:
-            sleep(1)
-            sec = sec + 1
+            sleep(offset)
+            sec = sec + offset
 
         check_complete = (timeout is None or sec >= timeout
                           or token is not None or check_complete)
@@ -117,6 +118,14 @@ def click_button(driver, title: str):
     log.debug(f"searching button with title '{title}' in available buttons: {options}")
     btn_idx = options.index(title)
     available_buttons[btn_idx].click()
+
+
+def click_link(driver, title: str):
+    available_links = driver.find_elements(By.XPATH, '//a')
+    options = [btn.text for btn in available_links]
+    log.debug(f"searching link with title '{title}' in available buttons: {options}")
+    link_idx = options.index(title)
+    available_links[link_idx].click()
 
 
 def find_nth_child(elem: WebElement, n: int):

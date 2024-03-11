@@ -1,7 +1,7 @@
 from collections import namedtuple
 from enum import Enum
 
-from src.types.anki_web_endpoints import AnkiWebEndpoints
+from src.types.const.anki_web_endpoints import AnkiWebEndpoints
 
 TokenInfo = namedtuple('TokenInfo', ['header_key', 'db_table', 'cookie_endpoint'])
 
