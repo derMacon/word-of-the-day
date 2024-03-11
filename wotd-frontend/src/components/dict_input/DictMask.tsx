@@ -3,7 +3,7 @@ import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
 import {SelectableTable} from "./SelectableTable";
-import {dictGetAvailableLang, dictLookupWord} from "../../logic/ApiFetcher";
+import {ankiApiLogin, dictGetAvailableLang, dictLookupWord} from "../../logic/ApiFetcher";
 import {LanguageUUID} from "../../model/LanguageUUID";
 import {DictOptionsResponse} from "../../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
@@ -44,11 +44,6 @@ export function DictMask() {
         let apiResponse: DictOptionsResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
         console.log('api resp options: ', apiResponse)
         setDictOptions(apiResponse)
-    }
-
-    const handleAnkiSyncLogin = (email: string, password: string) => {
-        console.log('user logged into anki with email: ', email)
-        console.log('user logged into anki with pass: ', password)
     }
 
     return (
@@ -94,7 +89,7 @@ export function DictMask() {
 
 
             <Offcanvas show={show} onHide={handleClose} className="w-100">
-                <AnkiSyncLogin handleAnkiLogin={handleAnkiSyncLogin} />
+                <AnkiSyncLogin handleAnkiLogin={ankiApiLogin} />
             </Offcanvas>
 
         </div>

@@ -9,18 +9,28 @@ import {type} from "os";
 import {Language} from "../model/Language";
 import {getPrincipal} from "./AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
+import AnkiSyncLogin from "../components/dict_input/AnkiSyncLogin";
+import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 
 const HTTP_STATUS_OK: number = 200
 
-const SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
-export const API_BASE: string = SERVER_ADDRESS + '/api/v1'
-export const DICTIONARY_BASE: string = API_BASE + '/dict'
+const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
+export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
+export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
+
+
+const ANKI_API_SERVER_ADDRESS: string = 'http://192.168.178.187:4000'
+export const ANKI_API_BASE: string = ANKI_API_SERVER_ADDRESS + '/api/v1'
+
 
 const HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }
 
+
+
+// ------------------- WOTD ------------------- //
 
 export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
 
@@ -29,7 +39,7 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
 
     try {
 
-        let output = await fetch(DICTIONARY_BASE + '/lookup-option', {
+        let output = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
             method: 'POST',
             headers: HEADERS,
             body: JSON.stringify(instanceToPlain(input))
@@ -64,7 +74,7 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
 
     try {
 
-        let out = await fetch(DICTIONARY_BASE + '/available-lang', {
+        let out = await fetch(WOTD_DICTIONARY_BASE + '/available-lang', {
             method: 'GET',
             headers: HEADERS,
         })
@@ -82,7 +92,7 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
 
 export async function apiIsHealthy(): Promise<boolean> {
     try {
-        return (await fetch(API_BASE + '/health')).ok
+        return (await fetch(WOTD_API_BASE + '/health')).ok
     } catch (error) {
         return false
     }
@@ -97,7 +107,7 @@ export async function pushSelectedOption(dictOptionsItemId: number) {
         selected_dict_options_item_id: dictOptionsItemId
     })
 
-    let out = await fetch(DICTIONARY_BASE + '/select-option', {
+    let out = await fetch(WOTD_DICTIONARY_BASE + '/select-option', {
         method: 'POST',
         headers: HEADERS,
         body: json
@@ -106,3 +116,26 @@ export async function pushSelectedOption(dictOptionsItemId: number) {
     let jsonObject: Object = await out.json() as Object
     console.log("select out: ", jsonObject)
 }
+
+
+// ------------------- Anki API ------------------- //
+
+export async function ankiApiLogin(email: string, password: string): Promise<void> {
+
+    let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
+    console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
+
+    try {
+        // return (await fetch(ANKI_API_BASE + '/login')).ok
+
+        let output = await fetch(ANKI_API_BASE + '/login', {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify(instanceToPlain(input))
+        })
+    } catch (error) {
+        console.error('anki login did not succeed')
+        // return false
+    }
+}
+
