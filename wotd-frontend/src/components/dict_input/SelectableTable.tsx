@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {apiIsHealthy, pushSelectedOption} from "../../logic/ApiFetcher";
+import {wotdApiIsHealthy, pushSelectedOption} from "../../logic/ApiFetcher";
 import {DictOptionsResponse} from "../../model/DictOptionsResponse";
 import {Option} from "../../model/Option";
 import './SelectableTable.css';
@@ -31,7 +31,7 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
     }, []);
 
     const handleSelection = (selectedOption: DictOptionsItem) => {
-        apiIsHealthy().then(e => {
+        wotdApiIsHealthy().then(e => {
             let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
             setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
 

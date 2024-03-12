@@ -89,7 +89,7 @@ export function DictMask() {
 
 
             <Offcanvas show={show} onHide={handleClose} className="w-100">
-                <AnkiSyncLogin handleAnkiLogin={ankiApiLogin} />
+                <AnkiSyncLogin handleAnkiLogin={ankiApiLogin} handleClose={handleClose}/>
             </Offcanvas>
 
         </div>

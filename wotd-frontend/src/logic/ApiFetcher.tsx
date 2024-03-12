@@ -29,7 +29,6 @@ const HEADERS = {
 }
 
 
-
 // ------------------- WOTD ------------------- //
 
 export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
@@ -90,7 +89,7 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
     }
 }
 
-export async function apiIsHealthy(): Promise<boolean> {
+export async function wotdApiIsHealthy(): Promise<boolean> {
     try {
         return (await fetch(WOTD_API_BASE + '/health')).ok
     } catch (error) {
@@ -125,19 +124,20 @@ export async function ankiApiLogin(email: string, password: string): Promise<boo
     let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
     console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
 
+    return (await fetch(ANKI_API_BASE + '/login', {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify(instanceToPlain(input))
+    })).ok
+
+}
+
+export async function ankiApiIsHealthy(): Promise<boolean> {
     try {
-        // return (await fetch(ANKI_API_BASE + '/login')).ok
-
-        return (await fetch(ANKI_API_BASE + '/login', {
-            method: 'POST',
-            headers: HEADERS,
-            body: JSON.stringify(instanceToPlain(input))
-        })).ok
-
+        return (await fetch(ANKI_API_BASE + '/health')).ok
     } catch (error) {
-        console.error('anki login did not succeed')
+        console.log('anki api is not reachable')
         return false
     }
-
 }
 

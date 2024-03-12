@@ -1,3 +1,5 @@
+from time import sleep
+
 from flask import request, Response
 from flask_cors import cross_origin
 
@@ -13,6 +15,9 @@ controller = Controller()
 @main.route("/login", methods=['POST'])
 @cross_origin()
 def login():
+    sleep(4)
+    return ''
+    
     log.debug('user called login endpoint')
     username = request.json.get('username')
     password = request.json.get('password')
@@ -29,7 +34,6 @@ def login():
 @main.route("/health")
 @cross_origin()
 def health():
-    raise UnauthorizedAccessError('test')
     log.debug("api healthy")
     return 'running'
 
