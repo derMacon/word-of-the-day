@@ -7,12 +7,14 @@ import {ankiApiLogin, dictGetAvailableLang, dictLookupWord} from "../../logic/Ap
 import {LanguageUUID} from "../../model/LanguageUUID";
 import {DictOptionsResponse} from "../../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
-import {FaArrowsRotate, FaCloudBolt} from "react-icons/fa6";
+import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
 import {Language} from "../../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import ListGroup from "react-bootstrap/ListGroup";
 import Form from 'react-bootstrap/Form';
 import AnkiSyncLogin from "./AnkiSyncLogin";
+import {AuthService} from "../../logic/AuthService";
+import {AnkiLoginResponseHeaders} from "../../model/AnkiLoginResponseHeaders";
 
 
 export function DictMask() {
@@ -25,6 +27,10 @@ export function DictMask() {
     const [availLang, setAvailLang] = useState<Language[]>([])
     const [dictOptions, setDictOptions] = useState<DictOptionsResponse>()
     const [show, setShow] = useState(false);
+    const [loginSuccessful, setLoginSuccessful] = useState(false);
+
+    const authProvider: AuthService = new AuthService();
+
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -44,6 +50,11 @@ export function DictMask() {
         let apiResponse: DictOptionsResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
         console.log('api resp options: ', apiResponse)
         setDictOptions(apiResponse)
+    }
+
+    const handleAnkiLogin = (userEmail: string, ankiResponse: AnkiLoginResponseHeaders): void => {
+        console.log('update auth provider with email: ', userEmail)
+        authProvider.loadAnkiLoginResponse(userEmail, ankiResponse)
     }
 
     return (
@@ -71,9 +82,12 @@ export function DictMask() {
                                 </ButtonGroup>
                             </Col>
                             <Col xs={12} md={1}>
-                                {/*FaCloudArrowUp*/}
-                                <Button variant='light' onClick={handleShow}><FaCloudBolt
-                                    className='mb-1'/></Button>
+                                <Button variant='light' onClick={handleShow}>
+                                    {authProvider.userIsLoggedIn()
+                                        ? (<FaCloudArrowUp className='mb-1'/>)
+                                        : (<FaCloudBolt className='mb-1'/>)}
+
+                                </Button>
                             </Col>
                         </Row>
                     </div>
@@ -89,7 +103,11 @@ export function DictMask() {
 
 
             <Offcanvas show={show} onHide={handleClose} className="w-100">
-                <AnkiSyncLogin handleAnkiLogin={ankiApiLogin} handleClose={handleClose}/>
+                <AnkiSyncLogin
+                    handleAnkiLogin={handleAnkiLogin}
+                    handleClose={handleClose}
+                    authProvider={authProvider}
+                />
             </Offcanvas>
 
         </div>

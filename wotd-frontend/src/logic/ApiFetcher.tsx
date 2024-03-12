@@ -11,6 +11,7 @@ import {getPrincipal} from "./AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import AnkiSyncLogin from "../components/dict_input/AnkiSyncLogin";
 import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
+import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -97,7 +98,7 @@ export async function wotdApiIsHealthy(): Promise<boolean> {
     }
 }
 
-export async function pushSelectedOption(dictOptionsItemId: number) {
+export async function pushSelectedOption(dictOptionsItemId: number): Promise<void> {
     console.log('pushing selected option: ', dictOptionsItemId)
 
     // TODO create / use special type
@@ -119,17 +120,39 @@ export async function pushSelectedOption(dictOptionsItemId: number) {
 
 // ------------------- Anki API ------------------- //
 
-export async function ankiApiLogin(email: string, password: string): Promise<boolean> {
+export async function ankiApiLogin(email: string, password: string): Promise<AnkiLoginResponseHeaders | undefined> {
+    try {
 
-    let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
-    console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
+        let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
+        console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
 
-    return (await fetch(ANKI_API_BASE + '/login', {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(instanceToPlain(input))
-    })).ok
+        let out: Response = (await fetch(ANKI_API_BASE + '/login', {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify(instanceToPlain(input))
+        }))
 
+        const mainTokenKey: string = 'main-token'
+        const cardTokenKey: string = 'card-token'
+        const responseHeaders: Headers = out.headers;
+
+        if (!out.ok || !responseHeaders.has(mainTokenKey) || !responseHeaders.has(cardTokenKey)) {
+            console.log('invalid credentials')
+            return undefined
+        }
+
+        const ankiResponseHeaders: AnkiLoginResponseHeaders = new AnkiLoginResponseHeaders(
+            responseHeaders.get(mainTokenKey)!,
+            responseHeaders.get(cardTokenKey)!
+        )
+
+        console.log('anki response headers: ', ankiResponseHeaders)
+        return ankiResponseHeaders
+
+    } catch (error) {
+        console.log('anki api is not reachable')
+        return undefined
+    }
 }
 
 export async function ankiApiIsHealthy(): Promise<boolean> {

@@ -7,12 +7,15 @@ import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {ankiApiIsHealthy} from "../../logic/ApiFetcher";
+import {ankiApiIsHealthy, ankiApiLogin} from "../../logic/ApiFetcher";
+import {AnkiLoginResponseHeaders} from "../../model/AnkiLoginResponseHeaders";
+import {AuthService} from "../../logic/AuthService";
 
 
 interface AnkiSyncLoginProps {
-    handleAnkiLogin: (email: string, password: string) => Promise<boolean>
+    handleAnkiLogin: (userEmail: string, ankiResponse: AnkiLoginResponseHeaders) => void
     handleClose: () => void
+    authProvider: AuthService
 }
 
 export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
@@ -23,7 +26,6 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
     const [showSpinner, setShowSpinner] = useState(false);
 
     useEffect(() => {
-        // Your asynchronous logic that returns a Promise<boolean>
         const fetchData = async () => {
             try {
                 const result: boolean = await ankiApiIsHealthy();
@@ -35,7 +37,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
         };
 
         fetchData();
-    }, []); // Empty dependency array to run the effect only once on mount
+    }, []);
 
 
     const handleEmailChange = (e: any): void => {
@@ -46,19 +48,22 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
         setPassword(e.target.value)
     }
 
-    const handleAnkiLogin = () => {
+    const handleLogin = () => {
         console.log('anki sync login email: ', email)
         setShowSpinner(true)
-        props.handleAnkiLogin(email, password).then((credentialsOk: boolean) => {
-            console.log('credentials ok: ', credentialsOk)
+        ankiApiLogin(email, password).then((response: AnkiLoginResponseHeaders | undefined) => {
+            console.log('anki response: ', response)
             setShowSpinner(false)
-            if (!credentialsOk) {
+
+            if (response == undefined) {
                 setEmail('')
                 setPassword('')
                 alert('Credentials incorrect, please try again.')
             } else {
+                props.handleAnkiLogin(email, response)
                 props.handleClose()
             }
+
         })
     }
 
@@ -78,6 +83,20 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             role="status"
             aria-hidden="true"
         />
+
+    const loggedInStatus: React.JSX.Element =
+        <Alert variant="success">
+            <Alert.Heading>Anki Web Login</Alert.Heading>
+            <p>
+                You are currently logged into your anki web account under <b>{email}</b>.
+            </p>
+            <hr/>
+            <div className="d-flex">
+                <Button onClick={props.authProvider.cleanCookies} variant="outline-success">
+                    Logout
+                </Button>
+            </div>
+        </Alert>
 
     const loginForm: React.JSX.Element =
         <>
@@ -115,7 +134,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                 </Form.Group>
             </Form>
 
-            <Button onClick={handleAnkiLogin} variant="light">
+            <Button onClick={handleLogin} variant="light">
                 {showSpinner ? spinner : 'Login'}
             </Button>
 
@@ -135,7 +154,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                 </Offcanvas.Header>
                 <Offcanvas.Body>
                     {healthyApi
-                        ? loginForm
+                        ? (props.authProvider.userIsLoggedIn() ? loggedInStatus : loginForm)
                         : ankiApiDownReport
                     }
                 </Offcanvas.Body>
