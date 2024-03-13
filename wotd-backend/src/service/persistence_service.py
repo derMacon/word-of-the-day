@@ -84,62 +84,6 @@ class PersistenceService:
         return req
 
     @_database_error_decorator  # type: ignore
-    def save_dict_unique_request(self, request: DictRequest) -> DictRequest:
-        duplicate: DictRequest | None = self.find_duplicate_dict_request(request)
-        if duplicate:
-            # TODO this is not a problem - delete this branch
-            app_log.debug(f"found duplicate: {duplicate}")
-            return duplicate
-
-        app_log.debug(f"save_dict_request: {request}")
-
-        sql_insert_string: str = (
-            f"INSERT INTO dict_Request (user_id, from_language_uuid, to_language_uuid, input, ts) VALUES ("
-            f"'{request.user_id}', "
-            f"'{request.from_language_uuid}', "
-            f"'{request.to_language_uuid}', "
-            f"'{request.input}', "
-            f"'{request.dict_request_ts}');")
-        app_log.debug(f"sql string: {sql_insert_string}")
-        self._cursor.execute(sql_insert_string)
-        self._conn.commit()
-
-        sql_select_string: str = f"SELECT * FROM dict_request WHERE input = '{request.input}'"
-        self._cursor.execute(sql_select_string)
-        entry = self._cursor.fetchone()
-        app_log.debug(f"entry: {entry}")
-        instance_with_id = DictRequest(*entry)
-        app_log.debug(f"instance with id: {instance_with_id}")
-
-        return instance_with_id
-
-    def find_duplicate_dict_request(self, request: DictRequest) -> DictRequest | None:
-        sql_select_clause: str = (f"SELECT * FROM dict_request "
-                                  f"WHERE input = '{request.input.upper()}' "
-                                  f"and user_id = '{request.user_id}' "
-                                  f"and from_language_uuid = '{request.from_language_uuid}' "
-                                  f"and to_language_uuid = '{request.to_language_uuid}';")
-        app_log.debug(f'sql clause {sql_select_clause}')
-        self._cursor.execute(sql_select_clause)
-        sql_out = self._cursor.fetchone()
-        if sql_out:
-            return DictRequest(*sql_out)
-        return None
-
-    def find_duplicate_dict_options_response(self, request: DictRequest) -> DictOptionsResponse | None:
-        sql_select_clause: str = (f"SELECT * FROM dict_options_response "
-                                  f"WHERE input = '{request.input.upper()}' "
-                                  f"and user_id = '{request.user_id}' "
-                                  f"and from_language_uuid = '{request.from_language_uuid}' "
-                                  f"and to_language_uuid = '{request.to_language_uuid}';")
-        app_log.debug(f'sql clause {sql_select_clause}')
-        self._cursor.execute(sql_select_clause)
-        sql_out = self._cursor.fetchone()
-        if sql_out:
-            return DictRequest(*sql_out)
-        return None
-
-    @_database_error_decorator  # type: ignore
     def save_dict_options_response(self, dict_options_response: DictOptionsResponse):
         dict_options_response = self._update_plain_response(dict_options_response)
         dict_options_response = self._update_plain_options(dict_options_response)
@@ -149,8 +93,7 @@ class PersistenceService:
         """
         saves the wrapper object into the db and fetches the generated id into a new object
         """
-        sql_insert = (f"INSERT INTO dict_options_response (dict_request_id, status, options_response_ts) VALUES ("
-                      f"{dict_options_response.dict_request.dict_request_id}, "
+        sql_insert = (f"INSERT INTO dict_options_response (status, options_response_ts) VALUES ("
                       f"'{dict_options_response.status.name.upper()}', "
                       f"'{dict_options_response.options_response_ts}' "
                       f") RETURNING dict_options_response_id;")
@@ -169,10 +112,11 @@ class PersistenceService:
         options: List[DictOptionsItem] = dict_options_response.options
 
         for curr_opt in options:
-            sql_insert = (f"INSERT INTO dict_options_item (dict_options_response_id, input, output) VALUES ("
-                          f"'{response_id}' ,"
-                          f"'{curr_opt.input}' ,"
-                          f"'{curr_opt.output}'"
+            sql_insert = (f"INSERT INTO dict_options_item (dict_options_response_id, input, output, selected) VALUES ("
+                          f"'{response_id}', "
+                          f"'{curr_opt.input}', "
+                          f"'{curr_opt.output}', "
+                          f"'{curr_opt.selected}'"
                           f") RETURNING dict_options_item_id;")
             self._cursor.execute(sql_insert)
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
@@ -186,6 +130,22 @@ class PersistenceService:
         # dict_options_response.options = updated_options
         # [DictOptionsItem(*curr_tuple) for curr_tuple in response_tuples]
         return dict_options_response
+
+
+    @_database_error_decorator  # type: ignore
+    def update_selected_item(self, item_id: int):
+        self._conn.commit()
+        self._cursor.execute(
+            "select selected from dict_options_item "
+            f"where dict_options_item_id = {item_id};")
+        selected_state = not self._cursor.fetchone()[0]
+        app_log.debug(f"new selected state of item with id {item_id}: {selected_state}")
+
+        sql_update = (f"UPDATE dict_options_item "
+                      f"SET selected = {selected_state} "
+                      f"WHERE dict_options_item_id = {item_id};")
+        self._cursor.execute(sql_update)
+        self._conn.commit()
 
 
 persistence_service = PersistenceService()

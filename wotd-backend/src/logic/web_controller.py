@@ -25,28 +25,29 @@ class WebController:
             to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
         options: List[DictOptionsItem] = [DictOptionsItem(*curr_tuple) for curr_tuple in response_tuples]
+        app_log.debug(f'lookup options: {options}')
 
         status: Status = evaluate_status(
             original_input=dict_request.input,
             options=options
         )
-
-        dict_request = self.persistence_service.save_dict_unique_request(dict_request)
-        app_log.debug(f"updated request: {dict_request}")
+        app_log.debug(f'status: {status}')
+        if status == Status.OK and options is not None and options:
+            options[0].selected = True  # preselect first entry
 
         dict_options_response = DictOptionsResponse(
-            dict_request=dict_request,
             status=status,
             options=options
         )
 
         dict_options_response = self.persistence_service.save_dict_options_response(dict_options_response)
+        app_log.debug(f'persisted dict options: {dict_options_response}')
 
         return dict_options_response
 
-    def select_dict_word(self, option_select_request: OptionSelectRequest) -> bool:
-        app_log.debug(f"option_select_request: {option_select_request}")
-
+    def select_dict_word(self, item_id: int) -> bool:
+        app_log.debug(f"toggle item id: {item_id}")
+        self.persistence_service.update_selected_item(item_id)
         return True
 
 

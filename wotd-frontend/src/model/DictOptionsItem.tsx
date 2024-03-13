@@ -15,17 +15,22 @@ export class DictOptionsItem {
     @Expose({name: 'output'})
     private _output: string
 
+    @Expose({name: 'selected'})
+    private _selected: boolean
+
 
     constructor(
         dictOptionsItemId: number,
         dictOptionsResponseId: number,
         input: string,
-        output: string
+        output: string,
+        selected: boolean
     ) {
         this._dictOptionsItemId = dictOptionsItemId;
         this._dictOptionsResponseId = dictOptionsResponseId;
         this._input = input;
         this._output = output;
+        this._selected = selected
     }
 
 
@@ -33,32 +38,39 @@ export class DictOptionsItem {
         return this._dictOptionsItemId;
     }
 
-    get dictOptionsResponseId(): number {
-        return this._dictOptionsResponseId;
-    }
-
-    get input(): string {
-        return this._input;
-    }
-
-    get output(): string {
-        return this._output;
-    }
-
-
     set dictOptionsItemId(value: number) {
         this._dictOptionsItemId = value;
+    }
+
+    get dictOptionsResponseId(): number {
+        return this._dictOptionsResponseId;
     }
 
     set dictOptionsResponseId(value: number) {
         this._dictOptionsResponseId = value;
     }
 
+    get input(): string {
+        return this._input;
+    }
+
     set input(value: string) {
         this._input = value;
     }
 
+    get output(): string {
+        return this._output;
+    }
+
     set output(value: string) {
         this._output = value;
+    }
+
+    get selected(): boolean {
+        return this._selected;
+    }
+
+    set selected(value: boolean) {
+        this._selected = value;
     }
 }

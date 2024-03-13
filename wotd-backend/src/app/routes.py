@@ -53,10 +53,10 @@ def select_word_options() -> Tuple[Response, int]:
     request_data = request.get_json()
     app_log.debug(f"request data: {request_data}")
 
-    option_select_request = OptionSelectRequest(**request_data)
+    selected_item_id: int = OptionSelectRequest(**request_data).selected_dict_options_item_id
 
     output = {
-        'select_successful': controller.select_dict_word(option_select_request)
+        'select_successful': controller.select_dict_word(selected_item_id)
     }
 
     app_log.debug(f"json output: {output}")

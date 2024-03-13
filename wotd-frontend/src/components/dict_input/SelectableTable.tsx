@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {wotdApiIsHealthy, pushSelectedOption} from "../../logic/ApiFetcher";
+import {wotdApiIsHealthy, toggleSelectedOption} from "../../logic/ApiFetcher";
 import {DictOptionsResponse} from "../../model/DictOptionsResponse";
 import {Option} from "../../model/Option";
 import './SelectableTable.css';
@@ -26,20 +26,17 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
     useEffect(() => {
         // preselect first entry
         if (props.apiResponse.options.length > 0) {
-            handleSelection(props.apiResponse.options[0])
+            let selectedOption = props.apiResponse.options[0]
+            let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
+            setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
         }
     }, []);
 
     const handleSelection = (selectedOption: DictOptionsItem) => {
         wotdApiIsHealthy().then(e => {
             let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
-            setHighlight((prevHighlight) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
-
-            if (highlight.get(selectedOption.dictOptionsItemId)) {
-                // TODO unselect
-            } else {
-                pushSelectedOption(selectedOption.dictOptionsItemId)
-            }
+            setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
+            toggleSelectedOption(selectedOption.dictOptionsItemId)
         })
     }
 

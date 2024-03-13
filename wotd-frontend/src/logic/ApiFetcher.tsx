@@ -98,22 +98,22 @@ export async function wotdApiIsHealthy(): Promise<boolean> {
     }
 }
 
-export async function pushSelectedOption(dictOptionsItemId: number): Promise<void> {
-    console.log('pushing selected option: ', dictOptionsItemId)
+export async function toggleSelectedOption(dictOptionsItemId: number): Promise<void> {
+    console.log('toggle selected option: ', dictOptionsItemId)
 
     // TODO create / use special type
 
-    let json = JSON.stringify({
+    let json: string = JSON.stringify({
         selected_dict_options_item_id: dictOptionsItemId
     })
 
-    let out = await fetch(WOTD_DICTIONARY_BASE + '/select-option', {
+    let response: Response = await fetch(WOTD_DICTIONARY_BASE + '/select-option', {
         method: 'POST',
         headers: HEADERS,
         body: json
     })
 
-    let jsonObject: Object = await out.json() as Object
+    let jsonObject: Object = await response.json() as Object
     console.log("select out: ", jsonObject)
 }
 
