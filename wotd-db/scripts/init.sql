@@ -19,17 +19,11 @@ CREATE TABLE IF NOT EXISTS language_default (
 INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VALUES
   ('EN', 'DE');
 
-CREATE TABLE IF NOT EXISTS dict_options_response (
-  dict_options_response_id SERIAL PRIMARY KEY,
-  status VARCHAR(100) NOT NULL,
-  options_response_ts timestamp
-);
-
 CREATE TABLE IF NOT EXISTS dict_options_item (
   dict_options_item_id SERIAL PRIMARY KEY,
-  dict_options_response_id INTEGER NOT NULL,
   input VARCHAR(100) NOT NULL,
   output VARCHAR(100) NOT NULL,
   selected BOOLEAN NOT NULL,
-  FOREIGN KEY (dict_options_response_id) REFERENCES dict_options_response(dict_options_response_id)
+  status VARCHAR(100) NOT NULL,
+  option_response_ts timestamp NOT NULL
 );

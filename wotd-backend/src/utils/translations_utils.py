@@ -2,18 +2,25 @@ import dataclasses
 from typing import List
 
 from src.data.dict_input.dict_options_item import DictOptionsItem
-from src.data.dict_input.dict_options_response import DictOptionsResponse
 from src.data.dict_input.status import Status
+from src.utils.logging_config import app_log
 
 
-def evaluate_status(original_input: str, options: List[DictOptionsItem]):
+def update_status(original_input: str, options: List[DictOptionsItem]):
+    status: Status = Status.OK
     if not options:
-        return Status.NOT_FOUND
+        status = Status.NOT_FOUND
     elif not any(original_input.upper() == get_first_word_or_whole_text(option.input).upper() for option in options):
         # check if any lookup option is exactly equal to request input,
         # otherwise the input was misspelled
-        return Status.MISSPELLED
-    return Status.OK
+        status = Status.MISSPELLED
+
+    for curr_option in options:
+        curr_option.status = status
+
+    app_log.debug(f'status: {status}')
+    if status == Status.OK and options is not None and options:
+        options[0].selected = True  # preselect first entry
 
 
 def get_first_word_or_whole_text(text):
@@ -22,17 +29,3 @@ def get_first_word_or_whole_text(text):
         return words[0]
     else:
         return text
-
-
-def asdict_nested(dict_options_response: DictOptionsResponse):
-    options = []
-    for curr_opt in dict_options_response.options:
-        tmp = dataclasses.asdict(curr_opt)
-        print("tmp: ", tmp)
-        options.append(tmp)
-
-    print("opts: ", options)
-    output = dataclasses.asdict(dict_options_response)
-    output['options'] = options
-
-    return output

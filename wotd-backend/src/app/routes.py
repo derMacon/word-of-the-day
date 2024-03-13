@@ -1,10 +1,11 @@
+from typing import List
 import dataclasses
 from typing import Tuple
 
 from flask import jsonify, request, Response
 
 from src.app import main
-from src.data.dict_input.dict_options_response import DictOptionsResponse
+from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
@@ -41,9 +42,9 @@ def lookup_word_options() -> Tuple[Response, int]:
 
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
-    dict_options_response: DictOptionsResponse = controller.lookup_dict_word(dict_request)
+    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request)
 
-    output = dataclasses.asdict(dict_options_response)
+    output = [dataclasses.asdict(curr_option) for curr_option in dict_options_response]
     app_log.debug(f"response options: {output}")
     return jsonify(output), 200
 

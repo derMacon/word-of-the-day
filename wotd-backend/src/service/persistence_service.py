@@ -4,8 +4,6 @@ from typing import List
 import psycopg2
 
 from src.data.dict_input.dict_options_item import DictOptionsItem
-from src.data.dict_input.dict_options_response import DictOptionsResponse
-from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
 from src.data.dict_input.language import Language
 from src.data.error.database_error import DatabaseError
@@ -83,53 +81,27 @@ class PersistenceService:
 
         return req
 
-    @_database_error_decorator  # type: ignore
-    def save_dict_options_response(self, dict_options_response: DictOptionsResponse):
-        dict_options_response = self._update_plain_response(dict_options_response)
-        dict_options_response = self._update_plain_options(dict_options_response)
-        return dict_options_response
 
-    def _update_plain_response(self, dict_options_response: DictOptionsResponse) -> DictOptionsResponse:
-        """
-        saves the wrapper object into the db and fetches the generated id into a new object
-        """
-        sql_insert = (f"INSERT INTO dict_options_response (status, options_response_ts) VALUES ("
-                      f"'{dict_options_response.status.name.upper()}', "
-                      f"'{dict_options_response.options_response_ts}' "
-                      f") RETURNING dict_options_response_id;")
-        self._cursor.execute(sql_insert)
-        out = self._cursor.fetchone()[0]
-        dict_options_response.dict_options_response_id = out
-        self._conn.commit()
 
-        return dict_options_response
 
-    def _update_plain_options(self, dict_options_response: DictOptionsResponse) -> DictOptionsResponse:
+    def insert_dict_options(self, options: List[DictOptionsItem]) -> List[DictOptionsItem]:
         """
         saves the option objects into the db and fetches the generated id into a new object
         """
-        response_id: int = dict_options_response.dict_options_response_id
-        options: List[DictOptionsItem] = dict_options_response.options
-
         for curr_opt in options:
-            sql_insert = (f"INSERT INTO dict_options_item (dict_options_response_id, input, output, selected) VALUES ("
-                          f"'{response_id}', "
-                          f"'{curr_opt.input}', "
-                          f"'{curr_opt.output}', "
-                          f"'{curr_opt.selected}'"
-                          f") RETURNING dict_options_item_id;")
-            self._cursor.execute(sql_insert)
+            sql_insert = ("INSERT INTO dict_options_item (input, output, selected, status, option_response_ts) "
+                          "VALUES (%s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
+            self._cursor.execute(sql_insert, (
+                curr_opt.input,
+                curr_opt.output,
+                curr_opt.selected,
+                curr_opt.status,
+                curr_opt.option_response_ts,
+            ))
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
-            curr_opt.dict_options_response_id = response_id
 
-        # sql_select = f"SELECT * FROM dict_options_item WHERE dict_options_response_id = {response_id};"
-        # self._cursor.execute(sql_select)
-        # updated_options = self._cursor.fetchall()
         self._conn.commit()
-
-        # dict_options_response.options = updated_options
-        # [DictOptionsItem(*curr_tuple) for curr_tuple in response_tuples]
-        return dict_options_response
+        return options
 
 
     @_database_error_decorator  # type: ignore
