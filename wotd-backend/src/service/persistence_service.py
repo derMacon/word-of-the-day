@@ -87,6 +87,7 @@ class PersistenceService:
     def save_dict_unique_request(self, request: DictRequest) -> DictRequest:
         duplicate: DictRequest | None = self.find_duplicate_dict_request(request)
         if duplicate:
+            # TODO this is not a problem - delete this branch
             app_log.debug(f"found duplicate: {duplicate}")
             return duplicate
 
