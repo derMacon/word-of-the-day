@@ -26,6 +26,7 @@ export class AuthService {
         this._cardToken = this._cookies.get(this.CARD_TOKEN_COOKIE_KEY) ?? '';
     }
 
+
     get email(): string {
         return this._email;
     }
@@ -50,6 +51,14 @@ export class AuthService {
         this._cardToken = value;
     }
 
+    get cookies(): Cookies {
+        return this._cookies;
+    }
+
+    set cookies(value: Cookies) {
+        this._cookies = value;
+    }
+
     userIsLoggedIn() {
         return this._email != ''
             && this._mainToken != ''
@@ -57,9 +66,11 @@ export class AuthService {
     }
 
     cleanCookies() {
-        this._cookies.remove(this.EMAIL_COOKIE_KEY)
-        this._cookies.remove(this.MAIN_TOKEN_COOKIE_KEY)
-        this._cookies.remove(this.CARD_TOKEN_COOKIE_KEY)
+        let allCookies = this._cookies.getAll();
+        Object.keys(allCookies).forEach(cookieName => {
+            this._cookies.remove(cookieName);
+        });
+        window.location.reload();
     }
 
 

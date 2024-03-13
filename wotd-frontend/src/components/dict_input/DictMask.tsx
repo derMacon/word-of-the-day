@@ -31,7 +31,6 @@ export function DictMask() {
 
     const authProvider: AuthService = new AuthService();
 
-
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 

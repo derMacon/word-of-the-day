@@ -48,6 +48,13 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
         setPassword(e.target.value)
     }
 
+    const handleKeyDown = (e: any): void => {
+        if (e.code === 'Enter' || e.which === 13) {
+            handleLogin()
+        }
+    }
+
+
     const handleLogin = () => {
         console.log('anki sync login email: ', email)
         setShowSpinner(true)
@@ -92,7 +99,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             </p>
             <hr/>
             <div className="d-flex">
-                <Button onClick={props.authProvider.cleanCookies} variant="outline-success">
+                <Button onClick={() => props.authProvider.cleanCookies()} variant="outline-success">
                     Logout
                 </Button>
             </div>
@@ -126,6 +133,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                         aria-describedby="passwordHelpBlock"
                         value={password}
                         onChange={handlePasswordChange}
+                        onKeyDown={handleKeyDown}
                     />
                     <Form.Text id="passwordHelpBlock" muted>
                         Your credentials will not be stored by this application.

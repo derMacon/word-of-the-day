@@ -15,9 +15,6 @@ controller = Controller()
 @main.route("/login", methods=['POST'])
 @cross_origin()
 def login():
-    sleep(4)
-    return ''
-    
     log.debug('user called login endpoint')
     username = request.json.get('username')
     password = request.json.get('password')
@@ -28,6 +25,10 @@ def login():
     resp = Response()
     resp.headers[TokenType.MAIN.value.header_key] = main_token
     resp.headers[TokenType.CARD.value.header_key] = card_token
+
+    resp.headers.add('Access-Control-Expose-Headers',
+                     TokenType.MAIN.value.header_key
+                     + ',' + TokenType.CARD.value.header_key)
     return resp
 
 
