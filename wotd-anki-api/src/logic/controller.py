@@ -33,11 +33,14 @@ class Controller:
     TIMEOUT_SEC = 3
 
     def __init__(self):
+        self.init_webdriver()
+        self._cookie_manager = PersistenceManager()
+
+    def init_webdriver(self):
         service_obj = Service('./chromedriver-linux64/chromedriver')
         # self.driver = webdriver.Chrome(service=service_obj, options=set_chrome_options())
         # service_obj = Service('/usr/bin/chromedriver')
         self._driver = webdriver.Chrome(service=service_obj)
-        self._cookie_manager = PersistenceManager()
 
     def login(self, email, password):
         self._logout_previous_session()
@@ -47,8 +50,8 @@ class Controller:
         return main_token, card_token
 
     def _logout_previous_session(self):
-        self._driver.delete_all_cookies()
-        self._driver.get(AnkiWebEndpoints.LOGIN)
+        self._driver.quit()
+        self.init_webdriver()
 
     def _insert_credentials(self, email: str, password: str):
         log.debug("inside controller login")

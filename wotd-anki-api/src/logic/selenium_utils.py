@@ -116,8 +116,12 @@ def click_button(driver, title: str):
     available_buttons = driver.find_elements(By.XPATH, '//button')
     options = [btn.text for btn in available_buttons]
     log.debug(f"searching button with title '{title}' in available buttons: {options}")
-    btn_idx = options.index(title)
-    available_buttons[btn_idx].click()
+    if title in options:
+        btn_idx = options.index(title)
+        available_buttons[btn_idx].click()
+        log.debug(f"button with title '{title}' found")
+    else:
+        log.debug(f"no button found for title '{title}'")
 
 
 def click_link(driver, title: str):
