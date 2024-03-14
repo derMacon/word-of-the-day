@@ -64,13 +64,13 @@ class PersistenceService:
     def get_default_languages(self) -> InfoRequestDefaultDictLang:
         self._cursor.execute(
             "SELECT language.* FROM language "
-            "INNER JOIN language_default ON language.language_id=language_default.dict_from_language_id;")
+            "INNER JOIN language_default ON language.language_uuid=language_default.dict_from_language_uuid;")
         entry = self._cursor.fetchone()
         app_log.debug(f"get_default_languages: {entry}")
         dict_default_from_language = Language(*entry)
 
         self._cursor.execute("SELECT language.* FROM language "
-                             "INNER JOIN language_default ON language.language_id=language_default.dict_to_language_id;")
+                             "INNER JOIN language_default ON language.language_uuid=language_default.dict_to_language_uuid;")
         entry = self._cursor.fetchone()
         dict_default_to_language = Language(*entry)
 
@@ -80,9 +80,6 @@ class PersistenceService:
         )
 
         return req
-
-
-
 
     def insert_dict_options(self, options: List[DictOptionsItem]) -> List[DictOptionsItem]:
         """
@@ -103,7 +100,6 @@ class PersistenceService:
         self._conn.commit()
         return options
 
-
     @_database_error_decorator  # type: ignore
     def update_selected_item(self, item_id: int):
         self._conn.commit()
@@ -118,6 +114,14 @@ class PersistenceService:
                       f"WHERE dict_options_item_id = {item_id};")
         self._cursor.execute(sql_update)
         self._conn.commit()
+
+    @_database_error_decorator  # type: ignore
+    def find_expired_options(self, expiry_interval: int) -> List[DictOptionsItem]:
+        return []
+
+    @_database_error_decorator  # type: ignore
+    def delete_items_with_ids(self, ids: List[int]) -> List[DictOptionsItem]:
+        pass
 
 
 persistence_service = PersistenceService()
