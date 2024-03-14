@@ -1,3 +1,5 @@
+SET TIMEZONE TO 'Europe/Berlin';
+
 CREATE TABLE IF NOT EXISTS language (
   language_uuid VARCHAR(50) PRIMARY KEY,
   name VARCHAR(100) NOT NULL

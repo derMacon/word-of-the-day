@@ -2,7 +2,7 @@ from typing import List
 
 from dictcc import Dict
 
-from src.data.dict_input.dict_options_item import DictOptionsItem
+from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
 from src.data.dict_input.dict_request import DictRequest
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
@@ -21,7 +21,7 @@ class WebController:
             from_language=dict_request.from_language_uuid.name.lower(),
             to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
-        options: List[DictOptionsItem] = [DictOptionsItem(*curr_tuple) for curr_tuple in response_tuples]
+        options: List[DictOptionsItem] = from_translation_tuples(response_tuples)
         app_log.debug(f'lookup options: {options}')
 
         update_status(

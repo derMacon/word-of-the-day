@@ -3,7 +3,6 @@ from os import environ
 from typing import List
 
 from src.data.anki.anki_card import AnkiCard
-from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.status import Status
 from src.logic.api_fetcher import api_fetcher
 from src.service.persistence_service import persistence_service
@@ -20,16 +19,20 @@ class HousekeepingController:
 
     def run(self):
         while (True):
-            self.sync_anki_cleanup()
+            self.sync_anki_push()
             time.sleep(self._housekeeping_interval)
 
-    def sync_anki_cleanup(self):
+    def sync_anki_push(self):
         persisted_options = persistence_service.find_expired_options(self._housekeeping_interval)
         for curr_option in persisted_options:
-            if curr_option.status == Status.OK:
-                app_log.debug(f"option with id '{curr_option.dict_options_item_id}' with status {curr_option.status}")
-                # api_fetcher.push_card(AnkiCard())
+            if curr_option.status == Status.OK and curr_option.selected:
+                app_log.debug(f"selected option with id '{curr_option.dict_options_item_id}' "
+                              f"with status {curr_option.status}")
+                api_fetcher.push_card(AnkiCard(
+                    deck=curr_option.deck,
+                    front=curr_option.input,
+                    back=curr_option.output,
+                ))
 
         id_to_delete: List[int] = [curr_option.dict_options_item_id for curr_option in persisted_options]
         persistence_service.delete_items_with_ids(id_to_delete)
-

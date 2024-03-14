@@ -118,6 +118,7 @@ class PersistenceService:
         selected_state = not self._cursor.fetchone()[0]
         app_log.debug(f"new selected state of item with id {item_id}: {selected_state}")
 
+        # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "
                       f"SET selected = {selected_state} "
                       f"WHERE dict_options_item_id = {item_id};")
@@ -126,7 +127,15 @@ class PersistenceService:
 
     @_database_error_decorator  # type: ignore
     def find_expired_options(self, expiry_interval: int) -> List[DictOptionsItem]:
-        return []
+        sql_select = (f"SELECT * FROM dict_options_item "
+                      f"WHERE option_response_ts < NOW() - interval '{expiry_interval} SECONDS';")
+        self._cursor.execute(sql_select)
+
+        options: List[DictOptionsItem] = []
+        for entry in self._cursor.fetchall():
+            options.append(DictOptionsItem(*entry))
+
+        return options
 
     @_database_error_decorator  # type: ignore
     def delete_items_with_ids(self, ids: List[int]) -> List[DictOptionsItem]:
