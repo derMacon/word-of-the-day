@@ -7,6 +7,7 @@ from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
 from src.data.dict_input.language import Language
 from src.data.error.database_error import DatabaseError
+from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log
 
 
@@ -61,6 +62,13 @@ class PersistenceService:
         return languages
 
     @_database_error_decorator  # type: ignore
+    def find_language_by_uuid(self, lang_uuid: str) -> List[Language]:
+        for curr_lang in self.get_available_languages():
+            if curr_lang.language_uuid == lang_uuid:
+                return curr_lang
+        raise LangNotFoundError(f'language with uuid {lang_uuid} not found')
+
+    @_database_error_decorator  # type: ignore
     def get_default_languages(self) -> InfoRequestDefaultDictLang:
         self._cursor.execute(
             "SELECT language.* FROM language "
@@ -86,9 +94,10 @@ class PersistenceService:
         saves the option objects into the db and fetches the generated id into a new object
         """
         for curr_opt in options:
-            sql_insert = ("INSERT INTO dict_options_item (input, output, selected, status, option_response_ts) "
-                          "VALUES (%s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
+            sql_insert = ("INSERT INTO dict_options_item (deck, input, output, selected, status, option_response_ts) "
+                          "VALUES (%s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
             self._cursor.execute(sql_insert, (
+                curr_opt.deck,
                 curr_opt.input,
                 curr_opt.output,
                 curr_opt.selected,

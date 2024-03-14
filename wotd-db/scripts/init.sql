@@ -21,8 +21,9 @@ INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VA
 
 CREATE TABLE IF NOT EXISTS dict_options_item (
   dict_options_item_id SERIAL PRIMARY KEY,
+  deck VARCHAR(100) NOT NULL,
   input VARCHAR(100) NOT NULL,
-  output VARCHAR(100) NOT NULL,
+  output VARCHAR(1000) NOT NULL,
   selected BOOLEAN NOT NULL,
   status VARCHAR(100) NOT NULL,
   option_response_ts timestamp NOT NULL

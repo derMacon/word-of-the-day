@@ -44,9 +44,7 @@ def lookup_word_options() -> Tuple[Response, int]:
     app_log.debug(f"dict request: {dict_request}")
     dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request)
 
-    output = [dataclasses.asdict(curr_option) for curr_option in dict_options_response]
-    app_log.debug(f"response options: {output}")
-    json: Response = jsonify(output)
+    json: Response = jsonify([dataclasses.asdict(curr_option) for curr_option in dict_options_response])
     app_log.debug('lookup response json: %s', json.get_json())
     return json, 200
 

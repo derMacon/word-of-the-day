@@ -1,10 +1,13 @@
-import dataclasses
 from typing import List
 
 from src.data.dict_input.dict_options_item import DictOptionsItem
+from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.status import Status
 from src.utils.logging_config import app_log
 
+# TODO put this into .ini file
+TRANSLATION_DECK = 'wotd_translations'
+DEFINITION_DECK = 'wotd_definitions'
 
 def update_status(original_input: str, options: List[DictOptionsItem]):
     status: Status = Status.OK
@@ -21,6 +24,22 @@ def update_status(original_input: str, options: List[DictOptionsItem]):
     app_log.debug(f'status: {status}')
     if status == Status.OK and options is not None and options:
         options[0].selected = True  # preselect first entry
+
+
+def update_deckname(options: List[DictOptionsItem], dict_request: DictRequest):
+    # TODO delete this
+    # to_lang: Language = persistence_service.find_language_by_uuid(dict_request.to_language_uuid)
+    # from_lang: Language = persistence_service.find_language_by_uuid(dict_request.from_language_uuid)
+
+    deckname = TRANSLATION_DECK
+    if dict_request.to_language_uuid == dict_request.from_language_uuid:
+        app_log.debug('from and to language of lookup request are the same '
+                      '- just search for definition of word, not for translation')
+        deckname = DEFINITION_DECK
+
+    app_log.debug('generated deckname: %s', deckname)
+    for curr_option in options:
+        curr_option.deck = deckname
 
 
 def get_first_word_or_whole_text(text):

@@ -6,7 +6,7 @@ from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
-from src.utils.translations_utils import update_status
+from src.utils.translations_utils import update_status, update_deckname
 
 
 class WebController:
@@ -28,6 +28,7 @@ class WebController:
             original_input=dict_request.input,
             options=options
         )
+        update_deckname(options, dict_request)
         app_log.debug(f'updated options: {options}')
 
         updated_options = self.persistence_service.insert_dict_options(options)
