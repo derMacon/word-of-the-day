@@ -15,6 +15,7 @@ import Form from 'react-bootstrap/Form';
 import AnkiSyncLogin from "./AnkiSyncLogin";
 import {AuthService} from "../../logic/AuthService";
 import {AnkiLoginResponseHeaders} from "../../model/AnkiLoginResponseHeaders";
+import {DictOptionsItem} from "../../model/DictOptionsItem";
 
 
 export function DictMask() {
@@ -25,7 +26,7 @@ export function DictMask() {
     const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
     const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
     const [availLang, setAvailLang] = useState<Language[]>([])
-    const [dictOptions, setDictOptions] = useState<DictOptionsResponse>()
+    const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>()
     const [show, setShow] = useState(false);
     const [loginSuccessful, setLoginSuccessful] = useState(false);
 
@@ -46,7 +47,7 @@ export function DictMask() {
     }
 
     const handleDictLookup = async (word: string) => {
-        let apiResponse: DictOptionsResponse = await dictLookupWord(word, selectedFromLang, selectedToLang)
+        let apiResponse: DictOptionsItem[] = await dictLookupWord(word, selectedFromLang, selectedToLang)
         console.log('api resp options: ', apiResponse)
         setDictOptions(apiResponse)
     }
@@ -91,7 +92,7 @@ export function DictMask() {
                         </Row>
                     </div>
 
-                    {dictOptions !== undefined && (
+                    {dictOptions !== undefined && dictOptions.length > 0 && (
                         <div className='mt-2'>
                             <SelectableTable apiResponse={dictOptions}/>
                         </div>

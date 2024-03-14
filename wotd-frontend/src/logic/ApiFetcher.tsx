@@ -1,15 +1,10 @@
 // TODO read this from props or some kind .ini, do not hardcode it
-import {LanguageUUID} from "../model/LanguageUUID";
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
-import {instanceToPlain, plainToClass, serialize} from "class-transformer";
-import {DictOptionsResponse} from "../model/DictOptionsResponse";
+import {instanceToPlain, plainToClass} from "class-transformer";
 import {DictRequest} from "../model/DictRequest";
-import {Option} from "../model/Option";
-import {type} from "os";
 import {Language} from "../model/Language";
 import {getPrincipal} from "./AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
-import AnkiSyncLogin from "../components/dict_input/AnkiSyncLogin";
 import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
@@ -32,7 +27,7 @@ const HEADERS = {
 
 // ------------------- WOTD ------------------- //
 
-export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsResponse> {
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsItem[]> {
 
     let input: DictRequest = new DictRequest(getPrincipal(), fromLanguage.language_uuid, toLanguage.language_uuid, word)
     console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
@@ -45,24 +40,9 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
             body: JSON.stringify(instanceToPlain(input))
         })
 
-        let jsonObject: Object = await output.json() as Object
-
-        let requestWrapper: DictOptionsResponse = plainToClass(DictOptionsResponse, jsonObject)
-        let originalRequest: DictRequest = plainToClass(DictRequest, requestWrapper.dictRequest)
-
-        let optionsUpdated: DictOptionsItem[] = []
-        for (let i = 0; i < requestWrapper.options.length; i++) {
-            let curr = requestWrapper.options[i] as Object
-            optionsUpdated.push(plainToClass(DictOptionsItem, curr))
-        }
-
-        requestWrapper.dictRequest = originalRequest
-        requestWrapper.options = optionsUpdated
-
-        // console.log('parsed options: ', requestWrapper)
-        // console.log('parsed request: ', originalRequest)
-
-        return requestWrapper
+        let out: DictOptionsItem[] = plainToClass(DictOptionsItem, await output.json())
+        console.log('parsed items: ', out)
+        return out
 
     } catch (error) {
         console.error(error)

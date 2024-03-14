@@ -46,7 +46,9 @@ def lookup_word_options() -> Tuple[Response, int]:
 
     output = [dataclasses.asdict(curr_option) for curr_option in dict_options_response]
     app_log.debug(f"response options: {output}")
-    return jsonify(output), 200
+    json: Response = jsonify(output)
+    app_log.debug('lookup response json: %s', json.get_json())
+    return json, 200
 
 
 @main.route("/dict/select-option", methods=['POST'])
