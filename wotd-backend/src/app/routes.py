@@ -1,5 +1,5 @@
-from typing import List
 import dataclasses
+from typing import List
 from typing import Tuple
 
 from flask import jsonify, request, Response
@@ -9,16 +9,35 @@ from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
+from src.data.anki.token_type import TokenType
+from src.logic.api_fetcher import anki_api_fetcher
 from src.logic.web_controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
 
 
 @main.route("/health")
-def test_log() -> Tuple[Response, int]:
+def health_check() -> Tuple[Response, int]:
     status = {'status': 'running'}
     app_log.debug(f"health: {status}")
     return jsonify(status), 200
+
+
+@main.route("/login", methods=['POST'])
+def anki_login():
+    request_data = request.get_json()
+    # anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request_data)
+    main_token, card_token = anki_api_fetcher.login(**request_data)
+
+    resp = Response()
+    resp.headers[TokenType.MAIN.value.header_key] = main_token
+    resp.headers[TokenType.CARD.value.header_key] = card_token
+
+    resp.headers.add('Access-Control-Expose-Headers',
+                     TokenType.MAIN.value.header_key
+                     + ',' + TokenType.CARD.value.header_key)
+
+    return resp
 
 
 @main.route("/dict/available-lang")

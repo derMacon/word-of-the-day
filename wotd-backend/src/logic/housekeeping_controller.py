@@ -4,7 +4,7 @@ from typing import List
 
 from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.status import Status
-from src.logic.api_fetcher import api_fetcher
+from src.logic.api_fetcher import anki_api_fetcher
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
 
@@ -30,7 +30,7 @@ class HousekeepingController:
             if curr_option.status == Status.OK and curr_option.selected:
                 app_log.debug(f"selected option with id '{curr_option.dict_options_item_id}' "
                               f"with status {curr_option.status}")
-                api_fetcher.push_card(AnkiCard(
+                anki_api_fetcher.push_card(AnkiCard(
                     deck=curr_option.deck,
                     front=curr_option.input,
                     back=curr_option.output,
