@@ -24,7 +24,9 @@ class HousekeepingController:
 
     def sync_anki_push(self):
         persisted_options = persistence_service.find_expired_options(self._housekeeping_interval)
+        ids_to_delete: List[int] = []
         for curr_option in persisted_options:
+
             if curr_option.status == Status.OK and curr_option.selected:
                 app_log.debug(f"selected option with id '{curr_option.dict_options_item_id}' "
                               f"with status {curr_option.status}")
@@ -34,5 +36,7 @@ class HousekeepingController:
                     back=curr_option.output,
                 ))
 
-        id_to_delete: List[int] = [curr_option.dict_options_item_id for curr_option in persisted_options]
-        persistence_service.delete_items_with_ids(id_to_delete)
+            ids_to_delete.append(curr_option.dict_options_item_id)
+
+        app_log.debug(f'id_to_delete: {ids_to_delete}')
+        persistence_service.delete_items_with_ids(ids_to_delete)

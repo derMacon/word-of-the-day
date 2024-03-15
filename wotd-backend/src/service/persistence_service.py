@@ -127,19 +127,28 @@ class PersistenceService:
 
     @_database_error_decorator  # type: ignore
     def find_expired_options(self, expiry_interval: int) -> List[DictOptionsItem]:
-        sql_select = (f"SELECT * FROM dict_options_item "
+        sql_select = ("SET TIMEZONE TO 'Europe/Berlin';" 
+                      f"SELECT * FROM dict_options_item "
                       f"WHERE option_response_ts < NOW() - interval '{expiry_interval} SECONDS';")
+        app_log.debug('sql select: %s', sql_select)
         self._cursor.execute(sql_select)
 
         options: List[DictOptionsItem] = []
-        for entry in self._cursor.fetchall():
+        response = self._cursor.fetchall()
+        app_log.debug('response: %s', response)
+        for entry in response:
             options.append(DictOptionsItem(*entry))
 
+        app_log.debug('expired options: %s', options)
         return options
 
     @_database_error_decorator  # type: ignore
-    def delete_items_with_ids(self, ids: List[int]) -> List[DictOptionsItem]:
-        pass
+    def delete_items_with_ids(self, ids_to_delete: List[int]) -> List[DictOptionsItem]:
+        if ids_to_delete:
+            app_log.debug('delete options with ids: %s', ids_to_delete)
+            delete_query = "DELETE FROM dict_options_item WHERE dict_options_item_id IN %s;"
+            self._cursor.execute(delete_query, (tuple(ids_to_delete),))
+            self._conn.commit()
 
 
 persistence_service = PersistenceService()
