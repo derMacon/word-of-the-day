@@ -1,4 +1,6 @@
 import dataclasses
+import threading
+from time import sleep
 from typing import List
 from typing import Tuple
 
@@ -6,6 +8,7 @@ from flask import jsonify, request, Response
 
 from src.app import main
 from src.data.anki.anki_card import AnkiCard
+from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
@@ -40,16 +43,16 @@ def anki_login():
 
     return resp
 
-@main.route("/anki/add-card")
-def anki_card_push():
-    request_data = request.get_json()
-    app_log.debug(f"request data: {request_data}")
-    anki_card = AnkiCard(**request_data)
-    app_log.debug(f"anki card: {anki_card}")
-
-    anki_api_fetcher.push_card(anki_card, request.headers)
-
-    return ''
+# @main.route("/anki/add-card")
+# def anki_card_push():
+#     request_data = request.get_json()
+#     app_log.debug(f"request data: {request_data}")
+#     anki_card = AnkiCard(**request_data)
+#     app_log.debug(f"anki card: {anki_card}")
+#
+#     anki_api_fetcher.push_card(anki_card, request.headers)
+#
+#     return ''
 
 
 
@@ -74,7 +77,12 @@ def lookup_word_options() -> Tuple[Response, int]:
 
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
-    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request)
+
+    main_token = request.headers[TokenType.MAIN.value.header_key]
+    card_token = request.headers[TokenType.CARD.value.header_key]
+    headers = AnkiLoginResponseHeaders(main_token, card_token)
+
+    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, headers)
 
     json: Response = jsonify([dataclasses.asdict(curr_option) for curr_option in dict_options_response])
     app_log.debug('lookup response json: %s', json.get_json())

@@ -9,8 +9,8 @@ class AnkiLoginResponseHeaders:
     main_token: str
     card_token: str
 
-    def to_headers(self):
+    def to_map(self):
         return {
-            TokenType.MAIN.value: self.main_token,
-            TokenType.CARD.value: self.card_token
+            TokenType.MAIN.value.header_key: self.main_token,
+            TokenType.CARD.value.header_key: self.card_token
         }

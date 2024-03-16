@@ -1,3 +1,3 @@
-import re
-pattern = re.compile("Buch")
-pattern.match("Buchhuelle")
+test: str = '2'
+
+print(float(test))

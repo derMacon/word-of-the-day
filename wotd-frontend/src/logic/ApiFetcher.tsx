@@ -36,6 +36,8 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
 
     try {
 
+        // TODO insert auth headers
+
         let output = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
             method: 'POST',
             headers: HEADERS,
