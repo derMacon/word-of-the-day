@@ -58,6 +58,8 @@ def add_deck():
 @main.route("/add-card")
 @cross_origin()
 def add_card():
+    log.debug('user called add card')
+
     deck = request.json.get('deck')
     front = request.json.get('front')
     back = request.json.get('back')

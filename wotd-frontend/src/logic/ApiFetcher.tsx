@@ -12,6 +12,7 @@ const HTTP_STATUS_OK: number = 200
 
 const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
 export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
+export const WOTD_ANKI_DOMAIN: string = WOTD_API_BASE + '/anki'
 export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
 
 
@@ -107,7 +108,7 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
         let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
         console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
 
-        let out: Response = (await fetch(WOTD_API_BASE + '/login', {
+        let out: Response = (await fetch(WOTD_ANKI_DOMAIN + '/login', {
             method: 'POST',
             headers: HEADERS,
             body: JSON.stringify(instanceToPlain(input))

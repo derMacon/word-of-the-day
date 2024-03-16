@@ -5,12 +5,13 @@ from typing import Tuple
 from flask import jsonify, request, Response
 
 from src.app import main
+from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.data.anki.token_type import TokenType
-from src.logic.api_fetcher import anki_api_fetcher
+from src.logic.anki_api_fetcher import anki_api_fetcher
 from src.logic.web_controller import controller
 from src.service.persistence_service import persistence_service
 from src.utils.logging_config import app_log
@@ -23,7 +24,7 @@ def health_check() -> Tuple[Response, int]:
     return jsonify(status), 200
 
 
-@main.route("/login", methods=['POST'])
+@main.route("/anki/login", methods=['POST'])
 def anki_login():
     request_data = request.get_json()
     # anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request_data)
@@ -38,6 +39,18 @@ def anki_login():
                      + ',' + TokenType.CARD.value.header_key)
 
     return resp
+
+@main.route("/anki/add-card")
+def anki_card_push():
+    request_data = request.get_json()
+    app_log.debug(f"request data: {request_data}")
+    anki_card = AnkiCard(**request_data)
+    app_log.debug(f"anki card: {anki_card}")
+
+    anki_api_fetcher.push_card(anki_card, request.headers)
+
+    return ''
+
 
 
 @main.route("/dict/available-lang")

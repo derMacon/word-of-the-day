@@ -114,7 +114,7 @@ class Controller:
     def setting_cookie_from_protected_domain(self, token_type: TokenType):
         """
         Hacky workaround. With selenium it is not possible to set cookie value for a given domain without first
-        accessing it. This is problematic in this usecase because the cookie contains the access token which we
+        accessing it. This is problematic in this use case because the cookie contains the access token which we
         want to modify before accessing the add card page. After trial and error I came up with the following.
         The ideal solution would be to access to the add card endpoint of anki web, then suppress the redirect to
         the login page, set the cookie and reload the add card endpoint with the appropriate token in the cookie.
@@ -134,8 +134,8 @@ class Controller:
             pass
 
     def list_decks(self):
-        self._driver.get(AnkiWebEndpoints.DECKS.value)
         self.set_cookies(TokenType.MAIN)
+        self._driver.get(AnkiWebEndpoints.DECKS.value)
         # sleep(100)  # TODO delete this sleep
         main_elems = grab_main_elements(self._driver)
         log.debug(main_elems)
@@ -160,6 +160,7 @@ class Controller:
         if deck not in available_decks:
             log.error(f"deck '{deck}' not present in available decks, creating new one: {available_decks}")
             self.create_deck(deck)
+
         self.setting_cookie_from_protected_domain(TokenType.CARD)
         insert_text_by_label(self._driver, 'Front', front)
         insert_text_by_label(self._driver, 'Back', back)
