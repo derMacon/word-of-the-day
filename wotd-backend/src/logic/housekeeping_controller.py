@@ -24,6 +24,7 @@ def sync_anki_push(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders
                 front=curr_option.input,
                 back=curr_option.output,
             )
+
             anki_api_fetcher.push_card(card_input, auth_headers)
 
         ids_to_delete.append(curr_option.dict_options_item_id)

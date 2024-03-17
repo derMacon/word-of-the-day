@@ -78,9 +78,13 @@ def lookup_word_options() -> Tuple[Response, int]:
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
 
-    main_token = request.headers[TokenType.MAIN.value.header_key]
-    card_token = request.headers[TokenType.CARD.value.header_key]
-    headers = AnkiLoginResponseHeaders(main_token, card_token)
+    headers = None
+    if TokenType.MAIN.value.header_key in request.headers \
+        and TokenType.CARD.value.header_key in request.headers:
+        app_log.debug('header: %s', request.headers)
+        main_token = request.headers[TokenType.MAIN.value.header_key]
+        card_token = request.headers[TokenType.CARD.value.header_key]
+        headers = AnkiLoginResponseHeaders(main_token, card_token)
 
     dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, headers)
 

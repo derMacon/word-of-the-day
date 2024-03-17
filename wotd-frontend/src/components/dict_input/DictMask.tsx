@@ -16,6 +16,7 @@ import AnkiSyncLogin from "./AnkiSyncLogin";
 import {AuthService} from "../../logic/AuthService";
 import {AnkiLoginResponseHeaders} from "../../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../../model/DictOptionsItem";
+import {EmptyPage} from "./EmptyPage";
 
 
 export function DictMask() {
@@ -26,9 +27,9 @@ export function DictMask() {
     const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
     const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
     const [availLang, setAvailLang] = useState<Language[]>([])
-    const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>()
+    const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>([])
     const [show, setShow] = useState(false);
-    const [loginSuccessful, setLoginSuccessful] = useState(false);
+    const [loginSuccessful, setLoginSuccessful] = useState(false); // TODO do we need this
 
     const authProvider: AuthService = new AuthService();
 
@@ -57,6 +58,7 @@ export function DictMask() {
         authProvider.loadAnkiLoginResponse(userEmail, ankiResponse)
     }
 
+    // TODO when selecttable in own component, maybe its useful to put the search also in a seperate component
     return (
         <div>
             <Container fluid="md">
@@ -92,11 +94,12 @@ export function DictMask() {
                         </Row>
                     </div>
 
-                    {dictOptions !== undefined && dictOptions.length > 0 && (
-                        <div className='mt-2'>
-                            <SelectableTable apiResponse={dictOptions}/>
-                        </div>
-                    )}
+                    <div className='mt-2'>
+                        {dictOptions !== undefined && dictOptions.length > 0
+                            ? <SelectableTable apiResponse={dictOptions}/>
+                            : <EmptyPage/>
+                        }
+                    </div>
                 </div>
 
             </Container>

@@ -20,7 +20,7 @@ class WebController:
         self.persistence_service = PersistenceService()
 
 
-    def lookup_dict_word(self, dict_request: DictRequest, auth_headers: AnkiLoginResponseHeaders) -> List[DictOptionsItem]:
+    def lookup_dict_word(self, dict_request: DictRequest, auth_headers: AnkiLoginResponseHeaders | None) -> List[DictOptionsItem]:
         response_tuples = self.dictcc_translator.translate(
             word=dict_request.input,
             from_language=dict_request.from_language_uuid.name.lower(),
@@ -28,6 +28,10 @@ class WebController:
         ).translation_tuples
         options: List[DictOptionsItem] = from_translation_tuples(response_tuples)
         app_log.debug(f'lookup options: {options}')
+
+        if auth_headers is None:
+            app_log.debug('user not logged into their anki web account -> webapp does not persist options')
+            return options
 
         update_status(
             original_input=dict_request.input,
