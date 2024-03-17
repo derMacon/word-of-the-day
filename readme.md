@@ -15,16 +15,21 @@ The webapp also provides the possiblity to select other options other than the d
 
 ### Screenshots
 1. Anki Login
+---
 ![anki-login](_other/media/readme/wotd_login.png)
 ![anki-login](_other/media/readme/wotd_not-logged-in.png)
 
 2. Select Languages
+---
 
 3. Search Query
+---
 
 4. Optional Word Select
+---
 
 5. Learn in Anki Web
+---
 
 
 
