@@ -99,6 +99,7 @@ def select_word_options() -> Tuple[Response, int]:
     app_log.debug(f"request data: {request_data}")
 
     selected_item_id: int = OptionSelectRequest(**request_data).selected_dict_options_item_id
+    app_log.debug(f"selected item id: {selected_item_id}")
 
     output = {
         'select_successful': controller.select_dict_word(selected_item_id)

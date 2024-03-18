@@ -5,7 +5,6 @@ import LanguageSelect from "./LanguageSelect";
 import {SelectableTable} from "./SelectableTable";
 import {ankiApiLogin, dictGetAvailableLang, dictLookupWord} from "../../logic/ApiFetcher";
 import {LanguageUUID} from "../../model/LanguageUUID";
-import {DictOptionsResponse} from "../../model/DictOptionsResponse";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
 import {Language} from "../../model/Language";
@@ -96,7 +95,7 @@ export function DictMask() {
 
                     <div className='mt-2'>
                         {dictOptions !== undefined && dictOptions.length > 0
-                            ? <SelectableTable apiResponse={dictOptions}/>
+                            ? <SelectableTable apiResponse={dictOptions} userIsLoggedIn={authProvider.userIsLoggedIn()}/>
                             : <EmptyPage/>
                         }
                     </div>

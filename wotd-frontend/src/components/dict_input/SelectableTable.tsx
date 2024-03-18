@@ -2,14 +2,13 @@ import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
 import {wotdApiIsHealthy, toggleSelectedOption} from "../../logic/ApiFetcher";
-import {DictOptionsResponse} from "../../model/DictOptionsResponse";
-import {Option} from "../../model/Option";
 import './SelectableTable.css';
 import {DictOptionsItem} from "../../model/DictOptionsItem";
 
 
 interface SelectableTableProps {
     apiResponse: DictOptionsItem[]
+    userIsLoggedIn: boolean
 }
 
 export function SelectableTable(props: Readonly<SelectableTableProps>) {
@@ -36,13 +35,19 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
         wotdApiIsHealthy().then(e => {
             let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
             setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
-            toggleSelectedOption(selectedOption.dictOptionsItemId)
+            if (props.userIsLoggedIn) {
+                console.log('user logged in, sending selection to backend')
+                toggleSelectedOption(selectedOption.dictOptionsItemId)
+            } else {
+                console.log('user not logged in, not able to send selection to backend')
+            }
         })
     }
 
     const items: JSX.Element[] = []
     props.apiResponse.forEach((option: DictOptionsItem) => items.push(
-        <tr key={option.dictOptionsItemId} onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleSelection(option)}>
+        <tr key={option.dictOptionsItemId}
+            onClick={(e: React.MouseEvent<HTMLTableRowElement>) => handleSelection(option)}>
             <td className={`w-50 ${highlight.get(option.dictOptionsItemId) ? 'text-bg-dark bg-secondary' : ''}`}>{option.input}</td>
             <td className={`w-50 ${highlight.get(option.dictOptionsItemId) ? 'text-bg-dark bg-secondary' : ''}`}>{option.output}</td>
         </tr>
