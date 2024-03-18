@@ -87,6 +87,17 @@ export class AuthService {
         this._cookies.set(this.CARD_TOKEN_COOKIE_KEY, this._cardToken);
     }
 
+    getHeaders() {
+        const out: { [key: string]: string } = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        out[this.MAIN_TOKEN_COOKIE_KEY] = this._mainToken
+        out[this.CARD_TOKEN_COOKIE_KEY] = this._cardToken
+        out[this.EMAIL_COOKIE_KEY] = this._email
+        return out
+    }
+
     toString() {
         return `{email: ${this.email}, main-token: ${this.mainToken}, card-token: ${this.cardToken}}`
     }

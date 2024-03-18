@@ -85,6 +85,8 @@ def lookup_word_options() -> Tuple[Response, int]:
         main_token = request.headers[TokenType.MAIN.value.header_key]
         card_token = request.headers[TokenType.CARD.value.header_key]
         headers = AnkiLoginResponseHeaders(main_token, card_token)
+    else:
+        app_log.debug(f'header not available: {request.headers}')
 
     dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, headers)
 

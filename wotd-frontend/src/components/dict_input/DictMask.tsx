@@ -47,7 +47,8 @@ export function DictMask() {
     }
 
     const handleDictLookup = async (word: string) => {
-        let apiResponse: DictOptionsItem[] = await dictLookupWord(word, selectedFromLang, selectedToLang)
+        let headers = authProvider.getHeaders()
+        let apiResponse: DictOptionsItem[] = await dictLookupWord(word, selectedFromLang, selectedToLang, headers)
         console.log('api resp options: ', apiResponse)
         setDictOptions(apiResponse)
     }

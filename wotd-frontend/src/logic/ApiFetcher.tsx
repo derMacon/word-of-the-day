@@ -21,7 +21,7 @@ const ANKI_API_SERVER_ADDRESS: string = 'http://192.168.178.187:4000'
 export const ANKI_API_BASE: string = ANKI_API_SERVER_ADDRESS + '/api/v1'
 
 
-const HEADERS = {
+const DEFAULT_HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }
@@ -29,9 +29,11 @@ const HEADERS = {
 
 // ------------------- WOTD ------------------- //
 
-export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<DictOptionsItem[]> {
+// TODO fix header param type
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[]> {
 
     let input: DictRequest = new DictRequest(getPrincipal(), fromLanguage.language_uuid, toLanguage.language_uuid, word)
+    console.log('headers: ', headers)
     console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
 
     try {
@@ -40,12 +42,11 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
 
         let output = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
             method: 'POST',
-            headers: HEADERS,
+            headers: headers || DEFAULT_HEADERS,
             body: JSON.stringify(instanceToPlain(input))
         })
 
         let out: DictOptionsItem[] = plainToClass(DictOptionsItem, await output.json())
-        console.log('parsed items: ', out)
         return out
 
     } catch (error) {
@@ -60,7 +61,7 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
 
         let out = await fetch(WOTD_DICTIONARY_BASE + '/available-lang', {
             method: 'GET',
-            headers: HEADERS,
+            headers: DEFAULT_HEADERS,
         })
 
         let jsonObject: Object = await out.json() as Object
@@ -93,7 +94,7 @@ export async function toggleSelectedOption(dictOptionsItemId: number): Promise<v
 
     let response: Response = await fetch(WOTD_DICTIONARY_BASE + '/select-option', {
         method: 'POST',
-        headers: HEADERS,
+        headers: DEFAULT_HEADERS,
         body: json
     })
 
@@ -112,7 +113,7 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
 
         let out: Response = (await fetch(WOTD_ANKI_DOMAIN + '/login', {
             method: 'POST',
-            headers: HEADERS,
+            headers: DEFAULT_HEADERS,
             body: JSON.stringify(instanceToPlain(input))
         }))
 

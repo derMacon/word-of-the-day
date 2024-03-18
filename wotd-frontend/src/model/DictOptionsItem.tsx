@@ -1,4 +1,7 @@
 import {Expose} from "class-transformer";
+import {Status} from "./Status";
+import {Simulate} from "react-dom/test-utils";
+import input = Simulate.input;
 
 
 export class DictOptionsItem {
@@ -6,8 +9,8 @@ export class DictOptionsItem {
     @Expose({name: 'dict_options_item_id'})
     private _dictOptionsItemId: number
 
-    @Expose({name: 'dict_options_response_id'})
-    private _dictOptionsResponseId: number
+    @Expose({name: 'deck'})
+    private _deck: string
 
     @Expose({name: 'input'})
     private _input: string
@@ -18,21 +21,22 @@ export class DictOptionsItem {
     @Expose({name: 'selected'})
     private _selected: boolean
 
+    @Expose({name: 'status'})
+    private _status: Status
 
-    constructor(
-        dictOptionsItemId: number,
-        dictOptionsResponseId: number,
-        input: string,
-        output: string,
-        selected: boolean
-    ) {
+    @Expose({name: 'options_response_ts'})
+    private _optionsResponseTs: string
+
+
+    constructor(dictOptionsItemId: number, deck: string, input: string, output: string, selected: boolean, status: Status, optionsResponseTs: string) {
         this._dictOptionsItemId = dictOptionsItemId;
-        this._dictOptionsResponseId = dictOptionsResponseId;
+        this._deck = deck;
         this._input = input;
         this._output = output;
-        this._selected = selected
+        this._selected = selected;
+        this._status = status;
+        this._optionsResponseTs = optionsResponseTs;
     }
-
 
     get dictOptionsItemId(): number {
         return this._dictOptionsItemId;
@@ -42,12 +46,12 @@ export class DictOptionsItem {
         this._dictOptionsItemId = value;
     }
 
-    get dictOptionsResponseId(): number {
-        return this._dictOptionsResponseId;
+    get deck(): string {
+        return this._deck;
     }
 
-    set dictOptionsResponseId(value: number) {
-        this._dictOptionsResponseId = value;
+    set deck(value: string) {
+        this._deck = value;
     }
 
     get input(): string {
@@ -72,5 +76,21 @@ export class DictOptionsItem {
 
     set selected(value: boolean) {
         this._selected = value;
+    }
+
+    get status(): Status {
+        return this._status;
+    }
+
+    set status(value: Status) {
+        this._status = value;
+    }
+
+    get optionsResponseTs(): string {
+        return this._optionsResponseTs;
+    }
+
+    set optionsResponseTs(value: string) {
+        this._optionsResponseTs = value;
     }
 }
