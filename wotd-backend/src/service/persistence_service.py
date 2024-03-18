@@ -9,6 +9,7 @@ from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
 from src.data.dict_input.language import Language
 from src.data.dict_input.sensitive_env import SensitiveEnv
+from src.data.dict_input.status import Status
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log
@@ -140,7 +141,7 @@ class PersistenceService:
         return options
 
     @_database_error_decorator  # type: ignore
-    def update_selected_item(self, item_id: int):
+    def update_item_select(self, item_id: int):
         self._conn.commit()
         self._cursor.execute(
             "select selected from dict_options_item "
@@ -151,6 +152,22 @@ class PersistenceService:
         # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "
                       f"SET selected = {selected_state} "
+                      f"WHERE dict_options_item_id = {item_id};")
+        self._cursor.execute(sql_update)
+        self._conn.commit()
+
+    @_database_error_decorator  # type: ignore
+    def update_item_status(self, item_id: int, status: Status):
+        self._conn.commit()
+        self._cursor.execute(
+            "select selected from dict_options_item "
+            f"where dict_options_item_id = {item_id};")
+        selected_state = not self._cursor.fetchone()[0]
+        app_log.debug(f"new selected state of item with id {item_id}: {selected_state}")
+
+        # TODO use wildcard pattern instead of format string - do this everywhere
+        sql_update = (f"UPDATE dict_options_item "
+                      f"SET status = {status.name} "
                       f"WHERE dict_options_item_id = {item_id};")
         self._cursor.execute(sql_update)
         self._conn.commit()

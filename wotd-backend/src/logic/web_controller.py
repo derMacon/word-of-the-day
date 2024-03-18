@@ -53,7 +53,7 @@ class WebController:
 
     def select_dict_word(self, item_id: int) -> bool:
         app_log.debug(f"toggle item id: {item_id}")
-        self.persistence_service.update_selected_item(item_id)
+        self.persistence_service.update_item_select(item_id)
         return True
 
 

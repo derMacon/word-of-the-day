@@ -1,7 +1,8 @@
 from enum import Enum
 
 
-class Status(str, Enum):
-    NOT_FOUND = 'NOT_FOUND'
-    MISSPELLED = 'MISSPELLED'
-    OK = 'OK'
+class Status(Enum):
+    NOT_FOUND = 1
+    MISSPELLED = 2
+    OK = 3
+    SYNCED = 4

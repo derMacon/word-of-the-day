@@ -29,6 +29,7 @@ export function DictMask() {
     const [availLang, setAvailLang] = useState<Language[]>([])
     const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>([])
     const [show, setShow] = useState(false);
+    const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
     const [loginSuccessful, setLoginSuccessful] = useState(false); // TODO do we need this
 
     const authProvider: AuthService = new AuthService();
@@ -38,6 +39,7 @@ export function DictMask() {
 
     useEffect(() => {
         apiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
+                setApiHealth(healthStatus)
 
                 if (!healthStatus.dbConnection) {
                     console.error('db connection down: ', healthStatus)

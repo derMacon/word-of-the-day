@@ -1,3 +1,4 @@
+from time import sleep
 from typing import List
 
 from src.data.anki.anki_card import AnkiCard
@@ -9,10 +10,22 @@ from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 
 
+MAX_CONNECTION_TRIES = 3
+
 def sync_anki_push(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders):
     try:
         app_log.debug(f'sync anki push with interval: {housekeeping_interval}')
-        _push_data(housekeeping_interval, auth_headers)
+
+        error_cnt = 0
+        while PersistenceService().connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
+            error_cnt = error_cnt + 1
+            sleep(housekeeping_interval)
+
+        if PersistenceService().connection_is_established():
+            _push_data(housekeeping_interval, auth_headers)
+        else:
+            app_log.debug('not possible to push data to anki api - try pushing with next cleanup job')
+
     except DatabaseError as e:
         app_log.error(f"error: '{e}'")
 
@@ -24,7 +37,7 @@ def _push_data(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders):
 
         if curr_option.status == Status.OK and curr_option.selected:
             app_log.debug(f"selected option with id '{curr_option.dict_options_item_id}' "
-                          f"with status {curr_option.status}")
+                          f"with status {curr_option.status.name}")
 
             card_input = AnkiCard(
                 deck=curr_option.deck,
@@ -33,8 +46,9 @@ def _push_data(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders):
             )
 
             anki_api_fetcher.push_card(card_input, auth_headers)
-
-        ids_to_delete.append(curr_option.dict_options_item_id)
+            PersistenceService().update_item_status(curr_option.dict_options_item_id, Status.SYNCED)
+        else:
+            ids_to_delete.append(curr_option.dict_options_item_id)
 
     app_log.debug(f'id_to_delete: {ids_to_delete}')
     PersistenceService().delete_items_with_ids(ids_to_delete)
