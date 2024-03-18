@@ -11,7 +11,7 @@ The webapp also provides the possiblity to select other options other than the d
 2. select the source and target language for the translation (if both are equal we'll simply return a definition of the input word)
 3. type in the word which should be translated
 4. Optional: select a word which should be generated to serve as a flashcard in anki
-5. learn stack in anki client
+5. learn stack in anki [web](https://ankiweb.net/about) or [client](https://apps.ankiweb.net/)
 
 ### Screenshots
 1. Anki Login
