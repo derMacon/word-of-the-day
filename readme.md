@@ -17,7 +17,8 @@ The webapp also provides the possiblity to select other options other than the d
 1. Anki Login
 ---
 ![anki-login](_other/media/readme/wotd_login.png)
-![anki-login](_other/media/readme/wotd_not-logged-in.png)
+![anki-login](_other/media/readme/wotd_without-logged-in.png)
+![anki-login](_other/media/readme/wotd_with-logged-in.png)
 
 2. Select Languages
 ---
@@ -31,6 +32,14 @@ The webapp also provides the possiblity to select other options other than the d
 5. Learn in Anki Web
 ---
 
+
+## Technology Used
+- TODO
+
+## Miscellaneous
+
+### Credits
+- Used [google font](https://fonts.google.com/specimen/Gluten?preview.text=Not%20Logged%20In%0A&preview.size=93&classification=Handwriting)
 
 
 ## Useful Commands
