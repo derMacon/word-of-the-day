@@ -30,7 +30,10 @@ class WebController:
         app_log.debug(f'lookup options: {options}')
 
         if auth_headers is None:
-            app_log.debug('user not logged into their anki web account -> webapp does not persist options')
+            app_log.debug('user not logged into their anki web account -> webapp does not persist options, still need to generate the ids')
+            # generate dummy ids
+            for index, item in enumerate(options):
+                item.dict_options_item_id = index
             return options
 
         update_status(
