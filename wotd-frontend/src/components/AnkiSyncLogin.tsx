@@ -7,9 +7,9 @@ import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {ankiApiIsHealthy, ankiApiLogin} from "../../logic/ApiFetcher";
-import {AnkiLoginResponseHeaders} from "../../model/AnkiLoginResponseHeaders";
-import {AuthService} from "../../logic/AuthService";
+import {ankiApiIsHealthy, ankiApiLogin} from "../logic/ApiFetcher";
+import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
+import {AuthService} from "../logic/AuthService";
 
 
 interface AnkiSyncLoginProps {

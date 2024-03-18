@@ -1,48 +1,68 @@
 import os
+import threading
 from typing import List
 
 import psycopg2
+from singleton_decorator import singleton
 
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
 from src.data.dict_input.language import Language
+from src.data.dict_input.sensitive_env import SensitiveEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log
 
 
+# TODO use singleton decorator in other services / controllers
+
+@singleton
 class PersistenceService:
-    ENV_PASSWORD = 'POSTGRES_PASSWORD'
-    ENV_USER = 'POSTGRES_USER'
-    ENV_DB_NAME = 'POSTGRES_DB'
+    _conn = None
+    _cursor = None
 
     def __init__(self):
-        if (PersistenceService.ENV_PASSWORD not in os.environ) \
-                or (PersistenceService.ENV_USER not in os.environ) \
-                or (PersistenceService.ENV_DB_NAME not in os.environ):
+        self._lock = threading.Lock()
+
+        try:
+            self._establish_db_connection()
+        except DatabaseError as e:
+            app_log.error(f"invalid db connection: '{e}'")
+
+    def _establish_db_connection(self):
+        if (SensitiveEnv.ENV_PASSWORD.value not in os.environ) \
+                or (SensitiveEnv.ENV_USER.value not in os.environ) \
+                or (SensitiveEnv.ENV_DB_NAME.value not in os.environ):
             print('invalid environment - shutting down')
             # TODO handle this differently
             exit(1)
 
-        self._conn = psycopg2.connect(
-            database=os.environ[PersistenceService.ENV_DB_NAME],
-            host="localhost",
-            user=os.environ[PersistenceService.ENV_USER],
-            password=os.environ[PersistenceService.ENV_PASSWORD],
-            port="5432"
-        )
-
-        self._cursor = self._conn.cursor()
+        try:
+            self._conn = psycopg2.connect(
+                database=os.environ[SensitiveEnv.ENV_DB_NAME.value],
+                host="localhost",
+                user=os.environ[SensitiveEnv.ENV_USER.value],
+                password=os.environ[SensitiveEnv.ENV_PASSWORD.value],
+                port="5432"
+            )
+            self._cursor = self._conn.cursor()
+        except Exception as e:
+            raise DatabaseError('invalid init', e)
 
     # src: https://stackoverflow.com/questions/1263451/python-decorators-in-classes
-    def _database_error_decorator(foo):
+    def _database_error_decorator(foo):  # TODO rename to 'instance' or something like that
         def decorate(self, *args, **kwargs):
-            try:
-                return foo(self, *args, **kwargs)
-            except Exception as e:
-                app_log.error(f"{e}")
-                raise DatabaseError(e, e)
-                print("end magic")
+            with self._lock:
+
+                if self._cursor is None:
+                    self._establish_db_connection()
+
+                try:
+                    return foo(self, *args, **kwargs)
+                except Exception as e:
+                    app_log.error(f"{e}")
+                    raise DatabaseError(e, e)
+                    print("end magic")
 
         return decorate
 
@@ -127,7 +147,7 @@ class PersistenceService:
 
     @_database_error_decorator  # type: ignore
     def find_expired_options(self, expiry_interval: int) -> List[DictOptionsItem]:
-        sql_select = ("SET TIMEZONE TO 'Europe/Berlin';" 
+        sql_select = ("SET TIMEZONE TO 'Europe/Berlin';"
                       f"SELECT * FROM dict_options_item "
                       f"WHERE option_response_ts < NOW() - interval '{expiry_interval} SECONDS';")
         app_log.debug('sql select: %s', sql_select)
@@ -149,6 +169,3 @@ class PersistenceService:
             delete_query = "DELETE FROM dict_options_item WHERE dict_options_item_id IN %s;"
             self._cursor.execute(delete_query, (tuple(ids_to_delete),))
             self._conn.commit()
-
-
-persistence_service = PersistenceService()

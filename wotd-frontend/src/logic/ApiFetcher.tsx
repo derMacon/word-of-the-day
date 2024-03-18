@@ -29,6 +29,19 @@ const DEFAULT_HEADERS = {
 
 // ------------------- WOTD ------------------- //
 
+export async function wotdApiIsHealthy(): Promise<boolean> {
+    try {
+        let response: Response = await fetch(WOTD_API_BASE + '/health')
+        console.log('inner response: ', response)
+        return response.ok
+    } catch (error) {
+        let defaultErrorMsg: string = 'Backend API not available - not possible to lookup words. Please try again later.'
+        console.log(defaultErrorMsg)
+        alert(defaultErrorMsg)
+        return false
+    }
+}
+
 // TODO fix header param type
 export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[]> {
 
@@ -75,13 +88,6 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
     }
 }
 
-export async function wotdApiIsHealthy(): Promise<boolean> {
-    try {
-        return (await fetch(WOTD_API_BASE + '/health')).ok
-    } catch (error) {
-        return false
-    }
-}
 
 export async function toggleSelectedOption(dictOptionsItemId: number): Promise<void> {
     console.log('toggle selected option: ', dictOptionsItemId)
@@ -102,8 +108,6 @@ export async function toggleSelectedOption(dictOptionsItemId: number): Promise<v
     console.log("select out: ", jsonObject)
 }
 
-
-// ------------------- Anki API ------------------- //
 
 export async function ankiApiLogin(email: string, password: string): Promise<AnkiLoginResponseHeaders | undefined> {
     try {

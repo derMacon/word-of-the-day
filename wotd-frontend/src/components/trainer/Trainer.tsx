@@ -34,6 +34,7 @@ export function Trainer() {
     const handleShow = () => setShow(true);
 
     return (
+        // TODO delete this
         // <div>
         //     <div className="custom-max-width custom-min-height">
         //

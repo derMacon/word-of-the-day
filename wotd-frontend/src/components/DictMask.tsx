@@ -3,18 +3,18 @@ import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
 import {SelectableTable} from "./SelectableTable";
-import {ankiApiLogin, dictGetAvailableLang, dictLookupWord} from "../../logic/ApiFetcher";
-import {LanguageUUID} from "../../model/LanguageUUID";
+import {ankiApiLogin, dictGetAvailableLang, dictLookupWord, wotdApiIsHealthy} from "../logic/ApiFetcher";
+import {LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
-import {Language} from "../../model/Language";
+import {Language} from "../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import ListGroup from "react-bootstrap/ListGroup";
 import Form from 'react-bootstrap/Form';
 import AnkiSyncLogin from "./AnkiSyncLogin";
-import {AuthService} from "../../logic/AuthService";
-import {AnkiLoginResponseHeaders} from "../../model/AnkiLoginResponseHeaders";
-import {DictOptionsItem} from "../../model/DictOptionsItem";
+import {AuthService} from "../logic/AuthService";
+import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
+import {DictOptionsItem} from "../model/DictOptionsItem";
 import {EmptyPage} from "./EmptyPage";
 
 
@@ -36,7 +36,14 @@ export function DictMask() {
     const handleShow = () => setShow(true);
 
     useEffect(() => {
-        dictGetAvailableLang().then(setAvailLang)
+        wotdApiIsHealthy().then((isHealthy: boolean): void => {
+                if (!isHealthy) {
+                    // alert('Backend API not available - not possible to lookup words. Please try again later.')
+                } else {
+                    dictGetAvailableLang().then(setAvailLang)
+                }
+            }
+        )
     }, []);
 
     const handleLanguageSwitch = () => {

@@ -7,10 +7,10 @@ class DatabaseError(Exception):
         self.errors = errors
 
 
-def database_error_decorator(func):
-    def wrap():
-        try:
-            return func()
-        except Exception as e:
-            app_log.error(f"{e}")
-            raise DatabaseError(e, e)
+# def database_error_decorator(func):
+#     def wrap():
+#         try:
+#             return func()
+#         except Exception as e:
+#             app_log.error(f"{e}")
+#             raise DatabaseError(e, e)

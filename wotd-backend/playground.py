@@ -1,3 +1,7 @@
-test: str = '2'
+from src.service.persistence_service import PersistenceService
 
-print(float(test))
+print('before')
+persistence = PersistenceService()
+print('middle: ', persistence)
+persistence.get_available_languages()
+print('after: ', persistence)

@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {wotdApiIsHealthy, toggleSelectedOption} from "../../logic/ApiFetcher";
+import {wotdApiIsHealthy, toggleSelectedOption} from "../logic/ApiFetcher";
 import './SelectableTable.css';
-import {DictOptionsItem} from "../../model/DictOptionsItem";
+import {DictOptionsItem} from "../model/DictOptionsItem";
 
 
 interface SelectableTableProps {
