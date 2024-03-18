@@ -17,25 +17,18 @@ import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import {EmptyPage} from "./EmptyPage";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
+import {UserInput} from "./UserInput";
 
 
 export function DictMask() {
 
-    const defaultFromLang = new Language(LanguageUUID.EN, 'english')
-    const defaultToLang = new Language(LanguageUUID.DE, 'german')
-
-    const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
-    const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
     const [availLang, setAvailLang] = useState<Language[]>([])
     const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>([])
-    const [show, setShow] = useState(false);
+    const [showAnkiLogin, setShowAnkiLogin] = useState(false);
     const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
-    const [loginSuccessful, setLoginSuccessful] = useState(false); // TODO do we need this
 
     const authProvider: AuthService = new AuthService();
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
 
     useEffect(() => {
         apiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
@@ -59,81 +52,46 @@ export function DictMask() {
         )
     }, []);
 
-    const handleLanguageSwitch = () => {
-        let fromLangNewInstance: Language = selectedFromLang as Language
-        let toLangNewInstance: Language = selectedToLang as Language
-        setSelectedFromLang(toLangNewInstance)
-        setSelectedToLang(fromLangNewInstance)
-    }
-
-    const handleDictLookup = async (word: string) => {
-        let headers = authProvider.getHeaders()
-        let apiResponse: DictOptionsItem[] = await dictLookupWord(word, selectedFromLang, selectedToLang, headers)
-        console.log('api resp options: ', apiResponse)
-        setDictOptions(apiResponse)
-    }
+    const handleCloseAnkiLogin = () => setShowAnkiLogin(false)
+    const handleShowAnkiLogin = () => setShowAnkiLogin(true)
 
     const handleAnkiLogin = (userEmail: string, ankiResponse: AnkiLoginResponseHeaders): void => {
         console.log('update auth provider with email: ', userEmail)
         authProvider.loadAnkiLoginResponse(userEmail, ankiResponse)
     }
 
-    // TODO when selecttable in own component, maybe its useful to put the search also in a seperate component
-    return (
-        <div>
-            <Container fluid="md">
-                <div className="custom-max-width">
+return (
+    <div>
+        <Container fluid="md">
+            <div className="custom-max-width">
 
-                    <div className='sticky pt-3 pb-3 bg-white white-shadow'>
-                        <Row>
-                            <Col xs={12} md={8} className='mb-2'>
-                                <TextField onSubmit={handleDictLookup}/>
-                            </Col>
-                            <Col xs={12} md={3}>
-                                <ButtonGroup className='nopadding w-100'>
-                                    <LanguageSelect
-                                        selectedElem={selectedFromLang}
-                                        onSelect={setSelectedFromLang}
-                                        availableLanguages={availLang}/>
-                                    <Button variant='light' onClick={handleLanguageSwitch}><FaArrowsRotate
-                                        className='mb-1'/></Button>
-                                    <LanguageSelect
-                                        selectedElem={selectedToLang}
-                                        onSelect={setSelectedToLang}
-                                        availableLanguages={availLang}/>
-                                </ButtonGroup>
-                            </Col>
-                            <Col xs={12} md={1}>
-                                <Button variant='light' onClick={handleShow}>
-                                    {authProvider.userIsLoggedIn()
-                                        ? (<FaCloudArrowUp className='mb-1'/>)
-                                        : (<FaCloudBolt className='mb-1'/>)}
+                {apiHealth.wotdApiConnection
+                    && <UserInput authProvider={authProvider}
+                                  setDictOptions={setDictOptions}
+                                  availLang={availLang}
+                                  handleShowAnkiLogin={handleShowAnkiLogin}/>}
 
-                                </Button>
-                            </Col>
-                        </Row>
-                    </div>
-
-                    <div className='mt-2'>
-                        {dictOptions !== undefined && dictOptions.length > 0
-                            ?
-                            <SelectableTable apiResponse={dictOptions} userIsLoggedIn={authProvider.userIsLoggedIn()}/>
-                            : <EmptyPage/>
-                        }
-                    </div>
+                <div className='mt-2'>
+                    {dictOptions !== undefined && dictOptions.length > 0
+                        ? <SelectableTable
+                            apiResponse={dictOptions}
+                            userIsLoggedIn={authProvider.userIsLoggedIn()}/>
+                        : <EmptyPage/>
+                    }
                 </div>
 
-            </Container>
+            </div>
+        </Container>
 
 
-            <Offcanvas show={show} onHide={handleClose} className="w-100">
-                <AnkiSyncLogin
-                    handleAnkiLogin={handleAnkiLogin}
-                    handleClose={handleClose}
-                    authProvider={authProvider}
-                />
-            </Offcanvas>
+        <Offcanvas show={showAnkiLogin} onHide={handleCloseAnkiLogin} className="w-100">
+            <AnkiSyncLogin
+                handleAnkiLogin={handleAnkiLogin}
+                handleClose={handleCloseAnkiLogin}
+                authProvider={authProvider}
+            />
+        </Offcanvas>
 
-        </div>
-    );
+    </div>
+);
 }
