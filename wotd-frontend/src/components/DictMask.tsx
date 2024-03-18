@@ -3,7 +3,7 @@ import Container from "react-bootstrap/Container";
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
 import {SelectableTable} from "./SelectableTable";
-import {ankiApiLogin, dictGetAvailableLang, dictLookupWord, wotdApiIsHealthy} from "../logic/ApiFetcher";
+import {ankiApiLogin, dictGetAvailableLang, dictLookupWord, apiHealthStatus} from "../logic/ApiFetcher";
 import {LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
@@ -16,6 +16,7 @@ import {AuthService} from "../logic/AuthService";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import {EmptyPage} from "./EmptyPage";
+import {ApiHealthInformation} from "../model/ApiHealthInformation";
 
 
 export function DictMask() {
@@ -36,12 +37,22 @@ export function DictMask() {
     const handleShow = () => setShow(true);
 
     useEffect(() => {
-        wotdApiIsHealthy().then((isHealthy: boolean): void => {
-                if (!isHealthy) {
-                    // alert('Backend API not available - not possible to lookup words. Please try again later.')
+        apiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
+
+                if (!healthStatus.dbConnection) {
+                    console.error('db connection down: ', healthStatus)
                 } else {
                     dictGetAvailableLang().then(setAvailLang)
                 }
+
+                if (!healthStatus.wotdApiConnection) {
+                    console.error('wotd api not available: ', healthStatus)
+                    alert('Backend API not available - not possible to lookup words. Please try again later.')
+                } else if (!healthStatus.ankiApiConnection) {
+                    console.error('anki api not available: ', healthStatus)
+                    alert('Anki API not available - you can lookup words but cannot synchronize them with your anki web account.')
+                }
+
             }
         )
     }, []);
@@ -103,7 +114,8 @@ export function DictMask() {
 
                     <div className='mt-2'>
                         {dictOptions !== undefined && dictOptions.length > 0
-                            ? <SelectableTable apiResponse={dictOptions} userIsLoggedIn={authProvider.userIsLoggedIn()}/>
+                            ?
+                            <SelectableTable apiResponse={dictOptions} userIsLoggedIn={authProvider.userIsLoggedIn()}/>
                             : <EmptyPage/>
                         }
                     </div>

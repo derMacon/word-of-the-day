@@ -7,6 +7,7 @@ import {getPrincipal} from "./AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
+import {ApiHealthInformation} from "../model/ApiHealthInformation";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -29,16 +30,18 @@ const DEFAULT_HEADERS = {
 
 // ------------------- WOTD ------------------- //
 
-export async function wotdApiIsHealthy(): Promise<boolean> {
+export async function apiHealthStatus(): Promise<ApiHealthInformation> {
     try {
         let response: Response = await fetch(WOTD_API_BASE + '/health')
-        console.log('inner response: ', response)
-        return response.ok
+        let jsonObject: Object = await response.json() as Object
+        let apiHealthInformation: ApiHealthInformation = plainToClass(ApiHealthInformation, jsonObject)
+        console.log('api health information: ', apiHealthInformation)
+        return apiHealthInformation
     } catch (error) {
         let defaultErrorMsg: string = 'Backend API not available - not possible to lookup words. Please try again later.'
         console.log(defaultErrorMsg)
         alert(defaultErrorMsg)
-        return false
+        return ApiHealthInformation.createInvalidStatus()
     }
 }
 
@@ -59,8 +62,11 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
             body: JSON.stringify(instanceToPlain(input))
         })
 
-        let out: DictOptionsItem[] = plainToClass(DictOptionsItem, await output.json())
-        return out
+        // TODO clean this up
+        // let out: DictOptionsItem[] = plainToClass(DictOptionsItem, await output.json())
+        // return out
+
+        return plainToClass(DictOptionsItem, await output.json())
 
     } catch (error) {
         console.error(error)

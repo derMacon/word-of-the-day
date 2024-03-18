@@ -1,28 +1,29 @@
 import dataclasses
-import threading
-from time import sleep
 from typing import List
 from typing import Tuple
 
 from flask import jsonify, request, Response
 
 from src.app import main
-from src.data.anki.anki_card import AnkiCard
+from src.data.anki.token_type import TokenType
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.data.anki.token_type import TokenType
 from src.logic.anki_api_fetcher import anki_api_fetcher
 from src.logic.web_controller import controller
-from src.service.persistence_service import persistence_service
+from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 
 
 @main.route("/health")
 def health_check() -> Tuple[Response, int]:
-    status = {'status': 'running'}
+    status = {
+        'db_connection': PersistenceService().connection_is_established(),
+        'anki_api_connection': anki_api_fetcher.health_check(),
+        'wotd_api_connection': True,
+    }
     app_log.debug(f"health: {status}")
     return jsonify(status), 200
 
@@ -43,6 +44,8 @@ def anki_login():
 
     return resp
 
+
+# TODO what is this?
 # @main.route("/anki/add-card")
 # def anki_card_push():
 #     request_data = request.get_json()
@@ -55,17 +58,16 @@ def anki_login():
 #     return ''
 
 
-
 @main.route("/dict/available-lang")
 def dict_available_languages() -> Tuple[Response, int]:
-    available_lang = persistence_service.get_available_languages()
+    available_lang = PersistenceService().get_available_languages()
     app_log.debug(f"user queries available languages: {available_lang}")
     return jsonify(InfoRequestAvailDictLang(available_lang)), 200
 
 
 @main.route("/dict/default-lang")
 def dict_default_languages() -> Tuple[Response, int]:
-    default_lang = persistence_service.get_default_languages()
+    default_lang = PersistenceService().get_default_languages()
     app_log.debug(f"user queries default languages: {default_lang}")
     return jsonify(InfoRequestAvailDictLang(default_lang)), 200
 
@@ -80,7 +82,7 @@ def lookup_word_options() -> Tuple[Response, int]:
 
     headers = None
     if TokenType.MAIN.value.header_key in request.headers \
-        and TokenType.CARD.value.header_key in request.headers:
+            and TokenType.CARD.value.header_key in request.headers:
         app_log.debug('header: %s', request.headers)
         main_token = request.headers[TokenType.MAIN.value.header_key]
         card_token = request.headers[TokenType.CARD.value.header_key]

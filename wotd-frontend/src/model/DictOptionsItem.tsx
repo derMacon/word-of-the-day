@@ -1,5 +1,5 @@
 import {Expose} from "class-transformer";
-import {Status} from "./Status";
+import {OptionStatus} from "./OptionStatus";
 import {Simulate} from "react-dom/test-utils";
 import input = Simulate.input;
 
@@ -22,13 +22,13 @@ export class DictOptionsItem {
     private _selected: boolean
 
     @Expose({name: 'status'})
-    private _status: Status
+    private _status: OptionStatus
 
     @Expose({name: 'options_response_ts'})
     private _optionsResponseTs: string
 
 
-    constructor(dictOptionsItemId: number, deck: string, input: string, output: string, selected: boolean, status: Status, optionsResponseTs: string) {
+    constructor(dictOptionsItemId: number, deck: string, input: string, output: string, selected: boolean, status: OptionStatus, optionsResponseTs: string) {
         this._dictOptionsItemId = dictOptionsItemId;
         this._deck = deck;
         this._input = input;
@@ -78,11 +78,11 @@ export class DictOptionsItem {
         this._selected = value;
     }
 
-    get status(): Status {
+    get status(): OptionStatus {
         return this._status;
     }
 
-    set status(value: Status) {
+    set status(value: OptionStatus) {
         this._status = value;
     }
 

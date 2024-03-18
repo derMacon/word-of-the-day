@@ -47,14 +47,24 @@ class PersistenceService:
             )
             self._cursor = self._conn.cursor()
         except Exception as e:
+            self._conn = None
+            self._cursor = None
             raise DatabaseError('invalid init', e)
+
+    def connection_is_established(self):
+        try:
+            self._establish_db_connection()
+        except DatabaseError as e:
+            app_log.error(e)
+
+        return self._cursor is not None
 
     # src: https://stackoverflow.com/questions/1263451/python-decorators-in-classes
     def _database_error_decorator(foo):  # TODO rename to 'instance' or something like that
         def decorate(self, *args, **kwargs):
             with self._lock:
 
-                if self._cursor is None:
+                if not self.connection_is_established:
                     self._establish_db_connection()
 
                 try:
