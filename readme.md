@@ -17,8 +17,8 @@ The webapp also provides the possiblity to select other options other than the d
 1. Anki Login
 ---
 ![anki-login](_other/media/readme/wotd_login.png)
-![anki-login](_other/media/readme/wotd_without-logged-in.png)
-![anki-login](_other/media/readme/wotd_with-logged-in.png)
+![anki-login](_other/media/readme/wotd-basic-input_with-login.png)
+![anki-login](_other/media/readme/wotd-basic-input_without-login.png)
 
 2. Select Languages
 ---
