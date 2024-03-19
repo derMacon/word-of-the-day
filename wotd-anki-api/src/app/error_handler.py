@@ -10,6 +10,7 @@ def handle_value_error(error):
     log.error('unauthorized access: ', error)
     return jsonify({'unauthorized_access_error': f"invalid access token: {error}"}), 401
 
+
 # @main.errorhandler(ValueError)
 # @main.errorhandler(TypeError)
 # def handle_value_error(error):
@@ -18,5 +19,8 @@ def handle_value_error(error):
 #
 # @main.errorhandler(AttributeError)
 # @main.errorhandler(DatabaseError)
+
+# @main.errorhandler(TimeoutException)
 # def handle_attribute_error(error):
-#     return jsonify({'database_error': f"internal server error: {error}"}), 500
+#     log.error(f"timed out function call: {error}")
+#     return jsonify({'timeout_error': f"internal server error: {error}"}), 500

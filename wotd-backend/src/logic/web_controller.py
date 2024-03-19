@@ -1,5 +1,3 @@
-import threading
-import os
 from typing import List
 
 from dictcc import Dict
@@ -7,7 +5,6 @@ from dictcc import Dict
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
 from src.data.dict_input.dict_request import DictRequest
-from src.logic.housekeeping_controller import sync_anki_push
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import update_status, update_deckname
@@ -45,9 +42,6 @@ class WebController:
 
         updated_options = self.persistence_service.insert_dict_options(options)
         app_log.debug(f'persisted dict options: {updated_options}')
-
-        delay_sec = float(os.environ['HOUSEKEEPING_INTERVAL_SEC']) # TODO dont hardcode this
-        threading.Timer(delay_sec, sync_anki_push, args=(delay_sec, auth_headers, )).start()
 
         return updated_options
 

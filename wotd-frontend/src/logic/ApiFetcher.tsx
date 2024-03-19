@@ -40,7 +40,6 @@ export async function apiHealthStatus(): Promise<ApiHealthInformation> {
     } catch (error) {
         let defaultErrorMsg: string = 'Backend API not available - not possible to lookup words. Please try again later.'
         console.log(defaultErrorMsg)
-        alert(defaultErrorMsg)
         return ApiHealthInformation.createInvalidStatus()
     }
 }

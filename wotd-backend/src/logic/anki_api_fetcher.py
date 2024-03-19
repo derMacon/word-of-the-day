@@ -49,6 +49,9 @@ class AnkiApiFetcher:
         main_token = response.headers[TokenType.MAIN.value.header_key]
         card_token = response.headers[TokenType.CARD.value.header_key]
 
+        app_log.debug(f"main token: '{main_token}'")
+        app_log.debug(f"card token: '{card_token}'")
+
         return main_token, card_token
 
     def push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders):

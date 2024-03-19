@@ -7,7 +7,6 @@ from flask_cors import cross_origin
 from src.app import main
 from src.logic.controller import Controller
 from src.types.const.token_type import TokenType
-from src.types.error.unauthorized_access_error import UnauthorizedAccessError
 from src.utils.logging_config import log
 from src.utils.thread_safe_counter import ThreadSafeCounter
 

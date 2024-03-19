@@ -167,7 +167,7 @@ class PersistenceService:
 
         # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "
-                      f"SET status = {status.name} "
+                      f"SET status = '{status}' "
                       f"WHERE dict_options_item_id = {item_id};")
         self._cursor.execute(sql_update)
         self._conn.commit()

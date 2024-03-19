@@ -12,6 +12,7 @@ from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.logic.anki_api_fetcher import anki_api_fetcher
+from src.logic.housekeeping_controller import trigger_housekeeping
 from src.logic.web_controller import controller
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
@@ -80,6 +81,17 @@ def lookup_word_options() -> Tuple[Response, int]:
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
 
+    headers = _extract_headers()
+    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, headers)
+
+    json: Response = jsonify([dataclasses.asdict(curr_option) for curr_option in dict_options_response])
+    app_log.debug('lookup response json: %s', json.get_json())
+
+    trigger_housekeeping(headers)
+    return json, 200
+
+
+def _extract_headers():
     headers = None
     if TokenType.MAIN.value.header_key in request.headers \
             and TokenType.CARD.value.header_key in request.headers:
@@ -89,12 +101,15 @@ def lookup_word_options() -> Tuple[Response, int]:
         headers = AnkiLoginResponseHeaders(main_token, card_token)
     else:
         app_log.debug(f'header not available: {request.headers}')
+    return headers
 
-    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, headers)
 
-    json: Response = jsonify([dataclasses.asdict(curr_option) for curr_option in dict_options_response])
-    app_log.debug('lookup response json: %s', json.get_json())
-    return json, 200
+@main.route("/anki/trigger-housekeeping")
+def manually_trigger_housekeeping():
+    app_log.debug('manually triggering housekeeping')
+    headers = _extract_headers()
+    trigger_housekeeping(headers)
+    return ''
 
 
 @main.route("/dict/select-option", methods=['POST'])

@@ -49,6 +49,28 @@ def retrieve_token(driver, timeout=None):
     return token
 
 
+def retry_decorator(foo):
+    """
+    :param foo:
+    :return:
+    """
+
+    def decorate(*args, **kwargs):
+        tries = 5
+        found_output = False
+        while tries > 0 and not found_output:
+            try:
+                sleep(.1)
+                return foo(*args, **kwargs)
+                sleep(.1)
+                found_output = True
+            except Exception as e:
+                log.error('couldnt grab main elem, trying again')
+
+    return decorate
+
+
+@retry_decorator
 def insert_text_by_placeholder(driver, placeholder: str, input_text: str):
     element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//form"))
@@ -63,6 +85,7 @@ def insert_text_by_placeholder(driver, placeholder: str, input_text: str):
     field.find_element(By.XPATH, "./child::input").send_keys(input_text)
 
 
+@retry_decorator
 def insert_text_by_label(driver, label: str, input_text: str):
     label_elem = find_label(driver, label)
     sibling = find_next_sibling(label_elem)
@@ -70,17 +93,21 @@ def insert_text_by_label(driver, label: str, input_text: str):
     text_box.send_keys(input_text)
 
 
+@retry_decorator
 def find_label(driver, text: str):
     span_xpath = f"//span[text()='{text}']"
+    log.debug(f'span xpath: {span_xpath}')
     return WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, span_xpath))
     )
 
 
+@retry_decorator
 def find_next_sibling(elem: WebElement):
     return elem.find_element(By.XPATH, './following-sibling::*')
 
 
+@retry_decorator
 def find_first_child(elem: WebElement):
     out = elem.find_elements(By.XPATH, './child::*')
     if out:
@@ -89,6 +116,7 @@ def find_first_child(elem: WebElement):
     return None
 
 
+@retry_decorator
 def select_dropdown(driver, label: str, option_title: str):
     label_elem = find_label(driver, label)
     sibling = find_next_sibling(label_elem)
@@ -106,12 +134,14 @@ def select_dropdown(driver, label: str, option_title: str):
     dropdown_options[option_idx].click()
 
 
+@retry_decorator
 def insert_text_in_alert(driver, text: str):
     alert = Alert(driver)
     alert.send_keys(text)
     alert.accept()
 
 
+@retry_decorator
 def click_button(driver, title: str):
     available_buttons = driver.find_elements(By.XPATH, '//button')
     options = [btn.text for btn in available_buttons]
@@ -124,6 +154,7 @@ def click_button(driver, title: str):
         log.debug(f"no button found for title '{title}'")
 
 
+@retry_decorator
 def click_link(driver, title: str):
     available_links = driver.find_elements(By.XPATH, '//a')
     options = [btn.text for btn in available_links]
@@ -132,6 +163,7 @@ def click_link(driver, title: str):
     available_links[link_idx].click()
 
 
+@retry_decorator
 def find_nth_child(elem: WebElement, n: int):
     out = elem.find_elements(By.XPATH, './child::*')
     if out and len(out) > n:
@@ -140,15 +172,16 @@ def find_nth_child(elem: WebElement, n: int):
     return None
 
 
+@retry_decorator
 def grab_main_elements(driver):
-    sleep(.1)
     element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//main"))
     )
-    sleep(.1)
+
     return element.find_elements(By.XPATH, "./child::*")
 
 
+@retry_decorator
 def filter_deck_names(main_elements):
     out = []
     for curr_elem in main_elements[:-2]:

@@ -50,7 +50,7 @@ class Controller:
         return main_token, card_token
 
     def _logout_previous_session(self):
-        self._driver.quit()
+        self.tear_down()
         self.init_webdriver()
 
     def _insert_credentials(self, email: str, password: str):
@@ -134,9 +134,11 @@ class Controller:
             pass
 
     def list_decks(self):
+        # self._driver.get(AnkiWebEndpoints.DECKS.value)
         self.set_cookies(TokenType.MAIN)
         self._driver.get(AnkiWebEndpoints.DECKS.value)
-        # sleep(100)  # TODO delete this sleep
+        sleep(.2)  # TODO delete this sleep
+
         main_elems = grab_main_elements(self._driver)
         log.debug(main_elems)
         return filter_deck_names(main_elems)
@@ -157,6 +159,7 @@ class Controller:
 
     def add_card(self, deck, front, back):
         available_decks = self.list_decks()
+        log.debug(f'available decks: {available_decks}')
         if deck not in available_decks:
             log.error(f"deck '{deck}' not present in available decks, creating new one: {available_decks}")
             self.create_deck(deck)
@@ -168,4 +171,8 @@ class Controller:
         click_button(self._driver, 'Add')
 
     def tear_down(self):
+        window_handles = self._driver.window_handles
+        for window_handle in window_handles:
+            self._driver.switch_to.window(window_handle)
+            self._driver.close()
         self._driver.quit()
