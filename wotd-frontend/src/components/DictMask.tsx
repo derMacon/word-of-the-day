@@ -1,15 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import Container from "react-bootstrap/Container";
-import TextField from "./TextField";
-import LanguageSelect from "./LanguageSelect";
 import {SelectableTable} from "./SelectableTable";
-import {ankiApiLogin, dictGetAvailableLang, dictLookupWord, apiHealthStatus} from "../logic/ApiFetcher";
-import {LanguageUUID} from "../model/LanguageUUID";
-import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
-import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
+import {apiHealthStatus, dictGetAvailableLang} from "../logic/ApiFetcher";
+import {Button} from "react-bootstrap";
 import {Language} from "../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
-import ListGroup from "react-bootstrap/ListGroup";
 import Form from 'react-bootstrap/Form';
 import AnkiSyncLogin from "./AnkiSyncLogin";
 import {AuthService} from "../logic/AuthService";
@@ -18,6 +13,8 @@ import {DictOptionsItem} from "../model/DictOptionsItem";
 import {EmptyPage} from "./EmptyPage";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {UserInput} from "./UserInput";
+import Modal from 'react-bootstrap/Modal';
+import LoginPrompt from "./LoginPrompt";
 
 
 export function DictMask() {
@@ -25,6 +22,7 @@ export function DictMask() {
     const [availLang, setAvailLang] = useState<Language[]>([])
     const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>([])
     const [showAnkiLogin, setShowAnkiLogin] = useState(false);
+    const [showAnkiStatusAlert, setShowAnkiStatusAlert] = useState(false);
     const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
 
     const authProvider: AuthService = new AuthService();
@@ -49,49 +47,90 @@ export function DictMask() {
                 }
 
             }
+
+
         )
     }, []);
 
     const handleCloseAnkiLogin = () => setShowAnkiLogin(false)
     const handleShowAnkiLogin = () => setShowAnkiLogin(true)
 
+    const handleCloseAnkiStatusAlert = () => setShowAnkiStatusAlert(false)
+    const handleShowAnkiStatusAlert = () => setShowAnkiStatusAlert(true)
+
     const handleAnkiLogin = (userEmail: string, ankiResponse: AnkiLoginResponseHeaders): void => {
         console.log('update auth provider with email: ', userEmail)
         authProvider.loadAnkiLoginResponse(userEmail, ankiResponse)
     }
 
-return (
-    <div>
-        <Container fluid="md">
-            <div className="custom-max-width">
+    return (
+        <div>
+            <Container fluid="md">
+                <div className="custom-max-width">
 
-                {apiHealth.wotdApiConnection
-                    && <UserInput authProvider={authProvider}
-                                  setDictOptions={setDictOptions}
-                                  availLang={availLang}
-                                  handleShowAnkiLogin={handleShowAnkiLogin}/>}
 
-                <div className='mt-2'>
-                    {dictOptions !== undefined && dictOptions.length > 0
-                        ? <SelectableTable
-                            apiResponse={dictOptions}
-                            userIsLoggedIn={authProvider.userIsLoggedIn()}/>
-                        : <EmptyPage/>
-                    }
+                    <Button variant="primary" onClick={handleShowAnkiStatusAlert}>
+                        Launch demo modal
+                    </Button>
+
+                    <LoginPrompt
+                        showAnkiStatusAlert={showAnkiStatusAlert}
+                        handleCloseAnkiStatusAlert={handleCloseAnkiStatusAlert}/>
+
+                    {/*<Modal show={showAnkiStatusAlert} onHide={handleCloseAnkiStatusAlert}>*/}
+                    {/*    <Modal.Header closeButton>*/}
+                    {/*        <Modal.Title>Log into Anki account</Modal.Title>*/}
+                    {/*    </Modal.Header>*/}
+                    {/*    <Modal.Body>*/}
+                    {/*        <p>In order for the cards to synchronize with your Anki account please login with*/}
+                    {/*            the following button or click on the cloud in the top right corner of the main*/}
+                    {/*            view.</p>*/}
+
+                    {/*        <Form.Check*/}
+                    {/*            type='checkbox'*/}
+                    {/*            id='ignore-alert-checkbox'*/}
+                    {/*            label="don't show this message again"*/}
+                    {/*        />*/}
+
+                    {/*    </Modal.Body>*/}
+                    {/*    <Modal.Footer>*/}
+                    {/*        <Button variant="secondary" onClick={handleCloseAnkiStatusAlert}>*/}
+                    {/*            Anki login*/}
+                    {/*        </Button>*/}
+                    {/*        <Button variant="primary" onClick={handleCloseAnkiStatusAlert}>*/}
+                    {/*            Ask me later*/}
+                    {/*        </Button>*/}
+                    {/*    </Modal.Footer>*/}
+                    {/*</Modal>*/}
+
+
+                    {apiHealth.wotdApiConnection
+                        && <UserInput authProvider={authProvider}
+                                      setDictOptions={setDictOptions}
+                                      availLang={availLang}
+                                      handleShowAnkiLogin={handleShowAnkiLogin}/>}
+
+                    <div className='mt-2'>
+                        {dictOptions !== undefined && dictOptions.length > 0
+                            ? <SelectableTable
+                                apiResponse={dictOptions}
+                                userIsLoggedIn={authProvider.userIsLoggedIn()}/>
+                            : <EmptyPage/>
+                        }
+                    </div>
+
                 </div>
-
-            </div>
-        </Container>
+            </Container>
 
 
-        <Offcanvas show={showAnkiLogin} onHide={handleCloseAnkiLogin} className="w-100">
-            <AnkiSyncLogin
-                handleAnkiLogin={handleAnkiLogin}
-                handleClose={handleCloseAnkiLogin}
-                authProvider={authProvider}
-            />
-        </Offcanvas>
+            <Offcanvas show={showAnkiLogin} onHide={handleCloseAnkiLogin} className="w-100">
+                <AnkiSyncLogin
+                    handleAnkiLogin={handleAnkiLogin}
+                    handleClose={handleCloseAnkiLogin}
+                    authProvider={authProvider}
+                />
+            </Offcanvas>
 
-    </div>
-);
+        </div>
+    );
 }
