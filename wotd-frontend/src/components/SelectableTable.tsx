@@ -4,6 +4,7 @@ import Table from 'react-bootstrap/Table';
 import {apiHealthStatus, toggleSelectedOption} from "../logic/ApiFetcher";
 import './SelectableTable.css';
 import {DictOptionsItem} from "../model/DictOptionsItem";
+import Card from 'react-bootstrap/Card';
 
 
 interface SelectableTableProps {
@@ -65,6 +66,7 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
             <tbody>
             {items}
             </tbody>
+
         </Table>
     );
 }

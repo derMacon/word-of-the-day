@@ -12,10 +12,12 @@ export class AuthService {
     readonly EMAIL_COOKIE_KEY: string = 'anki-email'
     readonly MAIN_TOKEN_COOKIE_KEY: string = 'main-token'
     readonly CARD_TOKEN_COOKIE_KEY: string = 'card-token'
+    readonly IGNORE_LOGIN_PROMPT_COOKIE_KEY: string = 'ignore-login-prompt'
 
     private _email: string;
     private _mainToken: string;
     private _cardToken: string;
+    private _ignoreLoginPrompt: boolean;
     private _cookies: Cookies;
 
 
@@ -24,6 +26,7 @@ export class AuthService {
         this._email = this._cookies.get(this.EMAIL_COOKIE_KEY) ?? ''
         this._mainToken = this._cookies.get(this.MAIN_TOKEN_COOKIE_KEY) ?? '';
         this._cardToken = this._cookies.get(this.CARD_TOKEN_COOKIE_KEY) ?? '';
+        this._ignoreLoginPrompt = this._cookies.get(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY) ?? false;
     }
 
 
@@ -51,6 +54,14 @@ export class AuthService {
         this._cardToken = value;
     }
 
+    get ignoreLoginPrompt(): boolean {
+        return this._ignoreLoginPrompt;
+    }
+
+    set ignoreLoginPrompt(value: boolean) {
+        this._ignoreLoginPrompt = value;
+    }
+
     get cookies(): Cookies {
         return this._cookies;
     }
@@ -59,10 +70,19 @@ export class AuthService {
         this._cookies = value;
     }
 
-    userIsLoggedIn() {
+    userIsLoggedIn(): boolean {
         return this._email != ''
             && this._mainToken != ''
             && this._cardToken != ''
+    }
+
+    showLoginPrompt(): boolean {
+        return !this.userIsLoggedIn()
+            && !this.ignoreLoginPrompt
+    }
+
+    writeIgnoreLoginPromptCookie(): void {
+        this._cookies.set(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY, this._ignoreLoginPrompt);
     }
 
     cleanCookies() {
@@ -85,6 +105,7 @@ export class AuthService {
         this._cookies.set(this.EMAIL_COOKIE_KEY, this._email);
         this._cookies.set(this.MAIN_TOKEN_COOKIE_KEY, this._mainToken);
         this._cookies.set(this.CARD_TOKEN_COOKIE_KEY, this._cardToken);
+        this.writeIgnoreLoginPromptCookie()
     }
 
     getHeaders() {

@@ -14,7 +14,8 @@ import {EmptyPage} from "./EmptyPage";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {UserInput} from "./UserInput";
 import Modal from 'react-bootstrap/Modal';
-import LoginPrompt from "./LoginPrompt";
+import LoginAlert from "./LoginAlert";
+import {BasicUsage} from "./BasicUsage";
 
 
 export function DictMask() {
@@ -36,6 +37,10 @@ export function DictMask() {
                     console.error('db connection down: ', healthStatus)
                 } else {
                     dictGetAvailableLang().then(setAvailLang)
+
+                    if (authProvider.showLoginPrompt()) {
+                        handleShowAnkiStatusAlert()
+                    }
                 }
 
                 if (!healthStatus.wotdApiConnection) {
@@ -47,8 +52,6 @@ export function DictMask() {
                 }
 
             }
-
-
         )
     }, []);
 
@@ -57,6 +60,7 @@ export function DictMask() {
 
     const handleCloseAnkiStatusAlert = () => setShowAnkiStatusAlert(false)
     const handleShowAnkiStatusAlert = () => setShowAnkiStatusAlert(true)
+
 
     const handleAnkiLogin = (userEmail: string, ankiResponse: AnkiLoginResponseHeaders): void => {
         console.log('update auth provider with email: ', userEmail)
@@ -68,41 +72,12 @@ export function DictMask() {
             <Container fluid="md">
                 <div className="custom-max-width">
 
-
-                    <Button variant="primary" onClick={handleShowAnkiStatusAlert}>
-                        Launch demo modal
-                    </Button>
-
-                    <LoginPrompt
+                    <LoginAlert
                         showAnkiStatusAlert={showAnkiStatusAlert}
-                        handleCloseAnkiStatusAlert={handleCloseAnkiStatusAlert}/>
-
-                    {/*<Modal show={showAnkiStatusAlert} onHide={handleCloseAnkiStatusAlert}>*/}
-                    {/*    <Modal.Header closeButton>*/}
-                    {/*        <Modal.Title>Log into Anki account</Modal.Title>*/}
-                    {/*    </Modal.Header>*/}
-                    {/*    <Modal.Body>*/}
-                    {/*        <p>In order for the cards to synchronize with your Anki account please login with*/}
-                    {/*            the following button or click on the cloud in the top right corner of the main*/}
-                    {/*            view.</p>*/}
-
-                    {/*        <Form.Check*/}
-                    {/*            type='checkbox'*/}
-                    {/*            id='ignore-alert-checkbox'*/}
-                    {/*            label="don't show this message again"*/}
-                    {/*        />*/}
-
-                    {/*    </Modal.Body>*/}
-                    {/*    <Modal.Footer>*/}
-                    {/*        <Button variant="secondary" onClick={handleCloseAnkiStatusAlert}>*/}
-                    {/*            Anki login*/}
-                    {/*        </Button>*/}
-                    {/*        <Button variant="primary" onClick={handleCloseAnkiStatusAlert}>*/}
-                    {/*            Ask me later*/}
-                    {/*        </Button>*/}
-                    {/*    </Modal.Footer>*/}
-                    {/*</Modal>*/}
-
+                        handleCloseAnkiStatusAlert={handleCloseAnkiStatusAlert}
+                        handleShowAnkiLogin={handleShowAnkiLogin}
+                        authProvider={authProvider}
+                    />
 
                     {apiHealth.wotdApiConnection
                         && <UserInput authProvider={authProvider}
@@ -110,13 +85,15 @@ export function DictMask() {
                                       availLang={availLang}
                                       handleShowAnkiLogin={handleShowAnkiLogin}/>}
 
+                    {/*<div className='mt-2'>*/}
                     <div className='mt-2'>
+                        {/*<div className='debugborder'>test</div>*/}
                         {dictOptions !== undefined && dictOptions.length > 0
                             ? <SelectableTable
                                 apiResponse={dictOptions}
                                 userIsLoggedIn={authProvider.userIsLoggedIn()}/>
-                            : <EmptyPage/>
-                        }
+                            : <BasicUsage/>}
+                            {/*// : <EmptyPage/>*/}
                     </div>
 
                 </div>

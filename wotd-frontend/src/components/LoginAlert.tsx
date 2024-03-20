@@ -3,14 +3,28 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import {Button} from "react-bootstrap";
+import {AuthService} from "../logic/AuthService";
 
 
 interface LoginPromptProps {
     showAnkiStatusAlert: boolean
     handleCloseAnkiStatusAlert: () => void
+    handleShowAnkiLogin: () => void
+    authProvider: AuthService
 }
 
-export function LoginPrompt(props: Readonly<LoginPromptProps>) {
+export function LoginAlert(props: Readonly<LoginPromptProps>) {
+
+    const handleOnSelect = (e: any) => {
+        props.authProvider.ignoreLoginPrompt = e.target.checked
+        props.authProvider.writeIgnoreLoginPromptCookie()
+        props.handleCloseAnkiStatusAlert()
+    }
+
+    const openLoginDialog = () => {
+        props.handleCloseAnkiStatusAlert()
+        props.handleShowAnkiLogin()
+    }
 
     return (
         <Modal show={props.showAnkiStatusAlert} onHide={props.handleCloseAnkiStatusAlert}>
@@ -26,11 +40,13 @@ export function LoginPrompt(props: Readonly<LoginPromptProps>) {
                     type='checkbox'
                     id='ignore-alert-checkbox'
                     label="don't show this message again"
+                    onSelect={handleOnSelect}
+                    onChange={handleOnSelect}
                 />
 
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={props.handleCloseAnkiStatusAlert}>
+                <Button variant="secondary" onClick={openLoginDialog}>
                     Anki login
                 </Button>
                 <Button variant="primary" onClick={props.handleCloseAnkiStatusAlert}>
@@ -42,4 +58,4 @@ export function LoginPrompt(props: Readonly<LoginPromptProps>) {
     );
 }
 
-export default LoginPrompt
+export default LoginAlert

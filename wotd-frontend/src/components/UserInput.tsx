@@ -17,6 +17,7 @@ import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import {EmptyPage} from "./EmptyPage";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
+import {FaCircleInfo} from "react-icons/fa6";
 
 interface UserInputProps {
     authProvider: AuthService
@@ -52,33 +53,45 @@ export function UserInput(props: Readonly<UserInputProps>) {
 
     return (
         <div className='sticky pt-3 pb-3 bg-white white-shadow'>
-            <Row>
-                <Col xs={12} md={8} className='mb-2'>
-                    <TextField onSubmit={handleDictLookup}/>
-                </Col>
-                <Col xs={12} md={3}>
-                    <ButtonGroup className='nopadding w-100'>
-                        <LanguageSelect
-                            selectedElem={selectedFromLang}
-                            onSelect={setSelectedFromLang}
-                            availableLanguages={props.availLang}/>
-                        <Button variant='light' onClick={handleLanguageSwitch}><FaArrowsRotate
-                            className='mb-1'/></Button>
-                        <LanguageSelect
-                            selectedElem={selectedToLang}
-                            onSelect={setSelectedToLang}
-                            availableLanguages={props.availLang}/>
-                    </ButtonGroup>
-                </Col>
-                <Col xs={12} md={1}>
-                    <Button variant='light' onClick={props.handleShowAnkiLogin}>
-                        {props.authProvider.userIsLoggedIn()
-                            ? (<FaCloudArrowUp className='mb-1'/>)
-                            : (<FaCloudBolt className='mb-1'/>)}
+            <div className='sticky pt-3 pb-3 bg-white white-shadow'>
+                <Row>
+                    <Col md={7} className='mb-2 pl-0 pr-1'>
+                        <TextField onSubmit={handleDictLookup}/>
+                    </Col>
+                    <Col md={3} className='mb-2 px-1'>
+                        <ButtonGroup className='w-100'>
+                            {/*<LanguageSelect*/}
+                            {/*    selectedElem={selectedFromLang}*/}
+                            {/*    onSelect={setSelectedFromLang}*/}
+                            {/*    availableLanguages={props.availLang}/>*/}
+                            <LanguageSelect
+                                selectedElem={selectedFromLang}
+                                onSelect={setSelectedFromLang}
+                                availableLanguages={props.availLang}/>
+                            <Button variant='light' onClick={handleLanguageSwitch}><FaArrowsRotate
+                                className='mb-1'/></Button>
+                            <LanguageSelect
+                                selectedElem={selectedToLang}
+                                onSelect={setSelectedToLang}
+                                availableLanguages={props.availLang}/>
+                        </ButtonGroup>
+                    </Col>
+                    <Col md={1} className='mb-2 px-1'>
+                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
+                            {props.authProvider.userIsLoggedIn()
+                                ? (<FaCloudArrowUp className='mb-1'/>)
+                                : (<FaCloudBolt className='mb-1'/>)}
+                        </Button>
+                    </Col>
+                    <Col md={1} className='mb-2 px-0'>
+                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
+                            <FaCircleInfo className='mb-1'/>
+                        </Button>
+                    </Col>
+                </Row>
+            </div>
 
-                    </Button>
-                </Col>
-            </Row>
+
         </div>
     );
 }
