@@ -1,23 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import Container from "react-bootstrap/Container";
+import React, {useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
-import {SelectableTable} from "./SelectableTable";
-import {ankiApiLogin, dictGetAvailableLang, dictLookupWord, apiHealthStatus} from "../logic/ApiFetcher";
+import {dictLookupWord} from "../logic/ApiFetcher";
 import {LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
-import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
+import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import {Language} from "../model/Language";
-import Offcanvas from "react-bootstrap/Offcanvas";
-import ListGroup from "react-bootstrap/ListGroup";
-import Form from 'react-bootstrap/Form';
-import AnkiSyncLogin from "./AnkiSyncLogin";
 import {AuthService} from "../logic/AuthService";
-import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../model/DictOptionsItem";
-import {EmptyPage} from "./EmptyPage";
-import {ApiHealthInformation} from "../model/ApiHealthInformation";
-import {FaCircleInfo} from "react-icons/fa6";
 
 interface UserInputProps {
     authProvider: AuthService
@@ -52,8 +42,7 @@ export function UserInput(props: Readonly<UserInputProps>) {
 
 
     return (
-        <div className='sticky pt-3 pb-3 bg-white white-shadow'>
-            <div className='sticky pt-3 pb-3 bg-white white-shadow'>
+        <div className='sticky pt-3 pb-2 bg-white white-shadow'>
                 <Row>
                     <Col md={7} className='mb-2 pl-0 pr-1'>
                         <TextField onSubmit={handleDictLookup}/>
@@ -89,8 +78,6 @@ export function UserInput(props: Readonly<UserInputProps>) {
                         </Button>
                     </Col>
                 </Row>
-            </div>
-
 
         </div>
     );
