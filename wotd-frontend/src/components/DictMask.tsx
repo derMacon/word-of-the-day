@@ -106,6 +106,7 @@ export function DictMask() {
                     handleClose={handleCloseAnkiLogin}
                     authProvider={authProvider}
                 />
+                {/*<EmptyPage/>*/}
             </Offcanvas>
 
         </div>
