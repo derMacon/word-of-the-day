@@ -52,8 +52,9 @@ def _push_data(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders):
                 back=curr_option.output,
             )
 
-            anki_api_fetcher.push_card(card_input, auth_headers)
-            PersistenceService().update_item_status(curr_option.dict_options_item_id, Status.SYNCED)
+            response_ok = anki_api_fetcher.push_card(card_input, auth_headers)
+            if response_ok:
+                PersistenceService().update_item_status(curr_option.dict_options_item_id, Status.SYNCED)
         elif curr_option.status != Status.SYNCED:
             ids_to_delete.append(curr_option.dict_options_item_id)
 

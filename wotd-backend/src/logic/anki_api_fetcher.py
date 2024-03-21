@@ -54,12 +54,12 @@ class AnkiApiFetcher:
 
         return main_token, card_token
 
-    def push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders):
+    def push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders) -> bool:
         app_log.debug(f'push anki card: {str(anki_card)}')
         url = self.ANKI_API_BASE + '/add-card'
         data = asdict(anki_card)
         app_log.debug(f"push data '{data}' to url '{url}' with headers '{headers}'")
-        requests.get(url, json=data, headers=headers.to_map())
+        return requests.get(url, json=data, headers=headers.to_map()).ok
 
 
 anki_api_fetcher = AnkiApiFetcher()

@@ -13,6 +13,8 @@ export function BasicUsage() {
     return (
         <Container fluid="md" className="text-lg-start p-0">
 
+            <p>Click on the icons in the top right corner to execute the following actions</p>
+
             <Table striped bordered hover className='table-fixed'>
                 <tbody>
                 <tr>

@@ -66,6 +66,7 @@ def retry_decorator(foo):
                 found_output = True
             except Exception as e:
                 log.error('couldnt grab main elem, trying again')
+                tries -= 1
 
     return decorate
 

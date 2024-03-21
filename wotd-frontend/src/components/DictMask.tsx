@@ -10,12 +10,13 @@ import AnkiSyncLogin from "./AnkiSyncLogin";
 import {AuthService} from "../logic/AuthService";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../model/DictOptionsItem";
-import {EmptyPage} from "./EmptyPage";
+import {InfoPage} from "./InfoPage";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {UserInput} from "./UserInput";
 import Modal from 'react-bootstrap/Modal';
 import LoginAlert from "./LoginAlert";
 import {BasicUsage} from "./BasicUsage";
+import {ErrorPage} from "./ErrorPage";
 
 
 export function DictMask() {
@@ -24,6 +25,8 @@ export function DictMask() {
     const [dictOptions, setDictOptions] = useState<DictOptionsItem[]>([])
     const [showAnkiLogin, setShowAnkiLogin] = useState(false);
     const [showAnkiStatusAlert, setShowAnkiStatusAlert] = useState(false);
+    const [showErrorPage, setShowErrorPage] = useState(false);
+    const [showInfoPage, setShowInfoPage] = useState(false);
     const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
 
     const authProvider: AuthService = new AuthService();
@@ -45,7 +48,8 @@ export function DictMask() {
 
                 if (!healthStatus.wotdApiConnection) {
                     console.error('wotd api not available: ', healthStatus)
-                    alert('Backend API not available - not possible to lookup words. Please try again later.')
+                    // alert('Backend API not available - not possible to lookup words. Please try again later.')
+                    setShowErrorPage(true)
                 } else if (!healthStatus.ankiApiConnection) {
                     console.error('anki api not available: ', healthStatus)
                     alert('Anki API not available - you can lookup words but cannot synchronize them with your anki web account.')
@@ -58,6 +62,10 @@ export function DictMask() {
     const handleCloseAnkiLogin = () => setShowAnkiLogin(false)
     const handleShowAnkiLogin = () => setShowAnkiLogin(true)
 
+    const handleCloseInfoPage = () => setShowInfoPage(false)
+    const handleShowInfoPage = () => setShowInfoPage(true)
+
+
     const handleCloseAnkiStatusAlert = () => setShowAnkiStatusAlert(false)
     const handleShowAnkiStatusAlert = () => setShowAnkiStatusAlert(true)
 
@@ -67,34 +75,36 @@ export function DictMask() {
         authProvider.loadAnkiLoginResponse(userEmail, ankiResponse)
     }
 
+    const mainPage = <>
+        <LoginAlert
+            showAnkiStatusAlert={showAnkiStatusAlert}
+            handleCloseAnkiStatusAlert={handleCloseAnkiStatusAlert}
+            handleShowAnkiLogin={handleShowAnkiLogin}
+            authProvider={authProvider}
+        />
+
+        {apiHealth.wotdApiConnection
+            && <UserInput authProvider={authProvider}
+                          setDictOptions={setDictOptions}
+                          availLang={availLang}
+                          handleShowInfoPage={handleShowInfoPage}
+                          handleShowAnkiLogin={handleShowAnkiLogin}/>}
+
+        <div className='mt-2'>
+            {dictOptions !== undefined && dictOptions.length > 0
+                ? <SelectableTable
+                    apiResponse={dictOptions}
+                    userIsLoggedIn={authProvider.userIsLoggedIn()}/>
+                : <BasicUsage/>}
+        </div>
+    </>
+
     return (
         <div>
             <Container fluid="md">
                 <div className="custom-max-width">
 
-                    <LoginAlert
-                        showAnkiStatusAlert={showAnkiStatusAlert}
-                        handleCloseAnkiStatusAlert={handleCloseAnkiStatusAlert}
-                        handleShowAnkiLogin={handleShowAnkiLogin}
-                        authProvider={authProvider}
-                    />
-
-                    {apiHealth.wotdApiConnection
-                        && <UserInput authProvider={authProvider}
-                                      setDictOptions={setDictOptions}
-                                      availLang={availLang}
-                                      handleShowAnkiLogin={handleShowAnkiLogin}/>}
-
-                    {/*<div className='mt-2'>*/}
-                    <div className='mt-2'>
-                        {/*<div className='debugborder'>test</div>*/}
-                        {dictOptions !== undefined && dictOptions.length > 0
-                            ? <SelectableTable
-                                apiResponse={dictOptions}
-                                userIsLoggedIn={authProvider.userIsLoggedIn()}/>
-                            : <BasicUsage/>}
-                            {/*// : <EmptyPage/>*/}
-                    </div>
+                    {showErrorPage ? <ErrorPage/> : mainPage}
 
                 </div>
             </Container>
@@ -106,7 +116,10 @@ export function DictMask() {
                     handleClose={handleCloseAnkiLogin}
                     authProvider={authProvider}
                 />
-                {/*<EmptyPage/>*/}
+            </Offcanvas>
+
+            <Offcanvas show={showInfoPage} onHide={handleCloseInfoPage} className="w-100">
+                <InfoPage/>
             </Offcanvas>
 
         </div>

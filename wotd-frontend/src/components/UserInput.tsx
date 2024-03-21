@@ -14,6 +14,7 @@ interface UserInputProps {
     setDictOptions: (options: DictOptionsItem[]) => void
     availLang: Language[]
     handleShowAnkiLogin: (e: any) => void
+    handleShowInfoPage: (e: any) => void
 }
 
 
@@ -73,7 +74,7 @@ export function UserInput(props: Readonly<UserInputProps>) {
                         </Button>
                     </Col>
                     <Col md={1} className='mb-2 px-0'>
-                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
+                        <Button variant='light' onClick={props.handleShowInfoPage}>
                             <FaCircleInfo className='mb-1'/>
                         </Button>
                     </Col>
