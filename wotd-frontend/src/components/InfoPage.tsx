@@ -15,7 +15,8 @@ export function InfoPage() {
 
                     <h1 className="text-lg-center">Word of the day</h1>
                     <h2 className={'text-left'}>Description</h2>
-                    <p>This online dictionary leverages the api of <a href="https://www.dict.cc/">dict.cc</a> to
+                    <p className="text-justify">This online dictionary leverages the api of <a
+                        href="https://www.dict.cc/">dict.cc</a> to
                         translate a
                         given input word. The webapp then saves this request to a flash card for the user to learn later
                         on.

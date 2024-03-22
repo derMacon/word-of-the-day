@@ -32,7 +32,7 @@
 
 @media (max-width: 768px) {
     * {
-        font-size: 20px; /* Adjust the size as needed */
+        font-size: 18px; /* Adjust the size as needed */
     }
 
     .custom-min-height {

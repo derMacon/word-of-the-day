@@ -11,7 +11,7 @@ import { FaCircleInfo } from "react-icons/fa6";
 export function BasicUsage() {
 
     return (
-        <Container fluid="md" className="text-lg-start p-0">
+        <Container fluid="md" className="text-start p-0">
 
             <p>Click on the icons in the top right corner to execute the following actions</p>
 
