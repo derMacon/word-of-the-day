@@ -47,10 +47,31 @@ export function UserInput(props: Readonly<UserInputProps>) {
     return (
         <div className='sticky pt-3 pb-2 bg-white white-shadow'>
             <Row>
-                <Col md={7} className='mb-2 pl-0 pr-1'>
+                {/*<Col className='debugbordergreen mb-2 pl-0 pr-1'>*/}
+                <Col xs={12} md className='debugbordergreen'>
                     <TextField onSubmit={handleDictLookup}/>
                 </Col>
-                <Col md={3} className='mb-2'>
+                {/*<Col className='mb-2'>*/}
+                <Col xs={6} sm={6} md={4} className='debugbordergreen px-md-0 pe-sm-1'>
+                    <ButtonGroup className='w-100'>
+                        <DropdownButton variant='secondary' id="dropdown-basic-button" title="Translation">
+                            <Dropdown.Item href="#/action-1">Translation</Dropdown.Item>
+                            <Dropdown.Item href="#/action-2">Definition</Dropdown.Item>
+                            <Dropdown.Item href="#/action-3">Synonyms</Dropdown.Item>
+                        </DropdownButton>
+                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
+                            {props.authProvider.userIsLoggedIn()
+                                ? (<FaCloudArrowUp className='mb-1'/>)
+                                : (<FaCloudBolt className='mb-1'/>)}
+                        </Button>
+                        <Button variant='light' onClick={props.handleShowInfoPage}>
+                            <FaCircleInfo className='mb-1'/>
+                        </Button>
+                    </ButtonGroup>
+                </Col>
+                {/*<Col className='mb-2'>*/}
+                <Col xs={6} sm={6} md={3} className='debugbordergreen ps-sm-1'>
+                    {/*<ButtonGroup className='w-100'>*/}
                     <ButtonGroup className='w-100'>
                         <LanguageSelect
                             selectedElem={selectedFromLang}
@@ -62,23 +83,6 @@ export function UserInput(props: Readonly<UserInputProps>) {
                             selectedElem={selectedToLang}
                             onSelect={setSelectedToLang}
                             availableLanguages={props.availLang}/>
-                    </ButtonGroup>
-                </Col>
-                <Col md={2} className='mb-2'>
-                    <ButtonGroup>
-                        <DropdownButton variant='secondary' id="dropdown-basic-button" title="Dropdown button">
-                            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-                            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-                        </DropdownButton>
-                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
-                            {props.authProvider.userIsLoggedIn()
-                                ? (<FaCloudArrowUp className='mb-1'/>)
-                                : (<FaCloudBolt className='mb-1'/>)}
-                        </Button>
-                        <Button variant='light' onClick={props.handleShowInfoPage}>
-                            <FaCircleInfo className='mb-1'/>
-                        </Button>
                     </ButtonGroup>
                 </Col>
             </Row>
