@@ -73,6 +73,17 @@ def dict_default_languages() -> Tuple[Response, int]:
     return jsonify(InfoRequestAvailDictLang(default_lang)), 200
 
 
+@main.route("/dict/autocomplete-option", methods=['POST'])
+def autocomplete_word_options() -> Tuple[Response, int]:
+    request_data = request.get_json()
+    app_log.debug(f"request data: {request_data}")
+
+    dict_request = DictRequest(**request_data)
+    app_log.debug(f"dict request: {dict_request}")
+
+    return jsonify(controller.autocomplete_dict_word(dict_request)), 200
+
+
 @main.route("/dict/lookup-option", methods=['POST'])
 def lookup_word_options() -> Tuple[Response, int]:
     request_data = request.get_json()

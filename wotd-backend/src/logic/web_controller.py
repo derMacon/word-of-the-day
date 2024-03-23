@@ -16,8 +16,19 @@ class WebController:
         self.dictcc_translator = Dict()
         self.persistence_service = PersistenceService()
 
+    def autocomplete_dict_word(self, dict_request: DictRequest) -> List[str]:
+        response_tuples = self.dictcc_translator.translate(
+            word=dict_request.input,
+            from_language=dict_request.from_language_uuid.name.lower(),
+            to_language=dict_request.to_language_uuid.name.lower()
+        ).translation_tuples
 
-    def lookup_dict_word(self, dict_request: DictRequest, auth_headers: AnkiLoginResponseHeaders | None) -> List[DictOptionsItem]:
+        autocomplete_options: List[str] = [t[0] for t in response_tuples]
+        app_log.debug(f'autocomplete options: {autocomplete_options}')
+        return autocomplete_options
+
+    def lookup_dict_word(self, dict_request: DictRequest,
+                         auth_headers: AnkiLoginResponseHeaders | None) -> List[DictOptionsItem]:
         response_tuples = self.dictcc_translator.translate(
             word=dict_request.input,
             from_language=dict_request.from_language_uuid.name.lower(),
@@ -27,7 +38,8 @@ class WebController:
         app_log.debug(f'lookup options: {options}')
 
         if auth_headers is None:
-            app_log.debug('user not logged into their anki web account -> webapp does not persist options, still need to generate the ids')
+            app_log.debug(
+                'user not logged into their anki web account -> webapp does not persist options, still need to generate the ids')
             # generate dummy ids
             for index, item in enumerate(options):
                 item.dict_options_item_id = index
