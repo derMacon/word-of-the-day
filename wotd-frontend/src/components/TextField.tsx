@@ -52,7 +52,7 @@ export function TextField(props: TextFieldProps) {
     ];
 
     const testList = <div className='w-100'>
-        <div className="w-100 bg-primary mx-0">
+        <div className="w-100 bg-white mx-0">
             <Container fluid="md">
 
                 <div className="custom-max-width">
@@ -68,7 +68,12 @@ export function TextField(props: TextFieldProps) {
                                 <ListGroup.Item>Morbi leo risus</ListGroup.Item>
                                 <ListGroup.Item>Porta ac consectetur ac</ListGroup.Item>
                                 <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
                             </ListGroup>
+                            <div className="custom-margin-bottom"/>
                         </Col>
                     </Row>
                 </div>
