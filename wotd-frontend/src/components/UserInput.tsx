@@ -40,22 +40,23 @@ export function UserInput(props: Readonly<UserInputProps>) {
         cookies.set(toLangCookieKey, lang.language_uuid.toString())
     }
 
-    useEffect(() => {
-        const fromLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(fromLangCookieKey))
-        const toLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(toLangCookieKey))
-
-        if (fromLang !== undefined) {
-            cookieSetFromLang(Language.createFromUUID(fromLang))
-        } else {
-            cookieSetFromLang(defaultFromLang)
-        }
-        if (toLang !== undefined) {
-            cookieSetToLang(Language.createFromUUID(toLang))
-        } else {
-            cookieSetToLang(defaultToLang)
-        }
-
-    }, []);
+    // TODO fix this
+    // useEffect(() => {
+    //     const fromLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(fromLangCookieKey))
+    //     const toLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(toLangCookieKey))
+    //
+    //     if (fromLang !== undefined) {
+    //         cookieSetFromLang(Language.createFromUUID(fromLang))
+    //     } else {
+    //         cookieSetFromLang(defaultFromLang)
+    //     }
+    //     if (toLang !== undefined) {
+    //         cookieSetToLang(Language.createFromUUID(toLang))
+    //     } else {
+    //         cookieSetToLang(defaultToLang)
+    //     }
+    //
+    // }, [cookieSetFromLang, cookieSetToLang, cookies, defaultFromLang, defaultToLang]);
 
 
 
@@ -65,6 +66,10 @@ export function UserInput(props: Readonly<UserInputProps>) {
         let toLangNewInstance: Language = selectedToLang as Language
         cookieSetFromLang(toLangNewInstance)
         cookieSetToLang(fromLangNewInstance)
+    }
+
+    const handleAutocomplete = (word: string) => {
+        console.log('autocompleting word: ', word)
     }
 
     const handleDictLookup = async (word: string) => {
@@ -79,7 +84,7 @@ export function UserInput(props: Readonly<UserInputProps>) {
         <div className='sticky pt-2 pb-2 bg-white white-shadow'>
             <Row>
                 <Col xs={12} md={7} className='pe-md-1 pb-2'>
-                    <TextField onSubmit={handleDictLookup}/>
+                    <TextField onSubmit={handleDictLookup} onType={handleAutocomplete}/>
                 </Col>
 
                 <Col xs={8} md={3} className='ps-md-0 pe-1'>

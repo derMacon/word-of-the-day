@@ -7,7 +7,7 @@ from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.status import Status
 from src.data.error.database_error import DatabaseError
-from src.logic.anki_api_fetcher import anki_api_fetcher
+from src.service.anki_api_fetcher import anki_api_fetcher
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 

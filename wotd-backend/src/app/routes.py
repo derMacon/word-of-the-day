@@ -11,9 +11,9 @@ from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.logic.anki_api_fetcher import anki_api_fetcher
-from src.logic.housekeeping_controller import trigger_housekeeping
-from src.logic.web_controller import controller
+from src.service.anki_api_fetcher import anki_api_fetcher
+from src.controller.housekeeping_controller import trigger_housekeeping
+from src.controller.web_controller import controller
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 

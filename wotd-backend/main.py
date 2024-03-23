@@ -1,5 +1,4 @@
 import threading
-
 import src.app
 
 app = src.app.create_app(debug=True)

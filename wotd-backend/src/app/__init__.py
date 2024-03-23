@@ -8,9 +8,10 @@ from flask_cors import CORS
 
 main = Blueprint('main', __name__, url_prefix='/api/v1')
 
-from . import routes
 from . import error_handler
 
+from .routes import main
+from .events import socketio
 
 def create_app(debug=False):
     """Create an application."""
@@ -19,4 +20,5 @@ def create_app(debug=False):
     app.debug = debug
     app.register_blueprint(main)
 
+    socketio.init_app(app)
     return app
