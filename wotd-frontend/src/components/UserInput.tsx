@@ -1,15 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
 import {dictLookupWord} from "../logic/ApiFetcher";
-import {LanguageUUID} from "../model/LanguageUUID";
+import {convertToLanguageUUIDEnum, LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import {Language} from "../model/Language";
 import {AuthService} from "../logic/AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
+import Cookies from "universal-cookie";
 
 interface UserInputProps {
     authProvider: AuthService
@@ -28,12 +27,44 @@ export function UserInput(props: Readonly<UserInputProps>) {
     const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
     const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
 
+    const cookies: Cookies = new Cookies(null, {path: '/'})
+    const fromLangCookieKey: string = 'from-lang'
+    const toLangCookieKey: string = 'to-lang'
+
+    const cookieSetFromLang = (lang: Language) => {
+        setSelectedFromLang(lang)
+        cookies.set(fromLangCookieKey, lang.language_uuid.toString())
+    }
+    const cookieSetToLang = (lang: Language) => {
+        setSelectedToLang(lang)
+        cookies.set(toLangCookieKey, lang.language_uuid.toString())
+    }
+
+    useEffect(() => {
+        const fromLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(fromLangCookieKey))
+        const toLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(toLangCookieKey))
+
+        if (fromLang !== undefined) {
+            cookieSetFromLang(Language.createFromUUID(fromLang))
+        } else {
+            cookieSetFromLang(defaultFromLang)
+        }
+        if (toLang !== undefined) {
+            cookieSetToLang(Language.createFromUUID(toLang))
+        } else {
+            cookieSetToLang(defaultToLang)
+        }
+
+    }, []);
+
+
+
 
     const handleLanguageSwitch = () => {
         let fromLangNewInstance: Language = selectedFromLang as Language
         let toLangNewInstance: Language = selectedToLang as Language
-        setSelectedFromLang(toLangNewInstance)
-        setSelectedToLang(fromLangNewInstance)
+        cookieSetFromLang(toLangNewInstance)
+        cookieSetToLang(fromLangNewInstance)
     }
 
     const handleDictLookup = async (word: string) => {
@@ -55,13 +86,13 @@ export function UserInput(props: Readonly<UserInputProps>) {
                     <ButtonGroup className='w-100'>
                         <LanguageSelect
                             selectedElem={selectedFromLang}
-                            onSelect={setSelectedFromLang}
+                            onSelect={cookieSetFromLang}
                             availableLanguages={props.availLang}/>
                         <Button variant='light' onClick={handleLanguageSwitch}><FaArrowsRotate
                             className='mb-1'/></Button>
                         <LanguageSelect
                             selectedElem={selectedToLang}
-                            onSelect={setSelectedToLang}
+                            onSelect={cookieSetToLang}
                             availableLanguages={props.availLang}/>
                     </ButtonGroup>
                 </Col>

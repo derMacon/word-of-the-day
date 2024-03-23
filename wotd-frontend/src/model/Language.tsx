@@ -34,4 +34,14 @@ export class Language {
     set name(value: string) {
         this._name = value;
     }
+
+    static createFromUUID(languageUUID: LanguageUUID): Language {
+        switch (languageUUID) {
+            case LanguageUUID.EN:
+                return new Language(languageUUID, 'english')
+            case LanguageUUID.DE:
+                return new Language(languageUUID, 'german')
+        }
+
+    }
 }

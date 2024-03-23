@@ -1,11 +1,6 @@
 import Cookies from 'universal-cookie';
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
-export function getPrincipal(): string {
-    // TODO
-    return 'test-user'
-}
-
 
 export class AuthService {
 

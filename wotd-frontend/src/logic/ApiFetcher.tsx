@@ -3,7 +3,6 @@ import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {instanceToPlain, plainToClass} from "class-transformer";
 import {DictRequest} from "../model/DictRequest";
 import {Language} from "../model/Language";
-import {getPrincipal} from "./AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
@@ -47,7 +46,7 @@ export async function apiHealthStatus(): Promise<ApiHealthInformation> {
 // TODO fix header param type
 export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[]> {
 
-    let input: DictRequest = new DictRequest(getPrincipal(), fromLanguage.language_uuid, toLanguage.language_uuid, word)
+    let input: DictRequest = new DictRequest(fromLanguage.language_uuid, toLanguage.language_uuid, word)
     console.log('headers: ', headers)
     console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
 

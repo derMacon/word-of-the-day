@@ -12,16 +12,12 @@ export class DictRequest {
     @Expose({name: 'input'})
     private _input: string
 
-    @Expose({name: 'user_id'})
-    private _userId: string
 
     constructor(
-        user_id: string,
         fromLanguage: LanguageUUID,
         toLanguage: LanguageUUID,
         input: string
     ) {
-        this._userId = user_id
         this._fromLanguageUuid = fromLanguage
         this._toLanguageUuid = toLanguage
         this._input = input
@@ -39,10 +35,6 @@ export class DictRequest {
         return this._input;
     }
 
-    get userId(): string {
-        return this._userId;
-    }
-
     set fromLanguageUuid(value: LanguageUUID) {
         this._fromLanguageUuid = value;
     }
@@ -55,7 +47,4 @@ export class DictRequest {
         this._input = value;
     }
 
-    set userId(value: string) {
-        this._userId = value;
-    }
 }
