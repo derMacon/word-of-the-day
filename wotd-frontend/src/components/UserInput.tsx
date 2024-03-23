@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
-import {dictLookupWord} from "../logic/ApiFetcher";
+import {dictAutocompleteWord, dictLookupWord} from "../logic/ApiFetcher";
 import {convertToLanguageUUIDEnum, LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
@@ -68,8 +68,11 @@ export function UserInput(props: Readonly<UserInputProps>) {
         cookieSetToLang(fromLangNewInstance)
     }
 
-    const handleAutocomplete = (word: string) => {
+    const handleAutocomplete = async (word: string): Promise<string[]> => {
         console.log('autocompleting word: ', word)
+        let apiResponse: string[] = await dictAutocompleteWord(word, selectedFromLang, selectedToLang)
+        console.log('autocomplete api resp options: ', apiResponse)
+        return apiResponse
     }
 
     const handleDictLookup = async (word: string) => {

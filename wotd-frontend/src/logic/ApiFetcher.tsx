@@ -72,6 +72,27 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
     }
 }
 
+export async function dictAutocompleteWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<string[]> {
+
+    let input: DictRequest = new DictRequest(fromLanguage.language_uuid, toLanguage.language_uuid, word)
+    console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
+
+    try {
+
+        let output = await fetch(WOTD_DICTIONARY_BASE + '/autocomplete-option', {
+            method: 'POST',
+            headers: DEFAULT_HEADERS,
+            body: JSON.stringify(instanceToPlain(input))
+        })
+
+        return await output.json();
+
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+}
+
 export async function dictGetAvailableLang(): Promise<Language[]> {
 
     try {

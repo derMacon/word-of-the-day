@@ -122,7 +122,3 @@
     @extend .px-3;
     /*composes: ;*/
 }
-
-.custom-margin-bottom {
-    margin-bottom: 300px; /* Adjust the margin size as needed */
-}

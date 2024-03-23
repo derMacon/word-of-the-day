@@ -29,6 +29,7 @@ class WebController:
             to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
 
+        app_log.debug(f'autocomplete options: {response_tuples}')
         autocomplete_options: List[str] = [t[0] for t in response_tuples]
         app_log.debug(f'autocomplete options: {autocomplete_options}')
         return autocomplete_options

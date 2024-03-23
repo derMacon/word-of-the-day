@@ -1,3 +1,4 @@
+import './TextField.css'
 import React, {useRef, useState} from 'react';
 import Container from "react-bootstrap/Container";
 import Form from 'react-bootstrap/Form';
@@ -12,7 +13,7 @@ import {ButtonGroup, Col, Row} from "react-bootstrap";
 
 interface TextFieldProps {
     onSubmit: (input: string) => void
-    onType: (input: string) => void
+    onType: (input: string) => Promise<string[]>
     type?: string
     placeholder?: string
 }
@@ -21,13 +22,15 @@ export function TextField(props: TextFieldProps) {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [input, setInput] = useState('')
-    const [show, setShow] = useState(false);
+    const [showAutocompleteOptions, setShowAutocompleteOptions] = useState(false);
+    const [options, setOptions] = useState<string[]>([])
 
 
     const handleKeyDown = (e: any) => {
         if (e.code === 'Enter' || e.which === 13) {
             const output = e.target.value;
             props.onSubmit(output);
+            setShowAutocompleteOptions(false)
             inputRef.current!.blur()
             // src: https://stackoverflow.com/questions/11845371/window-scrollto-is-not-working-in-mobile-phones
             setTimeout(() => window.scrollTo(0, 0), 100);
@@ -37,41 +40,45 @@ export function TextField(props: TextFieldProps) {
     const handleOnClear = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         setInput('')
         inputRef.current!.focus();
+        setShowAutocompleteOptions(false)
     }
 
     const handleInputChange = (e: any) => {
         setInput(e.target.value)
-        setShow(true)
+        props.onType(e.target.value).then((autocompleteOptions: string[]) => {
+            setOptions(autocompleteOptions.slice(0, 5))
+            setShowAutocompleteOptions(true)
+        })
+
     }
 
-    const options = [
-        {id: 1, name: 'Apple'},
-        {id: 2, name: 'Banana'},
-        {id: 3, name: 'Orange'},
-        // Add more options as needed
-    ];
 
-    const testList = <div className='w-100'>
+    const handleAutocompleteSelection = (word: string) => {
+        setInput(word)
+        props.onSubmit(word)
+        setShowAutocompleteOptions(false)
+    }
+
+    const generateItems = () => {
+        let items: JSX.Element[] = [];
+        options.forEach((elem: string) => items.push(
+            <ListGroup.Item
+                onClick={(e) => handleAutocompleteSelection(elem)}
+                className="custom-list-group-item">
+                {elem}
+            </ListGroup.Item>
+        ))
+        return items
+    }
+
+    const autocompleteOptions = <div className='w-100'>
         <div className="w-100 bg-white mx-0">
             <Container fluid="md">
-
                 <div className="custom-max-width">
-                    {/*<div className="custom-max-width bg-white debugborder" >*/}
                     <Row>
                         <Col xs={12} md={7} className='px-1 pe-3 pe-md-2'>
-                            {/*<div className='debugborder'>*/}
-                            {/*    test*/}
-                            {/*</div>*/}
                             <ListGroup variant="flush">
-                                <ListGroup.Item>Cras justo odio</ListGroup.Item>
-                                <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                                <ListGroup.Item>Morbi leo risus</ListGroup.Item>
-                                <ListGroup.Item>Porta ac consectetur ac</ListGroup.Item>
-                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
-                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
-                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
-                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
-                                <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                                {generateItems()}
                             </ListGroup>
                             <div className="custom-margin-bottom"/>
                         </Col>
@@ -80,18 +87,6 @@ export function TextField(props: TextFieldProps) {
             </Container>
         </div>
     </div>
-    // <Row>
-    //     <Col>
-    {/*<Col xs={12} md={7} className='pe-md-1 pb-2'>*/
-    }
-
-    {/*
-    }
-    <div className='debugborderpurple w-100'>test</div>
-    {/*    <Button>test</Button>*/
-    }
-    // </Col>
-    // </Row>
 
     return (
         <div>
@@ -109,12 +104,10 @@ export function TextField(props: TextFieldProps) {
                 <InputGroup.Text onClick={handleOnClear}>
                     <FaTimes/>
                 </InputGroup.Text>
-
-
             </InputGroup>
 
-            <Overlay target={inputRef} show={show} placement="bottom-start">
-                {testList}
+            <Overlay target={inputRef} show={showAutocompleteOptions} placement="bottom-start">
+                {autocompleteOptions}
             </Overlay>
         </div>
     );

@@ -1,0 +1,7 @@
+.custom-margin-bottom {
+    margin-bottom: 3000px; /* Adjust the margin size as needed */
+}
+
+.custom-list-group-item:hover {
+    background-color: #e7e7e7; /* Change background color on hover */
+}
