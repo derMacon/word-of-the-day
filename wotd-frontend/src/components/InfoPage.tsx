@@ -11,7 +11,7 @@ export function InfoPage() {
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title></Offcanvas.Title>
                 </Offcanvas.Header>
-                <Offcanvas.Body>
+                <Offcanvas.Body style={{ maxHeight: '95vh', overflowY: 'auto' }}>
 
                     <h1 className="text-lg-center">Word of the day</h1>
                     <h2 className={'text-left'}>Description</h2>

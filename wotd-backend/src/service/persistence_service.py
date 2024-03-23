@@ -52,7 +52,7 @@ class PersistenceService:
             self._cursor = None
             raise DatabaseError('invalid init', e)
 
-    def connection_is_established(self):
+    def db_connection_is_established(self):
         try:
             self._establish_db_connection()
         except DatabaseError as e:
@@ -65,7 +65,7 @@ class PersistenceService:
         def decorate(self, *args, **kwargs):
             with self._lock:
 
-                if not self.connection_is_established:
+                if not self.db_connection_is_established:
                     self._establish_db_connection()
 
                 try:

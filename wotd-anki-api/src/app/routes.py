@@ -20,7 +20,7 @@ cool_down_counter = ThreadSafeCounter()
 @main.route("/login", methods=['POST'])
 @cross_origin()
 def login():
-    with lock:
+    with lock: # TODO locking via server config not explicit in the code
         log.debug('user called login endpoint')
         username = request.json.get('username')
         password = request.json.get('password')

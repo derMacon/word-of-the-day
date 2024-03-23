@@ -1,12 +1,7 @@
 import React from 'react';
-import {FaArrowsRotate, FaCloudBolt, FaCloudArrowUp} from "react-icons/fa6";
+import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import Container from "react-bootstrap/Container";
 import Table from "react-bootstrap/Table";
-import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
-import LanguageSelect from "./LanguageSelect";
-import {Language} from "../model/Language";
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import { FaCircleInfo } from "react-icons/fa6";
 
 export function BasicUsage() {
 

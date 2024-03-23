@@ -21,7 +21,7 @@ from src.utils.logging_config import app_log
 @main.route("/health")
 def health_check() -> Tuple[Response, int]:
     status = {
-        'db_connection': PersistenceService().connection_is_established(),
+        'db_connection': PersistenceService().db_connection_is_established(),
         'anki_api_connection': anki_api_fetcher.health_check(),
         'wotd_api_connection': True,
     }

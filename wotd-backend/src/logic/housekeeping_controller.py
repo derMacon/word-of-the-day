@@ -24,11 +24,11 @@ def sync_anki_push(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders
         app_log.debug(f'sync anki push with interval: {housekeeping_interval}')
 
         error_cnt = 0
-        while PersistenceService().connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
+        while not PersistenceService().db_connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
             error_cnt = error_cnt + 1
             sleep(housekeeping_interval)
 
-        if PersistenceService().connection_is_established():
+        if PersistenceService().db_connection_is_established() and anki_api_fetcher.health_check():
             _push_data(housekeeping_interval, auth_headers)
         else:
             app_log.debug('not possible to push data to anki api - try pushing with next cleanup job')
@@ -52,9 +52,12 @@ def _push_data(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders):
                 back=curr_option.output,
             )
 
-            response_ok = anki_api_fetcher.push_card(card_input, auth_headers)
+            response_ok = anki_api_fetcher.api_push_card(card_input, auth_headers)
             if response_ok:
                 PersistenceService().update_item_status(curr_option.dict_options_item_id, Status.SYNCED)
+            else:
+                app_log.error(f"not able to push card '{str(card_input)}'")
+
         elif curr_option.status != Status.SYNCED:
             ids_to_delete.append(curr_option.dict_options_item_id)
 

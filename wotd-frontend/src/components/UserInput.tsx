@@ -45,33 +45,13 @@ export function UserInput(props: Readonly<UserInputProps>) {
 
 
     return (
-        <div className='sticky pt-3 pb-2 bg-white white-shadow'>
+        <div className='sticky pt-2 pb-2 bg-white white-shadow'>
             <Row>
-                {/*<Col className='debugbordergreen mb-2 pl-0 pr-1'>*/}
-                <Col xs={12} md className='debugbordergreen'>
+                <Col xs={12} md={7} className='pe-md-1 pb-2'>
                     <TextField onSubmit={handleDictLookup}/>
                 </Col>
-                {/*<Col className='mb-2'>*/}
-                <Col xs={6} sm={6} md={4} className='debugbordergreen px-md-0 pe-sm-1'>
-                    <ButtonGroup className='w-100'>
-                        <DropdownButton variant='secondary' id="dropdown-basic-button" title="Translation">
-                            <Dropdown.Item href="#/action-1">Translation</Dropdown.Item>
-                            <Dropdown.Item href="#/action-2">Definition</Dropdown.Item>
-                            <Dropdown.Item href="#/action-3">Synonyms</Dropdown.Item>
-                        </DropdownButton>
-                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
-                            {props.authProvider.userIsLoggedIn()
-                                ? (<FaCloudArrowUp className='mb-1'/>)
-                                : (<FaCloudBolt className='mb-1'/>)}
-                        </Button>
-                        <Button variant='light' onClick={props.handleShowInfoPage}>
-                            <FaCircleInfo className='mb-1'/>
-                        </Button>
-                    </ButtonGroup>
-                </Col>
-                {/*<Col className='mb-2'>*/}
-                <Col xs={6} sm={6} md={3} className='debugbordergreen ps-sm-1'>
-                    {/*<ButtonGroup className='w-100'>*/}
+
+                <Col xs={8} md={3} className='ps-md-0 pe-1'>
                     <ButtonGroup className='w-100'>
                         <LanguageSelect
                             selectedElem={selectedFromLang}
@@ -83,6 +63,19 @@ export function UserInput(props: Readonly<UserInputProps>) {
                             selectedElem={selectedToLang}
                             onSelect={setSelectedToLang}
                             availableLanguages={props.availLang}/>
+                    </ButtonGroup>
+                </Col>
+
+                <Col xs={4} md={2} className='ps-0'>
+                    <ButtonGroup className='w-100'>
+                        <Button variant='light' onClick={props.handleShowInfoPage}>
+                            <FaCircleInfo className='mb-1'/>
+                        </Button>
+                        <Button variant='light' onClick={props.handleShowAnkiLogin}>
+                            {props.authProvider.userIsLoggedIn()
+                                ? (<FaCloudArrowUp className='mb-1'/>)
+                                : (<FaCloudBolt className='mb-1'/>)}
+                        </Button>
                     </ButtonGroup>
                 </Col>
             </Row>

@@ -54,7 +54,7 @@ class AnkiApiFetcher:
 
         return main_token, card_token
 
-    def push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders) -> bool:
+    def api_push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders) -> bool:
         app_log.debug(f'push anki card: {str(anki_card)}')
         url = self.ANKI_API_BASE + '/add-card'
         data = asdict(anki_card)
