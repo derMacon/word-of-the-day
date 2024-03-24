@@ -52,7 +52,6 @@ export function DictMask() {
                     setShowErrorPage(true)
                 } else if (!healthStatus.ankiApiConnection) {
                     console.error('anki api not available: ', healthStatus)
-                    alert('Anki API not available - you can lookup words but cannot synchronize them with your anki web account.')
                 }
 
             }

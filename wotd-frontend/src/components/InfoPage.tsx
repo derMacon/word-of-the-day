@@ -1,6 +1,7 @@
 import React from 'react';
 import Container from "react-bootstrap/Container";
 import Offcanvas from "react-bootstrap/Offcanvas";
+import './InfoPage.css'
 
 
 export function InfoPage() {
@@ -45,6 +46,8 @@ export function InfoPage() {
                     <p>The source code for this project is available on <a
                         href='https://gitlab.com/s.hoffmann/projects/programming/msc/word-of-the-day'>gitlab</a>.
                     </p>
+
+                    <div className='custom-margin-bottom-small'/>
 
                 </Offcanvas.Body>
             </div>
