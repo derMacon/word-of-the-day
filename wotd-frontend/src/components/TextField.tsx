@@ -10,11 +10,12 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Button from 'react-bootstrap/Button';
 import {ButtonGroup, Col, Row} from "react-bootstrap";
 import {socket} from "../logic/ApiFetcher";
+import {initSocket} from "../logic/SocketFetcher";
 
 
 interface TextFieldProps {
     onSubmit: (input: string) => void
-    onType: (input: string) => Promise<string[]>
+    onType: (input: string) => void
     type?: string
     placeholder?: string
 }
@@ -26,6 +27,12 @@ export function TextField(props: TextFieldProps) {
     const [showAutocompleteOptions, setShowAutocompleteOptions] = useState(false);
     const [options, setOptions] = useState<string[]>([])
 
+    const setOptionsHandleShow = (input: string[]) => {
+        setOptions(input)
+        setShowAutocompleteOptions(true)
+    }
+
+    useEffect(() => initSocket(setOptionsHandleShow), []);
 
     const handleKeyDown = (e: any) => {
         if (e.code === 'Enter' || e.which === 13) {
@@ -46,11 +53,8 @@ export function TextField(props: TextFieldProps) {
 
     const handleInputChange = (e: any) => {
         setInput(e.target.value)
-        props.onType(e.target.value).then((autocompleteOptions: string[]) => {
-            setOptions(autocompleteOptions.slice(0, 5))
-            setShowAutocompleteOptions(true)
-        })
-
+        props.onType(e.target.value)
+        // setShowAutocompleteOptions(true)
     }
 
 

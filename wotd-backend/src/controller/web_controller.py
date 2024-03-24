@@ -11,10 +11,6 @@ from src.utils.translations_utils import update_status, update_deckname
 from src.app.events import *
 
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-    test_socket_io()
 
 class WebController:
 

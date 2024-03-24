@@ -9,6 +9,7 @@ import {Language} from "../model/Language";
 import {AuthService} from "../logic/AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import Cookies from "universal-cookie";
+import {socketAutocompleteWord} from "../logic/SocketFetcher";
 
 interface UserInputProps {
     authProvider: AuthService
@@ -27,7 +28,7 @@ export function UserInput(props: Readonly<UserInputProps>) {
     const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
     const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
 
-    const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isConnected, setIsConnected] = useState(socket.connected); // TODO what do we need this for?
 
     const cookies: Cookies = new Cookies(null, {path: '/'})
     const fromLangCookieKey: string = 'from-lang' // TODO all caps
@@ -60,34 +61,6 @@ export function UserInput(props: Readonly<UserInputProps>) {
     //
     // }, [cookieSetFromLang, cookieSetToLang, cookies, defaultFromLang, defaultToLang]);
 
-    useEffect(() => {
-
-        function onConnect() {
-            console.log('connected to socket')
-            setIsConnected(true);
-        }
-
-        function onDisconnect() {
-            setIsConnected(false);
-            alert('backend offline - check the docker compose setup on the host')
-        }
-
-        function onAutocorrectReceive(value: string[]) {
-            console.log('executing test call: ', value)
-        }
-
-        console.log('before trying to connect')
-        socket.on('connect', onConnect);
-        socket.on('disconnect', onDisconnect);
-        socket.on('update_autocorrect', onAutocorrectReceive);
-        console.log('after trying to connect')
-
-        return () => {
-            socket.off('connect', onConnect);
-            socket.off('disconnect', onDisconnect);
-            socket.off('update_autocorrect', onAutocorrectReceive);
-        };
-    }, []);
 
 
     const handleLanguageSwitch = () => {
@@ -97,11 +70,12 @@ export function UserInput(props: Readonly<UserInputProps>) {
         cookieSetToLang(fromLangNewInstance)
     }
 
-    const handleAutocomplete = async (word: string): Promise<string[]> => {
+    const handleAutocomplete = (word: string): void => {
         console.log('autocompleting word: ', word)
-        let apiResponse: string[] = await dictAutocompleteWord(word, selectedFromLang, selectedToLang)
-        console.log('autocomplete api resp options: ', apiResponse)
-        return apiResponse
+        socketAutocompleteWord(word, selectedFromLang, selectedToLang)
+        // let apiResponse: string[] = await dictAutocompleteWord(word, selectedFromLang, selectedToLang)
+        // console.log('autocomplete api resp options: ', apiResponse)
+        // return apiResponse
     }
 
     const handleDictLookup = async (word: string) => {

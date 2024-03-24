@@ -11,6 +11,7 @@ import {ApiHealthInformation} from "../model/ApiHealthInformation";
 
 const HTTP_STATUS_OK: number = 200
 
+// TODO read this from .ini or .env - don't hardcode it
 const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
 export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
 export const WOTD_ANKI_DOMAIN: string = WOTD_API_BASE + '/anki'
@@ -95,6 +96,8 @@ export async function dictAutocompleteWord(word: string, fromLanguage: Language,
         throw error
     }
 }
+
+
 
 export async function dictGetAvailableLang(): Promise<Language[]> {
 
