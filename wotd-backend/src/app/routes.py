@@ -5,6 +5,7 @@ from typing import Tuple
 from flask import jsonify, request, Response
 
 from src.app import main
+from src.app.events import test_socket_io
 from src.data.anki.token_type import TokenType
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
@@ -57,6 +58,11 @@ def anki_login():
 #     anki_api_fetcher.push_card(anki_card, request.headers)
 #
 #     return ''
+
+@main.route("/dict/test-socket")
+def test_socket():
+    test_socket_io()
+    return '', 200
 
 
 @main.route("/dict/available-lang")

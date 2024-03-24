@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
-import {dictAutocompleteWord, dictLookupWord} from "../logic/ApiFetcher";
+import {dictAutocompleteWord, dictLookupWord, socket} from "../logic/ApiFetcher";
 import {convertToLanguageUUIDEnum, LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
@@ -27,8 +27,10 @@ export function UserInput(props: Readonly<UserInputProps>) {
     const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
     const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
 
+    const [isConnected, setIsConnected] = useState(socket.connected);
+
     const cookies: Cookies = new Cookies(null, {path: '/'})
-    const fromLangCookieKey: string = 'from-lang'
+    const fromLangCookieKey: string = 'from-lang' // TODO all caps
     const toLangCookieKey: string = 'to-lang'
 
     const cookieSetFromLang = (lang: Language) => {
@@ -58,7 +60,34 @@ export function UserInput(props: Readonly<UserInputProps>) {
     //
     // }, [cookieSetFromLang, cookieSetToLang, cookies, defaultFromLang, defaultToLang]);
 
+    useEffect(() => {
 
+        function onConnect() {
+            console.log('connected to socket')
+            setIsConnected(true);
+        }
+
+        function onDisconnect() {
+            setIsConnected(false);
+            alert('backend offline - check the docker compose setup on the host')
+        }
+
+        function onAutocorrectReceive(value: string[]) {
+            console.log('executing test call: ', value)
+        }
+
+        console.log('before trying to connect')
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
+        socket.on('update_autocorrect', onAutocorrectReceive);
+        console.log('after trying to connect')
+
+        return () => {
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
+            socket.off('update_autocorrect', onAutocorrectReceive);
+        };
+    }, []);
 
 
     const handleLanguageSwitch = () => {

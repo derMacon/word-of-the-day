@@ -1,4 +1,5 @@
 // TODO read this from props or some kind .ini, do not hardcode it
+import { io } from 'socket.io-client';
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {instanceToPlain, plainToClass} from "class-transformer";
 import {DictRequest} from "../model/DictRequest";
@@ -14,6 +15,8 @@ const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
 export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
 export const WOTD_ANKI_DOMAIN: string = WOTD_API_BASE + '/anki'
 export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
+
+export const socket = io(WOTD_BACKEND_SERVER_ADDRESS)
 
 
 // TODO clean up communication with anki api only through wotd backend - delete info here
