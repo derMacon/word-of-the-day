@@ -4,10 +4,7 @@ import {instanceToPlain} from "class-transformer";
 import {socket} from "./ApiFetcher";
 
 
-// interface DropdownSelectProps {
-//     availableLanguages: Language[]
-// }
-
+const AUTOCORRECT_OPTION_COUNT = 8
 
 export function initSocket(
     optionSetter: (autocorrectOptions: string[]) => void
@@ -18,10 +15,11 @@ export function initSocket(
     }
 
     function onDisconnect() {
-        alert('disconnected from socket')
+        console.log('disconnected from socket')
     }
 
     function onAutocorrectReceive(options: string[]) {
+        options = options.slice(0, AUTOCORRECT_OPTION_COUNT)
         console.log('executing test call: ', options)
         optionSetter(options)
     }

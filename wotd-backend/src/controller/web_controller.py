@@ -21,8 +21,10 @@ class WebController:
     def autocomplete_dict_word(self, dict_request: DictRequest) -> List[str]:
         autocomplete_options: List[str] = []
         if dict_request.from_language_uuid == LanguageUUID.EN:
+            app_log.debug('using actual autocomplete api')
             autocomplete_options = lookup_autocomplete(dict_request.input)
         else:
+            app_log.debug('using dict.cc fake autocomplete api')
             response_tuples = self.dictcc_translator.translate(
                 word=dict_request.input,
                 from_language=dict_request.from_language_uuid.name.lower(),
