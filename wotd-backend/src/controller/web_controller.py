@@ -5,11 +5,11 @@ from dictcc import Dict
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
 from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.language_uuid import LanguageUUID
+from src.service.autocomplete_api_fetcher import lookup_autocomplete
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import update_status, update_deckname
-from src.app.events import *
-
 
 
 class WebController:
@@ -19,14 +19,18 @@ class WebController:
         self.persistence_service = PersistenceService()
 
     def autocomplete_dict_word(self, dict_request: DictRequest) -> List[str]:
-        response_tuples = self.dictcc_translator.translate(
-            word=dict_request.input,
-            from_language=dict_request.from_language_uuid.name.lower(),
-            to_language=dict_request.to_language_uuid.name.lower()
-        ).translation_tuples
+        autocomplete_options: List[str] = []
+        if dict_request.from_language_uuid == LanguageUUID.EN:
+            autocomplete_options = lookup_autocomplete(dict_request.input)
+        else:
+            response_tuples = self.dictcc_translator.translate(
+                word=dict_request.input,
+                from_language=dict_request.from_language_uuid.name.lower(),
+                to_language=dict_request.to_language_uuid.name.lower()
+            ).translation_tuples
+            app_log.debug(f'autocomplete options: {response_tuples}')
+            autocomplete_options = [t[0] for t in response_tuples]
 
-        app_log.debug(f'autocomplete options: {response_tuples}')
-        autocomplete_options: List[str] = [t[0] for t in response_tuples]
         app_log.debug(f'autocomplete options: {autocomplete_options}')
         return autocomplete_options
 
