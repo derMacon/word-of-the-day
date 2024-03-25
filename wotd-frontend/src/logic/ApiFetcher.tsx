@@ -33,7 +33,7 @@ const DEFAULT_HEADERS = {
 
 // ------------------- WOTD ------------------- //
 
-export async function apiHealthStatus(): Promise<ApiHealthInformation> {
+export async function wotdApiHealthStatus(): Promise<ApiHealthInformation> {
     try {
         let response: Response = await fetch(WOTD_API_BASE + '/health')
         let jsonObject: Object = await response.json() as Object

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Container from "react-bootstrap/Container";
 import {SelectableTable} from "./SelectableTable";
-import {apiHealthStatus, dictGetAvailableLang} from "../logic/ApiFetcher";
+import {wotdApiHealthStatus, dictGetAvailableLang} from "../logic/ApiFetcher";
 import {Button} from "react-bootstrap";
 import {Language} from "../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
@@ -33,7 +33,7 @@ export function DictMask() {
 
 
     useEffect(() => {
-        apiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
+        wotdApiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
                 setApiHealth(healthStatus)
 
                 if (!healthStatus.dbConnection) {

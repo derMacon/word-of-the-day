@@ -8,6 +8,8 @@ from src.utils.logging_config import app_log
 # TODO put this into .ini file
 TRANSLATION_DECK = 'wotd_translations'
 DEFINITION_DECK = 'wotd_definitions'
+PRESELECTED_ITEMS_COUNT = 2
+
 
 def update_status(original_input: str, options: List[DictOptionsItem]):
     status: Status = Status.OK
@@ -22,8 +24,14 @@ def update_status(original_input: str, options: List[DictOptionsItem]):
         curr_option.status = status
 
     app_log.debug(f'status: {status}')
-    if status == Status.OK and options is not None and options:
-        options[0].selected = True  # preselect first entry
+    if (status == Status.OK
+            and options is not None
+            and len(options) >= PRESELECTED_ITEMS_COUNT):
+        for i in range(PRESELECTED_ITEMS_COUNT):
+            options[i].selected = True  # preselect first n entries
+            i += 1
+    else:
+        app_log.error(f'could not preselect items for the following status / options: {status} / {options}')
 
 
 def update_deckname(options: List[DictOptionsItem], dict_request: DictRequest):

@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {apiHealthStatus, toggleSelectedOption} from "../logic/ApiFetcher";
+import {wotdApiHealthStatus, toggleSelectedOption} from "../logic/ApiFetcher";
 import './SelectableTable.css';
 import {DictOptionsItem} from "../model/DictOptionsItem";
-import Card from 'react-bootstrap/Card';
 
 
 interface SelectableTableProps {
@@ -33,7 +32,7 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
     }, []);
 
     const handleSelection = (selectedOption: DictOptionsItem) => {
-        apiHealthStatus().then(e => {
+        wotdApiHealthStatus().then(e => {
             let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
             setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
             if (props.userIsLoggedIn) {
