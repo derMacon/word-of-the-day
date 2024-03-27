@@ -12,8 +12,9 @@ def handle_value_error(error):
     return jsonify({'type_error': f"invalid request: {error}"}), 400
 
 
-@main.errorhandler(AttributeError)
-@main.errorhandler(DatabaseError)
-def handle_attribute_error(error):
-    app_log.error(f'http 500 - {error}')
-    return jsonify({'database_error': f"internal server error: {error}"}), 500
+# TODO remove this handler function
+# @main.errorhandler(AttributeError)
+# @main.errorhandler(DatabaseError)
+# def handle_attribute_error(error):
+#     app_log.error(f'http 500 - {error}')
+#     return jsonify({'database_error': f"internal server error: {error}"}), 500

@@ -1,4 +1,5 @@
 import os
+import random
 import threading
 from typing import List
 
@@ -138,6 +139,11 @@ class PersistenceService:
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
 
         self._conn.commit()
+        return options
+
+    def invalidate_dict_options(self, options: List[DictOptionsItem]) -> List[DictOptionsItem]:
+        for curr_opt in options:
+            curr_opt.dict_options_item_id = random.randint(-10000, -1)  # items with smaller ID than 0 are invalid
         return options
 
     @_database_error_decorator  # type: ignore

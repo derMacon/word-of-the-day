@@ -6,6 +6,7 @@ from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHea
 from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.language_uuid import LanguageUUID
+from src.data.error.database_error import DatabaseError
 from src.service.autocomplete_api_fetcher import lookup_autocomplete
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
@@ -61,10 +62,15 @@ class WebController:
         update_deckname(options, dict_request)
         app_log.debug(f'updated options: {options}')
 
-        updated_options = self.persistence_service.insert_dict_options(options)
-        app_log.debug(f'persisted dict options: {updated_options}')
-
-        return updated_options
+        try:
+            updated_options = self.persistence_service.insert_dict_options(options)
+            app_log.debug(f'persisted dict options: {updated_options}')
+            return updated_options
+        except (AttributeError, DatabaseError) as e:
+            app_log.error(f'database error: {e}')
+            self.persistence_service.invalidate_dict_options(options)
+            app_log.debug(f'not persisted dict options: {options}')
+            return options
 
     def select_dict_word(self, item_id: int) -> bool:
         app_log.debug(f"toggle item id: {item_id}")
