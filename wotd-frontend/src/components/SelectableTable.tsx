@@ -16,20 +16,20 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
     const [highlight, setHighlight] = useState<Map<number, boolean>>(() => {
         const initialHighlight = new Map();
         props.apiResponse.forEach((option: DictOptionsItem) => {
-            initialHighlight.set(option.dictOptionsItemId, false);
+            initialHighlight.set(option.dictOptionsItemId, option.selected);
         });
 
         return initialHighlight;
     });
 
-    useEffect(() => {
-        // preselect first entry
-        if (props.apiResponse.length > 0) {
-            let selectedOption = props.apiResponse[0]
-            let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
-            setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
-        }
-    }, []);
+    // useEffect(() => {
+    //     // preselect first entry
+    //     if (props.apiResponse.length > 0) {
+    //         let selectedOption = props.apiResponse[0]
+    //         let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
+    //         setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
+    //     }
+    // }, []);
 
     const handleSelection = (selectedOption: DictOptionsItem) => {
         wotdApiHealthStatus().then(e => {
