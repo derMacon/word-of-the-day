@@ -7,7 +7,7 @@ from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.status import Status
 from src.data.error.database_error import DatabaseError
-from src.service.anki_api_fetcher import anki_api_fetcher
+from src.service.wotd_api_fetcher import anki_api_fetcher
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 
@@ -16,6 +16,7 @@ MAX_CONNECTION_TRIES = 3
 
 def trigger_housekeeping(auth_headers: AnkiLoginResponseHeaders):
     delay_sec = float(os.environ['HOUSEKEEPING_INTERVAL_SEC'])  # TODO dont hardcode this
+    app_log.debug(f'triggering housekeeping in {delay_sec} secs')
     threading.Timer(delay_sec, sync_anki_push, args=(delay_sec, auth_headers,)).start()
 
 
@@ -38,7 +39,7 @@ def sync_anki_push(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders
 
 
 def _push_data(housekeeping_interval, auth_headers: AnkiLoginResponseHeaders):
-    persisted_options = PersistenceService().find_expired_options(housekeeping_interval)
+    persisted_options = PersistenceService().find_expired_options_for_user(housekeeping_interval, auth_headers)
     ids_to_delete: List[int] = []
     for curr_option in persisted_options:
 

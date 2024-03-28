@@ -5,13 +5,13 @@ from typing import Tuple
 from flask import jsonify, request, Response
 
 from src.app import main
-from src.data.anki.token_type import TokenType
+from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.service.anki_api_fetcher import anki_api_fetcher
+from src.service.wotd_api_fetcher import anki_api_fetcher
 from src.controller.housekeeping_controller import trigger_housekeeping
 from src.controller.web_controller import controller
 from src.service.persistence_service import PersistenceService
@@ -36,27 +36,14 @@ def anki_login():
     main_token, card_token = anki_api_fetcher.login(**request_data)
 
     resp = Response()
-    resp.headers[TokenType.MAIN.value.header_key] = main_token
-    resp.headers[TokenType.CARD.value.header_key] = card_token
+    resp.headers[HeaderType.MAIN.value.header_key] = main_token
+    resp.headers[HeaderType.CARD.value.header_key] = card_token
 
     resp.headers.add('Access-Control-Expose-Headers',
-                     TokenType.MAIN.value.header_key
-                     + ',' + TokenType.CARD.value.header_key)
+                     HeaderType.MAIN.value.header_key
+                     + ',' + HeaderType.CARD.value.header_key)
 
     return resp
-
-
-# TODO what is this?
-# @main.route("/anki/add-card")
-# def anki_card_push():
-#     request_data = request.get_json()
-#     app_log.debug(f"request data: {request_data}")
-#     anki_card = AnkiCard(**request_data)
-#     app_log.debug(f"anki card: {anki_card}")
-#
-#     anki_api_fetcher.push_card(anki_card, request.headers)
-#
-#     return ''
 
 
 @main.route("/dict/available-lang")
@@ -104,12 +91,14 @@ def lookup_word_options() -> Tuple[Response, int]:
 
 def _extract_headers():
     headers = None
-    if TokenType.MAIN.value.header_key in request.headers \
-            and TokenType.CARD.value.header_key in request.headers:
-        app_log.debug('header: %s', request.headers)
-        main_token = request.headers[TokenType.MAIN.value.header_key]
-        card_token = request.headers[TokenType.CARD.value.header_key]
-        headers = AnkiLoginResponseHeaders(main_token, card_token)
+    if HeaderType.MAIN.value.header_key in request.headers \
+            and HeaderType.CARD.value.header_key in request.headers:
+        app_log.debug('raw header: %s', request.headers)
+        username = request.headers[HeaderType.USER.value.header_key]
+        main_token = request.headers[HeaderType.MAIN.value.header_key]
+        card_token = request.headers[HeaderType.CARD.value.header_key]
+        headers = AnkiLoginResponseHeaders(username, main_token, card_token)
+        app_log.debug('parsed header: %s', headers)
     else:
         app_log.debug(f'header not available: {request.headers}')
     return headers

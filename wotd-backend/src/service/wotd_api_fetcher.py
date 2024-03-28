@@ -3,20 +3,20 @@ from dataclasses import asdict
 import requests
 
 from src.data.anki.anki_card import AnkiCard
-from src.data.anki.token_type import TokenType
+from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.utils.logging_config import app_log
 
 
 # TODO make functions static or use singleton decorator - only works without constants in the class (first put them into .ini file)
-class AnkiApiFetcher:
+class WotdApiFetcher:
     # TODO use .ini file
     ANKI_API_SERVER_ADDRESS = 'http://192.168.178.187:4000'
     ANKI_API_BASE = 'http://192.168.178.187:4000/api/v1'
 
     def health_check(self):
         try:
-            return requests.get(AnkiApiFetcher.ANKI_API_BASE + "/health").ok
+            return requests.get(WotdApiFetcher.ANKI_API_BASE + "/health").ok
         except Exception as e:
             app_log.error(e)
             return False
@@ -46,8 +46,8 @@ class AnkiApiFetcher:
         # else:
         #     print("POST request failed with status code:", response.status_code)
 
-        main_token = response.headers[TokenType.MAIN.value.header_key]
-        card_token = response.headers[TokenType.CARD.value.header_key]
+        main_token = response.headers[HeaderType.MAIN.value.header_key]
+        card_token = response.headers[HeaderType.CARD.value.header_key]
 
         app_log.debug(f"main token: '{main_token}'")
         app_log.debug(f"card token: '{card_token}'")
@@ -62,4 +62,4 @@ class AnkiApiFetcher:
         return requests.get(url, json=data, headers=headers.to_map()).ok
 
 
-anki_api_fetcher = AnkiApiFetcher()
+anki_api_fetcher = WotdApiFetcher()

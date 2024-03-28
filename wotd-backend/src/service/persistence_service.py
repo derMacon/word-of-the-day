@@ -6,6 +6,7 @@ from typing import List
 import psycopg2
 from singleton_decorator import singleton
 
+from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
 from src.data.dict_input.language import Language
@@ -126,9 +127,10 @@ class PersistenceService:
         saves the option objects into the db and fetches the generated id into a new object
         """
         for curr_opt in options:
-            sql_insert = ("INSERT INTO dict_options_item (deck, input, output, selected, status, option_response_ts) "
-                          "VALUES (%s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
+            sql_insert = ("INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
+                          "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
             self._cursor.execute(sql_insert, (
+                curr_opt.username,
                 curr_opt.deck,
                 curr_opt.input,
                 curr_opt.output,
@@ -179,10 +181,12 @@ class PersistenceService:
         self._conn.commit()
 
     @_database_error_decorator  # type: ignore
-    def find_expired_options(self, expiry_interval: int) -> List[DictOptionsItem]:
+    def find_expired_options_for_user(self, expiry_interval: int,
+                                      auth_headers: AnkiLoginResponseHeaders) -> List[DictOptionsItem]:
         sql_select = ("SET TIMEZONE TO 'Europe/Berlin';"
                       f"SELECT * FROM dict_options_item "
-                      f"WHERE option_response_ts < NOW() - interval '{expiry_interval} SECONDS';")
+                      f"WHERE username = '{auth_headers.username}' "
+                      f"AND option_response_ts < NOW() - interval '{expiry_interval} SECONDS';")
         app_log.debug('sql select: %s', sql_select)
         self._cursor.execute(sql_select)
 

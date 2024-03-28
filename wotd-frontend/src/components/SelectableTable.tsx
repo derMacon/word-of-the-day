@@ -22,15 +22,6 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
         return initialHighlight;
     });
 
-    // useEffect(() => {
-    //     // preselect first entry
-    //     if (props.apiResponse.length > 0) {
-    //         let selectedOption = props.apiResponse[0]
-    //         let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)
-    //         setHighlight((prevHighlight: Map<number, boolean>) => new Map(prevHighlight).set(selectedOption.dictOptionsItemId, state))
-    //     }
-    // }, []);
-
     const handleSelection = (selectedOption: DictOptionsItem) => {
         wotdApiHealthStatus().then(e => {
             let state: boolean = !highlight.get(selectedOption.dictOptionsItemId)

@@ -23,6 +23,7 @@ INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VA
 
 CREATE TABLE IF NOT EXISTS dict_options_item (
   dict_options_item_id SERIAL PRIMARY KEY,
+  username VARCHAR(100) NOT NULL,
   deck VARCHAR(100) NOT NULL,
   input VARCHAR(100) NOT NULL,
   output VARCHAR(1000) NOT NULL,

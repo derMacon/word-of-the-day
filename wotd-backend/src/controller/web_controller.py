@@ -44,7 +44,7 @@ class WebController:
             from_language=dict_request.from_language_uuid.name.lower(),
             to_language=dict_request.to_language_uuid.name.lower()
         ).translation_tuples
-        options: List[DictOptionsItem] = from_translation_tuples(response_tuples)
+        options: List[DictOptionsItem] = from_translation_tuples(response_tuples, auth_headers)
         app_log.debug(f'lookup options: {options}')
 
         if auth_headers is None:

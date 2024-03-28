@@ -3,17 +3,23 @@ from enum import Enum
 
 from src.data.anki.anki_web_endpoints import AnkiWebEndpoints
 
-TokenInfo = namedtuple('TokenInfo', ['header_key', 'db_table', 'cookie_endpoint'])
+ValueInfo = namedtuple('ValueInfo', ['header_key', 'db_table', 'cookie_endpoint'])
 
 
-class TokenType(Enum):
-    MAIN = TokenInfo(
+# TODO, why do we need a db_table attribute / is this even used?
+class HeaderType(Enum):
+    MAIN = ValueInfo(
         header_key='Main-token',
         db_table='MAIN_TOKEN',
         cookie_endpoint=AnkiWebEndpoints.DECKS
     )
-    CARD = TokenInfo(
+    CARD = ValueInfo(
         header_key='Card-token',
         db_table='CARD_TOKEN',
         cookie_endpoint=AnkiWebEndpoints.ADD
+    )
+    USER = ValueInfo(
+        header_key='Anki-Email',
+        db_table='USER',
+        cookie_endpoint=AnkiWebEndpoints.ALL
     )

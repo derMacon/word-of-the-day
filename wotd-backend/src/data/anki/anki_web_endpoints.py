@@ -6,3 +6,4 @@ class AnkiWebEndpoints(str, Enum):
     LOGOUT = 'https://ankiweb.net/account/logout'
     DECKS = 'https://ankiweb.net/decks'
     ADD = 'https://ankiweb.net/add'
+    ALL = '*'
