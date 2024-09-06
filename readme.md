@@ -54,3 +54,7 @@ psql -d wotd_db -U admin -a -f /docker-entrypoint-initdb.d/init.sql
 ```sql
 DROP SCHEMA public CASCADE; CREATE SCHEMA public;
 ```
+
+## TODO
+- Delete anki api since anki connect works better
+

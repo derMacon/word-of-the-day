@@ -32,18 +32,19 @@ def health_check() -> Tuple[Response, int]:
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
     request_data = request.get_json()
+
     # anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request_data)
     main_token, card_token = anki_api_fetcher.login(**request_data)
-
-    resp = Response()
-    resp.headers[HeaderType.MAIN.value.header_key] = main_token
-    resp.headers[HeaderType.CARD.value.header_key] = card_token
-
-    resp.headers.add('Access-Control-Expose-Headers',
-                     HeaderType.MAIN.value.header_key
-                     + ',' + HeaderType.CARD.value.header_key)
-
-    return resp
+    #
+    # resp = Response()
+    # resp.headers[HeaderType.MAIN.value.header_key] = main_token
+    # resp.headers[HeaderType.CARD.value.header_key] = card_token
+    #
+    # resp.headers.add('Access-Control-Expose-Headers',
+    #                  HeaderType.MAIN.value.header_key
+    #                  + ',' + HeaderType.CARD.value.header_key)
+    #
+    # return resp
 
 
 @main.route("/dict/available-lang")

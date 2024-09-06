@@ -1,8 +1,10 @@
+import os
 from dataclasses import asdict
 
 import requests
 
 from src.data.anki.anki_card import AnkiCard
+from src.data.anki.anki_connect_response_wrapper import AnkiConnectResponseWrapper
 from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.utils.logging_config import app_log
@@ -10,13 +12,27 @@ from src.utils.logging_config import app_log
 
 # TODO make functions static or use singleton decorator - only works without constants in the class (first put them into .ini file)
 class WotdApiFetcher:
-    # TODO use .ini file
-    ANKI_API_SERVER_ADDRESS = 'http://192.168.178.187:4000'
-    ANKI_API_BASE = 'http://192.168.178.187:4000/api/v1'
+    ANKI_CONNECT_HOST = os.environ.get('ANKI_CONNECT_HOST', 'localhost')
+    ANKI_CONNECT_DATA_PORT = os.environ.get('ANKI_CONNECT_DATA_PORT', 8765)
+    ANKI_CONNECT_LOGIN_PORT = os.environ.get('ANKI_CONNECT_LOGIN_PORT', 5900)
+
+    ANKI_CONNECT_DATA_ADDRESS_POST = f'http://{ANKI_CONNECT_HOST}:{ANKI_CONNECT_DATA_PORT}'
+    ANKI_CONNECT_LOGIN_ADDRESS_VNC = f'{ANKI_CONNECT_HOST}::{ANKI_CONNECT_LOGIN_PORT}'
 
     def health_check(self):
         try:
-            return requests.get(WotdApiFetcher.ANKI_API_BASE + "/health").ok
+
+            app_log.debug('before run')
+            data = {
+                "action": "deckNames",
+                "version": 6
+            }
+
+            plain_response = requests.post(url=WotdApiFetcher.ANKI_CONNECT_DATA_ADDRESS_POST, json=data).json()
+            anki_connect_response = AnkiConnectResponseWrapper(**plain_response)
+            app_log.debug(f'after: {anki_connect_response.error is None}')
+
+            return anki_connect_response.error is None
         except Exception as e:
             app_log.error(e)
             return False
