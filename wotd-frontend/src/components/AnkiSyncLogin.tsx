@@ -107,6 +107,9 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             </p>
             <hr/>
             <div className="d-flex">
+                <Button onClick={() => alert('feature coming soon')} variant="success"  className="me-2">
+                    Sync Now!
+                </Button>
                 <Button onClick={() => props.authProvider.cleanCookies()} variant="outline-success">
                     Logout
                 </Button>
