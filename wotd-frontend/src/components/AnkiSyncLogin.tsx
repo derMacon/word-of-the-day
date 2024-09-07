@@ -7,9 +7,10 @@ import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {ankiApiIsHealthy, ankiApiLogin} from "../logic/ApiFetcher";
+import {ankiApiIsHealthy, ankiApiLogin, dictGetAvailableLang, dictGetInfoHousekeeping} from "../logic/ApiFetcher";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {AuthService} from "../logic/AuthService";
+import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
 
 
 interface AnkiSyncLoginProps {
@@ -21,6 +22,7 @@ interface AnkiSyncLoginProps {
 export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
 
     const [email, setEmail] = useState('');
+    const [nextSync, setNextSync] = useState('');
     const [password, setPassword] = useState('');
     const [healthyApi, setHealthyApi] = useState(true);
     const [showSpinner, setShowSpinner] = useState(false);
@@ -30,6 +32,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             try {
                 const result: boolean = await ankiApiIsHealthy();
                 setHealthyApi(result);
+                dictGetInfoHousekeeping().then((e: InfoRequestHousekeeping) => setNextSync(e.nextSync))
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setHealthyApi(false);
@@ -41,7 +44,9 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
 
 
     const handleEmailChange = (e: any): void => {
-        setEmail(e.target.value)
+        let email = e.target.value
+        setEmail(email)
+        props.authProvider.plainUsername = email
     }
 
     const handlePasswordChange = (e: any): void => {
@@ -95,7 +100,10 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
         <Alert variant="success">
             <Alert.Heading>Anki Web Login</Alert.Heading>
             <p>
-                You are currently logged into your anki web account under <b>{email}</b>.
+                You are currently logged into your anki web account under <b>{props.authProvider.plainUsername}</b>.
+            </p>
+            <p>
+                The next synchronization with Anki web will take place on {nextSync}.
             </p>
             <hr/>
             <div className="d-flex">
@@ -107,7 +115,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
 
     const loginForm: React.JSX.Element =
         <>
-            <p>You are currently not logged into your anki account.
+            <p>You are currently not logged into your Anki account.
                 In order to sync the dictionary searches with anki web please log in.</p>
 
             <p>If you do net have an account, please register <a
@@ -136,8 +144,8 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                         onKeyDown={handleKeyDown}
                     />
                     <Form.Text id="passwordHelpBlock" muted>
-                        Your credentials will not be stored by this application.
-                        After the initial login the api works with the token retrieved from anki web.
+                        Your credentials will be forwarded directly to the Anki client running in the background
+                        and will not be stored by this application.
                     </Form.Text>
                 </Form.Group>
             </Form>

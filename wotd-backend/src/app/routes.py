@@ -1,24 +1,25 @@
 import dataclasses
 import uuid
+from datetime import datetime, time
 from typing import List
 from typing import Tuple
 
-from flask import jsonify, request, Response, make_response
+from flask import jsonify, request, Response
 
 from src.app import main
 from src.controller.housekeeping_controller import trigger_housekeeping
 from src.controller.web_controller import controller
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
-from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
+from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
+from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.persistence_service import PersistenceService
 from src.service.signature_service import SignatureService
 from src.service.wotd_api_fetcher import anki_api_fetcher
-from src.service.wotd_vnc_controller import WotdVncController
 from src.utils.logging_config import app_log
 
 
@@ -37,6 +38,7 @@ def health_check() -> Tuple[Response, int]:
 def anki_login():
     anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
+    # TODO use this & delete the testUUID
     # uuid = WotdVncController().login(
     #     username=anki_login_request.username,
     #     password=anki_login_request.password
@@ -47,26 +49,17 @@ def anki_login():
     signed_header_obj = SignatureService().create_signed_header_dict(
         username=anki_login_request.username,
         uuid=testUUID
-        # uuid = uuid
+        # uuid = uuid # TODO use this instead of testUUID
     )
 
     app_log.debug(f"signed header obj: {signed_header_obj}")
 
-    # resp = make_response("login successful", 200)
-    # resp.headers.extend(signed_header_obj)
-
-    # TODO delete this
     resp = Response()
-    # resp.headers[HeaderType.USERNAME.value] = 'testuser'
-    # resp.headers[HeaderType.UUID.value] = 'testuuid2'
-
     resp.headers.extend(signed_header_obj)
-
     resp.headers.add('Access-Control-Expose-Headers',
-                     f"{HeaderType.USERNAME.value}, {HeaderType.UUID.value}")
+                     f"{HeaderType.SIGNED_USERNAME.value}, {HeaderType.SIGNED_UUID.value}")
 
     return resp
-
 
 
 @main.route("/dict/available-lang")
@@ -102,37 +95,49 @@ def lookup_word_options() -> Tuple[Response, int]:
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
 
-    headers = _extract_headers()
-    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, headers)
+    unsigned_auth_headers: UnsignedAuthHeaders = _extract_unsigned_headers()
+    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, unsigned_auth_headers)
 
     json: Response = jsonify([dataclasses.asdict(curr_option) for curr_option in dict_options_response])
     app_log.debug('lookup response json: %s', json.get_json())
 
-    trigger_housekeeping(headers)
     return json, 200
 
 
-def _extract_headers():
-    headers = None
-    if HeaderType.MAIN.value.header_key in request.headers \
-            and HeaderType.CARD.value.header_key in request.headers:
+def _extract_unsigned_headers() -> UnsignedAuthHeaders:
+    auth_headers = None
+    if HeaderType.SIGNED_USERNAME.value in request.headers \
+            and HeaderType.SIGNED_UUID.value in request.headers:
         app_log.debug('raw header: %s', request.headers)
-        username = request.headers[HeaderType.USER.value.header_key]
-        main_token = request.headers[HeaderType.MAIN.value.header_key]
-        card_token = request.headers[HeaderType.CARD.value.header_key]
-        headers = AnkiLoginResponseHeaders(username, main_token, card_token)
-        app_log.debug('parsed header: %s', headers)
+        signed_username = request.headers[HeaderType.SIGNED_USERNAME.value]
+        signed_uuid = request.headers[HeaderType.SIGNED_UUID.value]
+
+        sign_service: SignatureService = SignatureService()
+        unsigned_username = sign_service.unsign(signed_username)
+        unsigned_uuid = sign_service.unsign(signed_uuid)
+
+        auth_headers: UnsignedAuthHeaders = UnsignedAuthHeaders(unsigned_username, unsigned_uuid)
+        app_log.debug('parsed auth headers: %s', auth_headers)
     else:
         app_log.debug(f'header not available: {request.headers}')
-    return headers
+    return auth_headers
 
 
 @main.route("/anki/trigger-housekeeping")
 def manually_trigger_housekeeping():
     app_log.debug('manually triggering housekeeping')
-    headers = _extract_headers()
+    headers: UnsignedAuthHeaders = _extract_unsigned_headers()
     trigger_housekeeping(headers)
     return ''
+
+
+@main.route("/anki/housekeeping-info")
+def housekeeping_info():
+    today = datetime.now().date()
+    midnight = datetime.combine(today, time.min)
+    housekeeping_info_dummy = InfoResponseHousekeeping(midnight)
+    app_log.debug(f'user requested housekeeping info: {housekeeping_info_dummy}')
+    return jsonify(housekeeping_info_dummy), 200
 
 
 @main.route("/dict/select-option", methods=['POST'])

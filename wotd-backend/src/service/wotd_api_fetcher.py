@@ -6,7 +6,7 @@ import requests
 from src.data.anki.anki_card import AnkiCard
 from src.data.anki.anki_connect_response_wrapper import AnkiConnectResponseWrapper
 from src.data.anki.token_type import HeaderType
-from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
+from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.utils.logging_config import app_log
 
 
@@ -69,7 +69,7 @@ class WotdApiFetcher:
 
         return main_token, card_token
 
-    def api_push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders) -> bool:
+    def api_push_card(self, anki_card: AnkiCard, headers: UnsignedAuthHeaders) -> bool:
         app_log.debug(f'push anki card: {str(anki_card)}')
         url = self.ANKI_API_BASE + '/add-card'
         data = asdict(anki_card)

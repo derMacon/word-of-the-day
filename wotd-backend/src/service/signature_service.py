@@ -16,13 +16,14 @@ class SignatureService:
 
     def create_signed_header_dict(self, username: str, uuid: str):
         return {
-            HeaderType.USERNAME.value: self._sign(username),
-            HeaderType.UUID.value: self._sign(uuid)
+            HeaderType.SIGNED_USERNAME.value: self.sign(username),
+            HeaderType.SIGNED_UUID.value: self.sign(uuid)
         }
 
-    def _sign(self, input: str) -> str:
-        return self.signer.sign(input)
 
-    def _unsign(self, signed_value) -> bool:
-        return self.signer.unsign(signed_value)
+    def sign(self, input: str) -> str:
+        return self.signer.sign(input).decode('utf-8')
+
+    def unsign(self, signed_value) -> bool:
+        return self.signer.unsign(signed_value).decode('utf-8')
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List
 
 from src.data.dict_input import now
-from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
-from src.data.dict_input.status import Status
+from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
+from src.data.dict_input.requeststatus import RequestStatus
 
 
 @dataclass
@@ -14,7 +14,7 @@ class DictOptionsItem:
     input: str
     output: str
     selected: bool
-    status: Status
+    status: RequestStatus
     option_response_ts: str
 
     def __init__(self,
@@ -24,7 +24,7 @@ class DictOptionsItem:
                  input: str = '',
                  output: str = '',
                  selected: bool = False,
-                 status: Status = Status.OK,
+                 status: RequestStatus = RequestStatus.OK,
                  ts: str = now()):
         self.dict_options_item_id = dict_options_item_id
         self.input = input.replace("'", "")
@@ -36,7 +36,7 @@ class DictOptionsItem:
         self.option_response_ts = ts
 
 
-def from_translation_tuples(response_tuples, auth_headers: AnkiLoginResponseHeaders | None) -> List[DictOptionsItem]:
+def from_translation_tuples(response_tuples, auth_headers: UnsignedAuthHeaders | None) -> List[DictOptionsItem]:
     # TODO types in signature
     username = '' if auth_headers is None else auth_headers.username
     parsed_options: List[DictOptionsItem] = []

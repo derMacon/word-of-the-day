@@ -2,5 +2,7 @@ from enum import Enum
 
 
 class HeaderType(str, Enum):
-    USERNAME = 'X-Wotd-Username'
-    UUID = 'X-Wotd-Uuid'
+    SIGNED_USERNAME = 'X-Wotd-Username'
+    SIGNED_UUID = 'X-Wotd-Uuid'
+    UNSIGNED_USERNAME = 'UNSIGNED_USERNAME'
+    UNSIGNED_UUID = 'UNSIGNED_UUID'

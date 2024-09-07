@@ -2,7 +2,7 @@ from typing import List
 
 from dictcc import Dict
 
-from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
+from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.language_uuid import LanguageUUID
@@ -10,7 +10,7 @@ from src.data.error.database_error import DatabaseError
 from src.service.autocomplete_api_fetcher import lookup_autocomplete
 from src.service.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
-from src.utils.translations_utils import update_status, update_deckname
+from src.utils.translations_utils import update_request_status, update_deckname
 
 
 class WebController:
@@ -38,7 +38,7 @@ class WebController:
         return autocomplete_options
 
     def lookup_dict_word(self, dict_request: DictRequest,
-                         auth_headers: AnkiLoginResponseHeaders | None) -> List[DictOptionsItem]:
+                         auth_headers: UnsignedAuthHeaders | None) -> List[DictOptionsItem]:
         response_tuples = self.dictcc_translator.translate(
             word=dict_request.input,
             from_language=dict_request.from_language_uuid.name.lower(),
@@ -49,13 +49,15 @@ class WebController:
 
         if auth_headers is None:
             app_log.debug(
-                'user not logged into their anki web account -> webapp does not persist options, still need to generate the ids')
+                'user not logged into their anki web account -> webapp does not '
+                'persist options, still need to generate the ids since frontend '
+                'expects them')
             # generate dummy ids
             for index, item in enumerate(options):
                 item.dict_options_item_id = index
             return options
 
-        update_status(
+        update_request_status(
             original_input=dict_request.input,
             options=options
         )

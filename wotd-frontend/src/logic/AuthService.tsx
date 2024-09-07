@@ -4,10 +4,12 @@ import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
 export class AuthService {
 
-    readonly EMAIL_COOKIE_KEY: string = 'anki-signed-email'
-    readonly UUID_COOKIE_KEY: string = 'anki-signed-profile-uuid'
+    readonly PLAIN_EMAIL_COOKIE_KEY: string = 'plain-email'
+    readonly UNSIGNED_EMAIL_COOKIE_KEY: string = 'X-Wotd-Username'
+    readonly UNSIGNED_UUID_COOKIE_KEY: string = 'X-Wotd-Uuid'
     readonly IGNORE_LOGIN_PROMPT_COOKIE_KEY: string = 'ignore-login-prompt'
 
+    private _plainUsername: string;
     private _signedUsername: string;
     private _signedUuid: string;
     private _ignoreLoginPrompt: boolean;
@@ -16,11 +18,16 @@ export class AuthService {
 
     constructor() {
         this._cookies = new Cookies(null, {path: '/'})
-        this._signedUsername = this._cookies.get(this.EMAIL_COOKIE_KEY) ?? ''
-        this._signedUuid = this._cookies.get(this.UUID_COOKIE_KEY) ?? '';
+        this._plainUsername = this._cookies.get(this.PLAIN_EMAIL_COOKIE_KEY) ?? ''
+        this._signedUsername = this._cookies.get(this.UNSIGNED_EMAIL_COOKIE_KEY) ?? ''
+        this._signedUuid = this._cookies.get(this.UNSIGNED_UUID_COOKIE_KEY) ?? '';
         this._ignoreLoginPrompt = this._cookies.get(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY) ?? false;
     }
 
+
+    get plainUsername(): string {
+        return this._plainUsername;
+    }
 
     get signedUsername(): string {
         return this._signedUsername;
@@ -32,6 +39,10 @@ export class AuthService {
 
     get signedUuid(): string {
         return this._signedUuid;
+    }
+
+    set plainUsername(value: string) {
+        this._plainUsername = value;
     }
 
     set signedUuid(value: string) {
@@ -84,8 +95,9 @@ export class AuthService {
     }
 
     setCookie() {
-        this._cookies.set(this.EMAIL_COOKIE_KEY, this._signedUsername);
-        this._cookies.set(this.UUID_COOKIE_KEY, this._signedUuid);
+        this._cookies.set(this.PLAIN_EMAIL_COOKIE_KEY, this._plainUsername);
+        this._cookies.set(this.UNSIGNED_EMAIL_COOKIE_KEY, this._signedUsername);
+        this._cookies.set(this.UNSIGNED_UUID_COOKIE_KEY, this._signedUuid);
         this.writeIgnoreLoginPromptCookie()
     }
 
@@ -94,8 +106,8 @@ export class AuthService {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
-        out[this.UUID_COOKIE_KEY] = this._signedUuid
-        out[this.EMAIL_COOKIE_KEY] = this._signedUsername
+        out[this.UNSIGNED_UUID_COOKIE_KEY] = this._signedUuid
+        out[this.UNSIGNED_EMAIL_COOKIE_KEY] = this._signedUsername
         return out
     }
 

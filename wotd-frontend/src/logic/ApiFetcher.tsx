@@ -1,5 +1,5 @@
 // TODO read this from props or some kind .ini, do not hardcode it
-import { io } from 'socket.io-client';
+import {io} from 'socket.io-client';
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {instanceToPlain, plainToClass} from "class-transformer";
 import {DictRequest} from "../model/DictRequest";
@@ -8,6 +8,7 @@ import {DictOptionsItem} from "../model/DictOptionsItem";
 import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
+import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -53,7 +54,7 @@ export async function dictLookupWord(word: string, fromLanguage: Language, toLan
 
         // TODO insert auth headers
 
-        let output = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
+        let output: Response = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
             method: 'POST',
             headers: headers || DEFAULT_HEADERS,
             body: JSON.stringify(instanceToPlain(input))
@@ -93,7 +94,6 @@ export async function dictAutocompleteWord(word: string, fromLanguage: Language,
 }
 
 
-
 export async function dictGetAvailableLang(): Promise<Language[]> {
 
     try {
@@ -111,6 +111,27 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
     } catch (error) {
         console.error(error)
         return []
+    }
+}
+
+
+export async function dictGetInfoHousekeeping(): Promise<InfoRequestHousekeeping> {
+
+    try {
+
+        let out = await fetch(WOTD_ANKI_DOMAIN + '/housekeeping-info', {
+            method: 'GET',
+            headers: DEFAULT_HEADERS,
+        })
+
+        let jsonObject: Object = await out.json() as Object
+        let requestWrapper: InfoRequestHousekeeping = plainToClass(InfoRequestHousekeeping, jsonObject)
+        console.log('info housekeeping: ', requestWrapper)
+        return requestWrapper
+
+    } catch (error) {
+        console.error(error)
+        throw error
     }
 }
 
