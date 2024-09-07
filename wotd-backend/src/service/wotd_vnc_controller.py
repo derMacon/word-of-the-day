@@ -56,6 +56,8 @@ class WotdVncController:
         self._select_created_profile()
         self._login_anki_web(username, password)
 
+        app_log.debug(f'login mechanism run complete for new profile with uuid: {profile_name}')
+
         return profile_name
 
     def _create_new_profile(self, profile_name: str):
@@ -81,7 +83,6 @@ class WotdVncController:
         self._press_combination(['enter'], delay_after_action=.8)
         self._press_combination(['y'])
         self._press_combination(['d'])
-        self._press_combination(['escape'])
 
     def _press_combination(self, keys, repetitions=1, delay_after_action=.5):
         for _ in range(repetitions):

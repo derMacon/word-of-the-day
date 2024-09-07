@@ -1,4 +1,5 @@
 import dataclasses
+import uuid
 from typing import List
 from typing import Tuple
 
@@ -41,25 +42,25 @@ def anki_login():
     #     password=anki_login_request.password
     # )
 
-    # signed_header_obj = SignatureService().create_signed_header_dict(
-    #     username=anki_login_request.username,
-    #     uuid=uuid
-    # )
+    testUUID = str(uuid.uuid4())
 
     signed_header_obj = SignatureService().create_signed_header_dict(
-        username='testmail',
-        uuid='testuuid'
+        username=anki_login_request.username,
+        uuid=testUUID
+        # uuid = uuid
     )
 
     app_log.debug(f"signed header obj: {signed_header_obj}")
 
-    resp = make_response("login successful", 200)
-    resp.headers.extend(signed_header_obj)
+    # resp = make_response("login successful", 200)
+    # resp.headers.extend(signed_header_obj)
 
     # TODO delete this
     resp = Response()
-    resp.headers[HeaderType.USERNAME.value] = 'testuser'
-    resp.headers[HeaderType.UUID.value] = 'testuuid2'
+    # resp.headers[HeaderType.USERNAME.value] = 'testuser'
+    # resp.headers[HeaderType.UUID.value] = 'testuuid2'
+
+    resp.headers.extend(signed_header_obj)
 
     resp.headers.add('Access-Control-Expose-Headers',
                      f"{HeaderType.USERNAME.value}, {HeaderType.UUID.value}")

@@ -20,7 +20,7 @@ class SignatureService:
             HeaderType.UUID.value: self._sign(uuid)
         }
 
-    def _sign(self, input):
+    def _sign(self, input: str) -> str:
         return self.signer.sign(input)
 
     def _unsign(self, signed_value) -> bool:
