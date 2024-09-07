@@ -21,16 +21,15 @@ class WotdApiFetcher:
 
     def health_check(self):
         try:
-
-            app_log.debug('before run')
             data = {
                 "action": "deckNames",
                 "version": 6
             }
 
+            app_log.debug('triggering health check for anki connect api container')
             plain_response = requests.post(url=WotdApiFetcher.ANKI_CONNECT_DATA_ADDRESS_POST, json=data).json()
             anki_connect_response = AnkiConnectResponseWrapper(**plain_response)
-            app_log.debug(f'after: {anki_connect_response.error is None}')
+            app_log.debug(f'anki_connect_response: {anki_connect_response.error}')
 
             return anki_connect_response.error is None
         except Exception as e:

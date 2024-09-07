@@ -2,19 +2,22 @@ import dataclasses
 from typing import List
 from typing import Tuple
 
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, make_response
 
 from src.app import main
+from src.controller.housekeeping_controller import trigger_housekeeping
+from src.controller.web_controller import controller
+from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.service.wotd_api_fetcher import anki_api_fetcher
-from src.controller.housekeeping_controller import trigger_housekeeping
-from src.controller.web_controller import controller
 from src.service.persistence_service import PersistenceService
+from src.service.signature_service import SignatureService
+from src.service.wotd_api_fetcher import anki_api_fetcher
+from src.service.wotd_vnc_controller import WotdVncController
 from src.utils.logging_config import app_log
 
 
@@ -31,20 +34,40 @@ def health_check() -> Tuple[Response, int]:
 
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
-    request_data = request.get_json()
+    anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
-    # anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request_data)
-    main_token, card_token = anki_api_fetcher.login(**request_data)
-    #
-    # resp = Response()
-    # resp.headers[HeaderType.MAIN.value.header_key] = main_token
-    # resp.headers[HeaderType.CARD.value.header_key] = card_token
-    #
-    # resp.headers.add('Access-Control-Expose-Headers',
-    #                  HeaderType.MAIN.value.header_key
-    #                  + ',' + HeaderType.CARD.value.header_key)
-    #
-    # return resp
+    # uuid = WotdVncController().login(
+    #     username=anki_login_request.username,
+    #     password=anki_login_request.password
+    # )
+
+    # signed_header_obj = SignatureService().create_signed_header_dict(
+    #     username=anki_login_request.username,
+    #     uuid=uuid
+    # )
+
+    signed_header_obj = SignatureService().create_signed_header_dict(
+        username='testmail',
+        uuid='testuuid'
+    )
+
+    app_log.debug(f"signed header obj: {signed_header_obj}")
+
+    resp = make_response("login successful", 200)
+    resp.headers.extend(signed_header_obj)
+
+    # TODO delete this
+    resp = Response()
+    resp.headers[HeaderType.USERNAME] = 'testuser'
+    resp.headers[HeaderType.UUID] = 'testuuid2'
+
+    resp.headers.add('Access-Control-Expose-Headers',
+                     HeaderType.MAIN.value.header_key
+                     + ',' + HeaderType.CARD.value.header_key)
+
+    return resp
+
+    # return 'works', 200
 
 
 @main.route("/dict/available-lang")

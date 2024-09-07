@@ -1,4 +1,6 @@
 Flask==3.0.0
 Flask_Cors==4.0.0
+itsdangerous==2.2.0
+vncdotool==1.2.0
 
 dictcc~=0.1
