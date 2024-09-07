@@ -58,16 +58,14 @@ def anki_login():
 
     # TODO delete this
     resp = Response()
-    resp.headers[HeaderType.USERNAME] = 'testuser'
-    resp.headers[HeaderType.UUID] = 'testuuid2'
+    resp.headers[HeaderType.USERNAME.value] = 'testuser'
+    resp.headers[HeaderType.UUID.value] = 'testuuid2'
 
     resp.headers.add('Access-Control-Expose-Headers',
-                     HeaderType.MAIN.value.header_key
-                     + ',' + HeaderType.CARD.value.header_key)
+                     f"{HeaderType.USERNAME.value}, {HeaderType.UUID.value}")
 
     return resp
 
-    # return 'works', 200
 
 
 @main.route("/dict/available-lang")
