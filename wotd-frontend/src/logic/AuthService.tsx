@@ -4,49 +4,38 @@ import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
 export class AuthService {
 
-    readonly EMAIL_COOKIE_KEY: string = 'anki-email'
-    readonly MAIN_TOKEN_COOKIE_KEY: string = 'main-token'
-    readonly CARD_TOKEN_COOKIE_KEY: string = 'card-token'
+    readonly EMAIL_COOKIE_KEY: string = 'anki-signed-email'
+    readonly UUID_COOKIE_KEY: string = 'anki-signed-profile-uuid'
     readonly IGNORE_LOGIN_PROMPT_COOKIE_KEY: string = 'ignore-login-prompt'
 
-    private _email: string;
-    private _mainToken: string;
-    private _cardToken: string;
+    private _signedUsername: string;
+    private _signedUuid: string;
     private _ignoreLoginPrompt: boolean;
     private _cookies: Cookies;
 
 
     constructor() {
         this._cookies = new Cookies(null, {path: '/'})
-        this._email = this._cookies.get(this.EMAIL_COOKIE_KEY) ?? ''
-        this._mainToken = this._cookies.get(this.MAIN_TOKEN_COOKIE_KEY) ?? '';
-        this._cardToken = this._cookies.get(this.CARD_TOKEN_COOKIE_KEY) ?? '';
+        this._signedUsername = this._cookies.get(this.EMAIL_COOKIE_KEY) ?? ''
+        this._signedUuid = this._cookies.get(this.UUID_COOKIE_KEY) ?? '';
         this._ignoreLoginPrompt = this._cookies.get(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY) ?? false;
     }
 
 
-    get email(): string {
-        return this._email;
+    get signedUsername(): string {
+        return this._signedUsername;
     }
 
-    set email(value: string) {
-        this._email = value;
+    set signedUsername(value: string) {
+        this._signedUsername = value;
     }
 
-    get mainToken(): string {
-        return this._mainToken;
+    get signedUuid(): string {
+        return this._signedUuid;
     }
 
-    set mainToken(value: string) {
-        this._mainToken = value;
-    }
-
-    get cardToken(): string {
-        return this._cardToken;
-    }
-
-    set cardToken(value: string) {
-        this._cardToken = value;
+    set signedUuid(value: string) {
+        this._signedUuid = value;
     }
 
     get ignoreLoginPrompt(): boolean {
@@ -66,9 +55,8 @@ export class AuthService {
     }
 
     userIsLoggedIn(): boolean {
-        return this._email != ''
-            && this._mainToken != ''
-            && this._cardToken != ''
+        return this._signedUsername != ''
+            && this._signedUuid != ''
     }
 
     showLoginPrompt(): boolean {
@@ -89,17 +77,15 @@ export class AuthService {
     }
 
 
-    loadAnkiLoginResponse(email: string, response: AnkiLoginResponseHeaders): void {
-        this._email = email
-        this._mainToken = response.mainToken
-        this._cardToken = response.cardToken
+    loadAnkiLoginResponse(response: AnkiLoginResponseHeaders): void {
+        this._signedUsername = response.signedUsername
+        this._signedUuid = response.signedUuid
         this.setCookie()
     }
 
     setCookie() {
-        this._cookies.set(this.EMAIL_COOKIE_KEY, this._email);
-        this._cookies.set(this.MAIN_TOKEN_COOKIE_KEY, this._mainToken);
-        this._cookies.set(this.CARD_TOKEN_COOKIE_KEY, this._cardToken);
+        this._cookies.set(this.EMAIL_COOKIE_KEY, this._signedUsername);
+        this._cookies.set(this.UUID_COOKIE_KEY, this._signedUuid);
         this.writeIgnoreLoginPromptCookie()
     }
 
@@ -108,14 +94,13 @@ export class AuthService {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
-        out[this.MAIN_TOKEN_COOKIE_KEY] = this._mainToken
-        out[this.CARD_TOKEN_COOKIE_KEY] = this._cardToken
-        out[this.EMAIL_COOKIE_KEY] = this._email
+        out[this.UUID_COOKIE_KEY] = this._signedUuid
+        out[this.EMAIL_COOKIE_KEY] = this._signedUsername
         return out
     }
 
     toString() {
-        return `{email: ${this.email}, main-token: ${this.mainToken}, card-token: ${this.cardToken}}`
+        return `{signed-username: ${this.signedUsername}, signed-uuid: ${this.signedUuid}}`
     }
 
 }

@@ -69,9 +69,9 @@ export function DictMask() {
     const handleShowAnkiStatusAlert = () => setShowAnkiStatusAlert(true)
 
 
-    const handleAnkiLogin = (userEmail: string, ankiResponse: AnkiLoginResponseHeaders): void => {
-        console.log('update auth provider with email: ', userEmail)
-        authProvider.loadAnkiLoginResponse(userEmail, ankiResponse)
+    const handleAnkiLogin = (ankiResponse: AnkiLoginResponseHeaders): void => {
+        console.log('update auth provider with signed email: ', ankiResponse.signedUsername)
+        authProvider.loadAnkiLoginResponse(ankiResponse)
     }
 
     const mainPage = <>

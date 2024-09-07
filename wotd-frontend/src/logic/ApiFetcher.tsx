@@ -20,11 +20,6 @@ export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
 export const socket = io(WOTD_BACKEND_SERVER_ADDRESS)
 
 
-// TODO clean up communication with anki api only through wotd backend - delete info here
-const ANKI_API_SERVER_ADDRESS: string = 'http://192.168.178.187:4000'
-export const ANKI_API_BASE: string = ANKI_API_SERVER_ADDRESS + '/api/v1'
-
-
 const DEFAULT_HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
@@ -152,18 +147,22 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
             body: JSON.stringify(instanceToPlain(input))
         }))
 
-        const mainTokenKey: string = 'main-token'
-        const cardTokenKey: string = 'card-token'
+        const signedUsername: string = 'X-Wotd-Username'
+        const signedUuid: string = 'X-Wotd-Uuid'
         const responseHeaders: Headers = out.headers;
 
-        if (!out.ok || !responseHeaders.has(mainTokenKey) || !responseHeaders.has(cardTokenKey)) {
+        console.log('response headers: ', responseHeaders)
+
+        if (!out.ok || !responseHeaders.has(signedUsername) || !responseHeaders.has(signedUuid)) {
             console.log('invalid credentials')
             return undefined
         }
 
+        console.log('valid headers')
+
         const ankiResponseHeaders: AnkiLoginResponseHeaders = new AnkiLoginResponseHeaders(
-            responseHeaders.get(mainTokenKey)!,
-            responseHeaders.get(cardTokenKey)!
+            responseHeaders.get(signedUsername)!,
+            responseHeaders.get(signedUuid)!
         )
 
         console.log('anki response headers: ', ankiResponseHeaders)
@@ -177,7 +176,7 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
 
 export async function ankiApiIsHealthy(): Promise<boolean> {
     try {
-        return (await fetch(ANKI_API_BASE + '/health')).ok
+        return (await fetch(WOTD_API_BASE + '/health')).ok
     } catch (error) {
         console.log('anki api is not reachable')
         return false

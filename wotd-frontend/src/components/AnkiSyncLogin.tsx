@@ -13,7 +13,7 @@ import {AuthService} from "../logic/AuthService";
 
 
 interface AnkiSyncLoginProps {
-    handleAnkiLogin: (userEmail: string, ankiResponse: AnkiLoginResponseHeaders) => void
+    handleAnkiLogin: (ankiResponse: AnkiLoginResponseHeaders) => void
     handleClose: () => void
     authProvider: AuthService
 }
@@ -67,7 +67,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                 setPassword('')
                 alert('Credentials incorrect, please try again.')
             } else {
-                props.handleAnkiLogin(email, response)
+                props.handleAnkiLogin(response)
                 props.handleClose()
             }
 
