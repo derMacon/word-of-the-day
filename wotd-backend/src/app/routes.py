@@ -19,7 +19,7 @@ from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeep
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.persistence_service import PersistenceService
 from src.service.signature_service import SignatureService
-from src.service.wotd_api_fetcher import anki_api_fetcher
+from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 
@@ -27,7 +27,7 @@ from src.utils.logging_config import app_log
 def health_check() -> Tuple[Response, int]:
     status = {
         'db_connection': PersistenceService().db_connection_is_established(),
-        'anki_api_connection': anki_api_fetcher.health_check(),
+        'anki_api_connection': WotdAnkiConnectFetcher.health_check(),
         'wotd_api_connection': True,
     }
     app_log.debug(f"health: {status}")

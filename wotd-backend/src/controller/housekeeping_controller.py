@@ -7,8 +7,8 @@ from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.requeststatus import RequestStatus
 from src.data.error.database_error import DatabaseError
-from src.service.wotd_api_fetcher import anki_api_fetcher
 from src.service.persistence_service import PersistenceService
+from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 MAX_CONNECTION_TRIES = 3
@@ -29,7 +29,7 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
             error_cnt = error_cnt + 1
             sleep(housekeeping_interval)
 
-        if PersistenceService().db_connection_is_established() and anki_api_fetcher.health_check():
+        if PersistenceService().db_connection_is_established() and WotdAnkiConnectFetcher.health_check():
             _push_data(housekeeping_interval, auth_headers)
         else:
             app_log.debug('not possible to push data to anki api - try pushing with next cleanup job')
