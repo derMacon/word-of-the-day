@@ -2,11 +2,13 @@ from flask import jsonify
 from itsdangerous import BadSignature
 
 from src.app import main
+from src.data.error.missing_headers_error import MissingHeadersError
 from src.utils.logging_config import app_log
 
 
 @main.errorhandler(ValueError)
 @main.errorhandler(TypeError)
+@main.errorhandler(MissingHeadersError)
 def handle_value_error(error):
     app_log.error(f'http 400 - {error}')
     return jsonify({'type_error': f"invalid request: {error}"}), 400

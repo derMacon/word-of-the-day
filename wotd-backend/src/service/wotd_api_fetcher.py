@@ -35,7 +35,7 @@ class WotdAnkiConnectFetcher:
             return False
 
     @staticmethod
-    def api_push_card(self, anki_card: AnkiCard, headers: UnsignedAuthHeaders) -> bool:
+    def api_push_cards(anki_cards: List[AnkiCard], headers: UnsignedAuthHeaders) -> bool:
         # app_log.debug(f'push anki card: {str(anki_card)}')
         # url = self.ANKI_API_BASE + '/add-card'
         # data = asdict(anki_card)
@@ -43,11 +43,12 @@ class WotdAnkiConnectFetcher:
         # return requests.get(url, json=data, headers=headers.to_map()).ok
 
         app_log.debug(f'auth headers: {headers}')
-        app_log.debug(f'push anki card: {str(anki_card)}')
+        app_log.debug(f'push anki card: {anki_cards}')
 
         # profile_uuid = headers.uuid
         # WotdAnkiConnectFetcher._validate_if_profile_present(profile_uuid)
         # WotdAnkiConnectFetcher._load_profile(profile_uuid)
+        return True
 
     @staticmethod
     def _validate_if_profile_present(profile_uuid: str) -> None:

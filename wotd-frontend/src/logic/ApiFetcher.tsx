@@ -27,8 +27,6 @@ const DEFAULT_HEADERS = {
 }
 
 
-// ------------------- WOTD ------------------- //
-
 export async function wotdApiHealthStatus(): Promise<ApiHealthInformation> {
     try {
         let response: Response = await fetch(WOTD_API_BASE + '/health')
@@ -200,6 +198,22 @@ export async function ankiApiIsHealthy(): Promise<boolean> {
         return (await fetch(WOTD_API_BASE + '/health')).ok
     } catch (error) {
         console.log('anki api is not reachable')
+        return false
+    }
+}
+
+
+// TODO fix param type
+export async function ankiApiTriggerManualHousekeeping(auth_headers: any) {
+    try {
+        let out: Response = (await fetch(WOTD_ANKI_DOMAIN + '/trigger-housekeeping', {
+            method: 'GET',
+            headers: auth_headers
+        }))
+        console.log('response triggering manual housekeeping: ', out)
+
+    } catch (error) {
+        console.log('cannot trigger manual housekeeping in the backend')
         return false
     }
 }

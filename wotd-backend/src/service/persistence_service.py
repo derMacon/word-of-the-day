@@ -165,24 +165,33 @@ class PersistenceService:
         self._conn.commit()
 
     @_database_error_decorator  # type: ignore
-    def update_item_status(self, item_id: int, status: RequestStatus):
+    def update_items_status(self, item_ids: int, status: RequestStatus):
+        if len(item_ids) == 0:
+            app_log.debug('empty item id list - nothing to update')
+            return
+
+        id_placeholder = f"({','.join(map(str, item_ids))})"
+        app_log.debug(f'sql update id placeholder: {id_placeholder}')
+
         self._conn.commit()
         self._cursor.execute(
             "select selected from dict_options_item "
-            f"where dict_options_item_id = {item_id};")
+            f"where dict_options_item_id in {id_placeholder};")
         selected_state = not self._cursor.fetchone()[0]
-        app_log.debug(f"new selected state of item with id {item_id}: {selected_state}")
+        app_log.debug(f"new selected state of items with ids {item_ids}: {selected_state}")
 
         # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "
                       f"SET status = '{status}' "
-                      f"WHERE dict_options_item_id = {item_id};")
+                      f"WHERE dict_options_item_id IN {id_placeholder};")
         self._cursor.execute(sql_update)
         self._conn.commit()
 
     @_database_error_decorator  # type: ignore
     def find_expired_options_for_user(self, expiry_interval: int,
                                       auth_headers: UnsignedAuthHeaders) -> List[DictOptionsItem]:
+        app_log.debug(f'find expired options for user with expiration interval of {expiry_interval} s for '
+                      f'auth header {auth_headers}')
         sql_select = ("SET TIMEZONE TO 'Europe/Berlin';"
                       f"SELECT * FROM dict_options_item "
                       f"WHERE username = '{auth_headers.username}' "

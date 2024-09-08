@@ -128,7 +128,7 @@ def manually_trigger_housekeeping():
     app_log.debug('manually triggering housekeeping')
     headers: UnsignedAuthHeaders = _extract_unsigned_headers()
     trigger_housekeeping(headers)
-    return ''
+    return '', 200
 
 
 @main.route("/anki/housekeeping-info")

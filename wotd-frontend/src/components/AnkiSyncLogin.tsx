@@ -7,7 +7,13 @@ import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {ankiApiIsHealthy, ankiApiLogin, dictGetAvailableLang, dictGetInfoHousekeeping} from "../logic/ApiFetcher";
+import {
+    ankiApiIsHealthy,
+    ankiApiLogin,
+    ankiApiTriggerManualHousekeeping,
+    dictGetAvailableLang,
+    dictGetInfoHousekeeping
+} from "../logic/ApiFetcher";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {AuthService} from "../logic/AuthService";
 import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
@@ -107,7 +113,8 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             </p>
             <hr/>
             <div className="d-flex">
-                <Button onClick={() => alert('feature coming soon')} variant="success"  className="me-2">
+                <Button onClick={() => ankiApiTriggerManualHousekeeping(props.authProvider.getHeaders())}
+                        variant="success" className="me-2">
                     Sync Now!
                 </Button>
                 <Button onClick={() => props.authProvider.cleanCookies()} variant="outline-success">
