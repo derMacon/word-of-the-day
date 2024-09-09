@@ -51,6 +51,7 @@ class WotdVncController:
         app_log.debug(f"user '{username}' tries to login")
 
         profile_name = str(uuid.uuid4())
+        # profile_name = 'test-profile-01'
 
         self._create_new_profile(profile_name)
         self._select_created_profile()
@@ -80,8 +81,8 @@ class WotdVncController:
         self._type_str(username)
         self._press_combination(['tab'])
         self._type_str(password)
-        self._press_combination(['enter'], delay_after_action=.8)
-        self._press_combination(['y'])
+        self._press_combination(['enter'], delay_after_action=2)
+        self._press_combination(['y'], delay_after_action=2)
         self._press_combination(['d'])
 
     def _press_combination(self, keys, repetitions=1, delay_after_action=.5):

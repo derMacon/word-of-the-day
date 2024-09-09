@@ -20,6 +20,7 @@ from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.persistence_service import PersistenceService
 from src.service.signature_service import SignatureService
 from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
+from src.service.wotd_vnc_controller import WotdVncController
 from src.utils.logging_config import app_log
 
 
@@ -38,18 +39,17 @@ def health_check() -> Tuple[Response, int]:
 def anki_login():
     anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
-    # TODO use this & delete the testUUID
-    # uuid = WotdVncController().login(
-    #     username=anki_login_request.username,
-    #     password=anki_login_request.password
-    # )
+    uuid = WotdVncController().login(
+        username=anki_login_request.username,
+        password=anki_login_request.password
+    )
 
-    testUUID = str(uuid.uuid4())
+    # testUUID = str(uuid.uuid4())
 
     signed_header_obj = SignatureService().create_signed_header_dict(
         username=anki_login_request.username,
-        uuid=testUUID
-        # uuid = uuid # TODO use this instead of testUUID
+        # uuid=testUUID
+        uuid = uuid # TODO use this instead of testUUID
     )
 
     app_log.debug(f"signed header obj: {signed_header_obj}")
