@@ -3,7 +3,7 @@ import threading
 from time import sleep
 from typing import List, Tuple
 
-from more_itertools import chunked
+from more_itertools import chunked, collapse
 
 from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
@@ -53,13 +53,16 @@ def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
         housekeeping_interval,
         auth_headers
     )
+
     cards_to_push, ids_to_delete = _filter_elems(persisted_options)
+    cards_to_push = _merge_duplicates(cards_to_push)
+    # TODO flip and append cards to create more
     _push_in_batches(cards_to_push, auth_headers)
     _delete_elems_in_batches(ids_to_delete)
 
 
-def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[Tuple[int, AnkiCard]], List[int]]:
-    cards_to_push: List[Tuple[int, AnkiCard]] = []
+def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCard], List[int]]:
+    cards_to_push: List[AnkiCard] = []
     ids_to_delete: List[int] = []
 
     for curr_option in persisted_options:
@@ -68,16 +71,14 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[Tuple[
             app_log.debug(f"selected option with id '{curr_option.dict_options_item_id}' "
                           f"with status {curr_option.status}")
 
-            curr_card = AnkiCard(
-                deck=curr_option.deck,
-                front=curr_option.input,
-                back=curr_option.output,
+            cards_to_push.append(
+                AnkiCard(
+                    item_ids=[curr_option.dict_options_item_id],
+                    deck=curr_option.deck,
+                    front=curr_option.input,
+                    back=curr_option.output
+                )
             )
-
-            cards_to_push.append((
-                curr_option.dict_options_item_id,
-                curr_card
-            ))
 
         elif curr_option.status != RequestStatus.SYNCED:
             ids_to_delete.append(curr_option.dict_options_item_id)
@@ -85,17 +86,26 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[Tuple[
     return cards_to_push, ids_to_delete
 
 
+def _merge_duplicates(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
+    mapping: dict[str, List[AnkiCard]] = {}
+    for card in cards_to_push:
+        mapping.setdefault(card.front, []).append(card)
 
-# def _merge_duplicates(cards_to_push: List[Tuple[int, AnkiCard]]) -> :
+    merged_stack: List[AnkiCard] = []
+    duplicates: list[AnkiCard]
+    for _, duplicates in mapping.items():
+        assert len(duplicates) > 0
+        merged_elems = duplicates[0].merge_cards(duplicates[1:])
+        merged_stack.append(merged_elems)
+
+    return merged_stack
 
 
-
-def _push_in_batches(cards_to_push: List[Tuple[int, AnkiCard]], auth_headers: UnsignedAuthHeaders) -> None:
+def _push_in_batches(cards_to_push: List[AnkiCard], auth_headers: UnsignedAuthHeaders) -> None:
     for card_batch in chunked(cards_to_push, API_CONNECT_BATCH_SIZE):
-        item_ids = [elem[0] for elem in card_batch]
-        card_objects = [elem[1] for elem in card_batch]
+        item_ids = list(collapse([elem.item_ids for elem in card_batch]))
 
-        response_ok = WotdAnkiConnectFetcher.api_push_cards(card_objects, auth_headers)
+        response_ok = WotdAnkiConnectFetcher.api_push_cards(card_batch, auth_headers)
         if response_ok:
             PersistenceService().update_items_status(item_ids, RequestStatus.SYNCED)
         else:

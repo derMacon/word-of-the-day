@@ -42,32 +42,26 @@ export async function wotdApiHealthStatus(): Promise<ApiHealthInformation> {
 }
 
 // TODO fix header param type
-export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[]> {
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[] | null> {
 
     let input: DictRequest = new DictRequest(fromLanguage.language_uuid, toLanguage.language_uuid, word)
     console.log('headers: ', headers)
     console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
 
     try {
-
-        // TODO insert auth headers
-
         let output: Response = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
             method: 'POST',
             headers: headers || DEFAULT_HEADERS,
             body: JSON.stringify(instanceToPlain(input))
         })
 
-        // TODO clean this up
-        // let out: DictOptionsItem[] = plainToClass(DictOptionsItem, await output.json())
-        // return out
-
         return plainToClass(DictOptionsItem, await output.json())
 
     } catch (error) {
         console.error(error)
-        throw error
+        alert("Sorry we're having trouble connecting to the background api. Please try again later.")
     }
+    return null
 }
 
 export async function dictAutocompleteWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<string[]> {

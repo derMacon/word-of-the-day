@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS dict_options_item (
   dict_options_item_id SERIAL PRIMARY KEY,
   username VARCHAR(100) NOT NULL,
   deck VARCHAR(100) NOT NULL,
-  input VARCHAR(100) NOT NULL,
+  input VARCHAR(1000) NOT NULL,
   output VARCHAR(1000) NOT NULL,
   selected BOOLEAN NOT NULL,
   status VARCHAR(100) NOT NULL,
