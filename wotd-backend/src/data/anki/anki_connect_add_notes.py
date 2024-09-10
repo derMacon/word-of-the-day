@@ -6,8 +6,8 @@ from src.data.anki.anki_card import AnkiCard
 
 
 @dataclass
-class AnkiConnectRequestCanAddNotes:
-    action: str = 'canAddNotes'
+class AnkiConnectRequestAddNotes:
+    action: str = 'addNotes'
     version: int = ANKI_CONNECT_VERSION
     params: Dict[str, str] = None
 
@@ -20,6 +20,6 @@ class AnkiConnectRequestCanAddNotes:
 
 
 @dataclass(frozen=True)
-class AnkiConnectResponseCanAddNotes:
+class AnkiConnectResponseAddNotes:
     result: List[bool]
     error: int

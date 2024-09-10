@@ -1,5 +1,4 @@
 import dataclasses
-import uuid
 from datetime import datetime, time
 from typing import List
 from typing import Tuple
@@ -22,6 +21,8 @@ from src.service.signature_service import SignatureService
 from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
 from src.service.wotd_vnc_controller import WotdVncController
 from src.utils.logging_config import app_log
+
+LOGIN_MAX_RETRIES = 3
 
 
 @main.route("/health")
@@ -49,7 +50,7 @@ def anki_login():
     signed_header_obj = SignatureService().create_signed_header_dict(
         username=anki_login_request.username,
         # uuid=testUUID
-        uuid = uuid # TODO use this instead of testUUID
+        uuid=uuid  # TODO use this instead of testUUID
     )
 
     app_log.debug(f"signed header obj: {signed_header_obj}")

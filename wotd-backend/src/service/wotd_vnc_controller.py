@@ -5,10 +5,12 @@ import uuid
 from singleton_decorator import singleton
 from vncdotool import api
 
+from src.data.error.anki_vnc_error import AnkiVncError
+from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
 from src.utils.logging_config import app_log
 
+LOGIN_MAX_RETRIES = 3
 
-# TODO make functions static or use singleton decorator - only works without constants in the class (first put them into .ini file)
 
 @singleton
 class WotdVncController:
@@ -43,7 +45,6 @@ class WotdVncController:
             password=self.anki_connect_login_password
         )
 
-
     def login(self, username: str, password: str) -> str:
         # TODO mutex with housekeeping so no connection gets interrupted?
         self.reset_connection()
@@ -53,17 +54,22 @@ class WotdVncController:
         profile_name = str(uuid.uuid4())
         # profile_name = 'test-profile-01'
 
+        if WotdAnkiConnectFetcher.check_if_profile_present(profile_name):
+            raise AnkiVncError('anki profile already present - should not be the case since we want to create '
+                               'a new profile')
         self._create_new_profile(profile_name)
         self._select_created_profile()
         self._login_anki_web(username, password)
 
-        app_log.debug(f'login mechanism run complete for new profile with uuid: {profile_name}')
+        if WotdAnkiConnectFetcher.check_if_profile_present(profile_name):
+            app_log.debug(f'login mechanism run complete for new profile with uuid: {profile_name}')
+            return profile_name
 
-        return profile_name
+        raise AnkiVncError(f'login failed for {username} with profile uuid {profile_name}')
 
     def _create_new_profile(self, profile_name: str):
         app_log.debug(f'creating new profile with uuid: {profile_name}')
-        self._press_combination(['ctrl', 'shift', 'p'])
+        self._press_combination(['ctrl', 'shift', 'p'], delay_after_action=2)
         self._press_combination(['tab'], repetitions=2)
         self._press_combination(['ctrl', ' '])
         self._type_str(profile_name)
@@ -71,6 +77,7 @@ class WotdVncController:
 
     def _select_created_profile(self):
         app_log.debug('select created profile')
+        # self._press_combination(['d'], delay_after_action=2)
         self._press_combination(['shift', 'tab'])
         self._press_combination(['ctrl', ' '])
 
@@ -82,7 +89,7 @@ class WotdVncController:
         self._press_combination(['tab'])
         self._type_str(password)
         self._press_combination(['enter'], delay_after_action=2)
-        self._press_combination(['y'], delay_after_action=2)
+        self._press_combination(['y'])
         self._press_combination(['d'])
 
     def _press_combination(self, keys, repetitions=1, delay_after_action=.5):
