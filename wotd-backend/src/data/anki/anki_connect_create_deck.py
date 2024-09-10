@@ -6,20 +6,18 @@ from src.data.anki.anki_card import AnkiCard
 
 
 @dataclass
-class AnkiConnectRequestCanAddNotes:
-    action: str = 'canAddNotes'
+class AnkiConnectRequestCreateDeck:
+    action: str = 'createDeck'
     version: int = ANKI_CONNECT_VERSION
     params: Dict[str, str] = None
 
-    def __init__(self, anki_cards: List[AnkiCard]):
+    def __init__(self, deck_name: str):
         self.params = {
-            'notes': [
-                card.to_anki_connect_params_format() for card in anki_cards
-            ]
+            'deck': deck_name
         }
 
 
 @dataclass(frozen=True)
-class AnkiConnectResponseCanAddNotes:
-    result: List[bool]
+class AnkiConnectResponseCreateDeck:
+    result: int
     error: str

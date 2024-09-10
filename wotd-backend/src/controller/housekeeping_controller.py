@@ -7,6 +7,7 @@ from more_itertools import chunked
 
 from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
+from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.requeststatus import RequestStatus
 from src.data.error.database_error import DatabaseError
 from src.data.error.missing_headers_error import MissingHeadersError
@@ -48,9 +49,18 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
 
 def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
     app_log.debug('preparing data to push to anki connect')
-    persisted_options = PersistenceService().find_expired_options_for_user(housekeeping_interval, auth_headers)
+    persisted_options: List[DictOptionsItem] = PersistenceService().find_expired_options_for_user(
+        housekeeping_interval,
+        auth_headers
+    )
+    cards_to_push, ids_to_delete = _filter_elems(persisted_options)
+    _push_in_batches(cards_to_push, auth_headers)
+    _delete_elems_in_batches(ids_to_delete)
+
+
+def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[Tuple[int, AnkiCard]], List[int]]:
+    cards_to_push: List[Tuple[int, AnkiCard]] = []
     ids_to_delete: List[int] = []
-    cards_to_push: List[Tuple[str, AnkiCard]] = []
 
     for curr_option in persisted_options:
 
@@ -72,6 +82,15 @@ def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
         elif curr_option.status != RequestStatus.SYNCED:
             ids_to_delete.append(curr_option.dict_options_item_id)
 
+    return cards_to_push, ids_to_delete
+
+
+
+# def _merge_duplicates(cards_to_push: List[Tuple[int, AnkiCard]]) -> :
+
+
+
+def _push_in_batches(cards_to_push: List[Tuple[int, AnkiCard]], auth_headers: UnsignedAuthHeaders) -> None:
     for card_batch in chunked(cards_to_push, API_CONNECT_BATCH_SIZE):
         item_ids = [elem[0] for elem in card_batch]
         card_objects = [elem[1] for elem in card_batch]
@@ -82,6 +101,8 @@ def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
         else:
             app_log.error(f"not able to push card batch {card_batch}")
 
+
+def _delete_elems_in_batches(ids_to_delete: List[int]):
     for id_batch in chunked(ids_to_delete, DB_BATCH_SIZE):
         app_log.debug(f'id_to_delete: {id_batch}')
         PersistenceService().delete_items_with_ids(id_batch)

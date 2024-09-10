@@ -13,4 +13,4 @@ class AnkiConnectRequestGetProfiles:
 @dataclass(frozen=True)
 class AnkiConnectResponseGetProfiles:
     result: List[str]
-    error: int
+    error: str

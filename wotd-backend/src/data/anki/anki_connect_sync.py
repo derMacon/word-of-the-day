@@ -13,4 +13,4 @@ class AnkiConnectRequestSync:
 @dataclass(frozen=True)
 class AnkiConnectResponseSync:
     result: str
-    error: int
+    error: str

@@ -19,4 +19,4 @@ class AnkiConnectRequestLoadProfile:
 @dataclass(frozen=True)
 class AnkiConnectResponseLoadProfile:
     result: List[str]
-    error: int
+    error: str

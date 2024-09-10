@@ -7,7 +7,7 @@ from flask import jsonify, request, Response
 
 from src.app import main
 from src.controller.housekeeping_controller import trigger_housekeeping
-from src.controller.web_controller import controller
+from src.controller.web_controller import WebController
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
@@ -85,7 +85,7 @@ def autocomplete_word_options() -> Tuple[Response, int]:
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
 
-    return jsonify(controller.autocomplete_dict_word(dict_request)), 200
+    return jsonify(WebController().autocomplete_dict_word(dict_request)), 200
 
 
 @main.route("/dict/lookup-option", methods=['POST'])
@@ -96,8 +96,8 @@ def lookup_word_options() -> Tuple[Response, int]:
     dict_request = DictRequest(**request_data)
     app_log.debug(f"dict request: {dict_request}")
 
-    unsigned_auth_headers: UnsignedAuthHeaders = _extract_unsigned_headers()
-    dict_options_response: List[DictOptionsItem] = controller.lookup_dict_word(dict_request, unsigned_auth_headers)
+    unsigned_auth_headers: UnsignedAuthHeaders | None = _extract_unsigned_headers()
+    dict_options_response: List[DictOptionsItem] = WebController().lookup_dict_word(dict_request, unsigned_auth_headers)
 
     json: Response = jsonify([dataclasses.asdict(curr_option) for curr_option in dict_options_response])
     app_log.debug('lookup response json: %s', json.get_json())
@@ -150,7 +150,7 @@ def select_word_options() -> Tuple[Response, int]:
     app_log.debug(f"selected item id: {selected_item_id}")
 
     output = {
-        'select_successful': controller.select_dict_word(selected_item_id)
+        'select_successful': WebController().select_dict_word(selected_item_id)
     }
 
     app_log.debug(f"json output: {output}")

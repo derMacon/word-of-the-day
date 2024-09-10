@@ -1,6 +1,7 @@
 from typing import List
 
 from dictcc import Dict
+from singleton_decorator import singleton
 
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
@@ -13,6 +14,7 @@ from src.utils.logging_config import app_log
 from src.utils.translations_utils import update_request_status, update_deckname
 
 
+@singleton
 class WebController:
 
     def __init__(self):
@@ -78,6 +80,3 @@ class WebController:
         app_log.debug(f"toggle item id: {item_id}")
         self.persistence_service.update_item_select(item_id)
         return True
-
-
-controller = WebController()
