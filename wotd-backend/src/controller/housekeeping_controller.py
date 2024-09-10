@@ -57,6 +57,7 @@ def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
     cards_to_push, ids_to_delete = _filter_elems(persisted_options)
     cards_to_push = _merge_duplicates(cards_to_push)
     # TODO flip and append cards to create more
+    cards_to_push = _sort_by_ts(cards_to_push)
     _push_in_batches(cards_to_push, auth_headers)
     _delete_elems_in_batches(ids_to_delete)
 
@@ -76,7 +77,8 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCa
                     item_ids=[curr_option.dict_options_item_id],
                     deck=curr_option.deck,
                     front=curr_option.input,
-                    back=curr_option.output
+                    back=curr_option.output,
+                    ts=curr_option.option_response_ts
                 )
             )
 
@@ -84,6 +86,10 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCa
             ids_to_delete.append(curr_option.dict_options_item_id)
 
     return cards_to_push, ids_to_delete
+
+
+def _sort_by_ts(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
+    return sorted(cards_to_push, key=lambda card: card.ts)
 
 
 def _merge_duplicates(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:

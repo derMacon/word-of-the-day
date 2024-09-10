@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 
 from src.data.dict_input import now
@@ -16,7 +17,7 @@ class DictOptionsItem:
     output: str
     selected: bool
     status: RequestStatus
-    option_response_ts: str
+    option_response_ts: datetime
 
     def __init__(self,
                  dict_options_item_id: int = -1,
@@ -26,7 +27,7 @@ class DictOptionsItem:
                  output: str = '',
                  selected: bool = False,
                  status: RequestStatus = RequestStatus.OK,
-                 ts: str = now()):
+                 ts: datetime = now()):
         self.dict_options_item_id = dict_options_item_id
         self.input = input.replace("'", "")
         self.output = output.replace("'", "")

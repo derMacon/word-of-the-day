@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 
+from src.data.dict_input import parse_datetime_from_string
 from src.data.error.logic_error import LogicError
 
 MERGING_SEPERATOR = ' | '
@@ -13,12 +15,14 @@ class AnkiCard:
     deck: str
     front: str
     back: set[str]
+    ts: datetime
 
-    def __init__(self, item_ids: List[int], deck: str, front: str, back: str):
+    def __init__(self, item_ids: List[int], deck: str, front: str, back: str, ts: datetime):
         self.item_ids = item_ids
         self.deck = deck
         self.front = front
         self.back = {back}
+        self.ts = ts
 
     def to_anki_connect_params_format(self):
         """
