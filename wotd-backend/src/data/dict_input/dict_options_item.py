@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 
 from src.data.dict_input import now
-from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
-from src.data.dict_input.status import Status
+from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
+from src.data.dict_input.requeststatus import RequestStatus
+from src.utils.logging_config import app_log
 
 
 @dataclass
@@ -14,8 +16,8 @@ class DictOptionsItem:
     input: str
     output: str
     selected: bool
-    status: Status
-    option_response_ts: str
+    status: RequestStatus
+    option_response_ts: datetime
 
     def __init__(self,
                  dict_options_item_id: int = -1,
@@ -24,8 +26,8 @@ class DictOptionsItem:
                  input: str = '',
                  output: str = '',
                  selected: bool = False,
-                 status: Status = Status.OK,
-                 ts: str = now()):
+                 status: RequestStatus = RequestStatus.OK,
+                 ts: datetime = now()):
         self.dict_options_item_id = dict_options_item_id
         self.input = input.replace("'", "")
         self.output = output.replace("'", "")
@@ -36,15 +38,16 @@ class DictOptionsItem:
         self.option_response_ts = ts
 
 
-def from_translation_tuples(response_tuples, auth_headers: AnkiLoginResponseHeaders | None) -> List[DictOptionsItem]:
-    # TODO types in signature
+def from_translation_tuples(response_tuples, auth_headers: UnsignedAuthHeaders | None) -> List[DictOptionsItem]:
+    app_log.debug('translating tuples')
     username = '' if auth_headers is None else auth_headers.username
     parsed_options: List[DictOptionsItem] = []
     for curr_tuple in response_tuples:
         item: DictOptionsItem = DictOptionsItem(
             input=curr_tuple[0],
             output=curr_tuple[1],
-            username=username
+            username=username,
+            ts=now()
         )
 
         parsed_options.append(item)

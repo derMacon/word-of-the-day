@@ -10,29 +10,20 @@ export function BasicUsage() {
 
             <p>Click on the icons in the top right corner to execute the following actions</p>
 
-            <Table striped bordered hover className='table-fixed'>
-                <tbody>
-                <tr>
-                    <td className='w-50'>
-                        <FaCloudArrowUp className="mx-1"/>
-                        <FaCloudBolt className="mx-1"/>
-                    </td>
-                    <td className='w-50'>click to see anki account login status</td>
-                </tr>
-                <tr>
-                    <td className='w-50'>
-                        <FaArrowsRotate className="mx-1"/>
-                    </td>
-                    <td className='w-50'>switch languages</td>
-                </tr>
-                <tr>
-                    <td className='w-50'>
-                        <FaCircleInfo className="mx-1"/>
-                    </td>
-                    <td className='w-50'>further info / description</td>
-                </tr>
-                </tbody>
-            </Table>
+            <ul>
+                <li>
+                    <FaCloudArrowUp className="mx-1 me-3"/>
+                    anki account login status
+                </li>
+                <li>
+                    <FaArrowsRotate className="mx-1 me-3"/>
+                    switch languages
+                </li>
+                <li>
+                    <FaCircleInfo className="mx-1 me-3"/>
+                    further info / description
+                </li>
+            </ul>
 
         </Container>
     );

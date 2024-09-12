@@ -1,5 +1,5 @@
 // TODO read this from props or some kind .ini, do not hardcode it
-import { io } from 'socket.io-client';
+import {io} from 'socket.io-client';
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {instanceToPlain, plainToClass} from "class-transformer";
 import {DictRequest} from "../model/DictRequest";
@@ -8,6 +8,7 @@ import {DictOptionsItem} from "../model/DictOptionsItem";
 import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
+import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
 
 const HTTP_STATUS_OK: number = 200
 
@@ -20,18 +21,11 @@ export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
 export const socket = io(WOTD_BACKEND_SERVER_ADDRESS)
 
 
-// TODO clean up communication with anki api only through wotd backend - delete info here
-const ANKI_API_SERVER_ADDRESS: string = 'http://192.168.178.187:4000'
-export const ANKI_API_BASE: string = ANKI_API_SERVER_ADDRESS + '/api/v1'
-
-
 const DEFAULT_HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }
 
-
-// ------------------- WOTD ------------------- //
 
 export async function wotdApiHealthStatus(): Promise<ApiHealthInformation> {
     try {
@@ -48,32 +42,26 @@ export async function wotdApiHealthStatus(): Promise<ApiHealthInformation> {
 }
 
 // TODO fix header param type
-export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[]> {
+export async function dictLookupWord(word: string, fromLanguage: Language, toLanguage: Language, headers: any | undefined): Promise<DictOptionsItem[] | null> {
 
     let input: DictRequest = new DictRequest(fromLanguage.language_uuid, toLanguage.language_uuid, word)
     console.log('headers: ', headers)
     console.log('dict lookup input: ', JSON.stringify(instanceToPlain(input)))
 
     try {
-
-        // TODO insert auth headers
-
-        let output = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
+        let output: Response = await fetch(WOTD_DICTIONARY_BASE + '/lookup-option', {
             method: 'POST',
             headers: headers || DEFAULT_HEADERS,
             body: JSON.stringify(instanceToPlain(input))
         })
 
-        // TODO clean this up
-        // let out: DictOptionsItem[] = plainToClass(DictOptionsItem, await output.json())
-        // return out
-
         return plainToClass(DictOptionsItem, await output.json())
 
     } catch (error) {
         console.error(error)
-        throw error
+        alert("Sorry we're having trouble connecting to the background api. Please try again later.")
     }
+    return null
 }
 
 export async function dictAutocompleteWord(word: string, fromLanguage: Language, toLanguage: Language): Promise<string[]> {
@@ -98,7 +86,6 @@ export async function dictAutocompleteWord(word: string, fromLanguage: Language,
 }
 
 
-
 export async function dictGetAvailableLang(): Promise<Language[]> {
 
     try {
@@ -116,6 +103,27 @@ export async function dictGetAvailableLang(): Promise<Language[]> {
     } catch (error) {
         console.error(error)
         return []
+    }
+}
+
+
+export async function dictGetInfoHousekeeping(): Promise<InfoRequestHousekeeping> {
+
+    try {
+
+        let out = await fetch(WOTD_ANKI_DOMAIN + '/housekeeping-info', {
+            method: 'GET',
+            headers: DEFAULT_HEADERS,
+        })
+
+        let jsonObject: Object = await out.json() as Object
+        let requestWrapper: InfoRequestHousekeeping = plainToClass(InfoRequestHousekeeping, jsonObject)
+        console.log('info housekeeping: ', requestWrapper)
+        return requestWrapper
+
+    } catch (error) {
+        console.error(error)
+        throw error
     }
 }
 
@@ -152,18 +160,22 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
             body: JSON.stringify(instanceToPlain(input))
         }))
 
-        const mainTokenKey: string = 'main-token'
-        const cardTokenKey: string = 'card-token'
+        const signedUsername: string = 'X-Wotd-Username'
+        const signedUuid: string = 'X-Wotd-Uuid'
         const responseHeaders: Headers = out.headers;
 
-        if (!out.ok || !responseHeaders.has(mainTokenKey) || !responseHeaders.has(cardTokenKey)) {
+        console.log('response headers: ', responseHeaders)
+
+        if (!out.ok || !responseHeaders.has(signedUsername) || !responseHeaders.has(signedUuid)) {
             console.log('invalid credentials')
             return undefined
         }
 
+        console.log('valid headers')
+
         const ankiResponseHeaders: AnkiLoginResponseHeaders = new AnkiLoginResponseHeaders(
-            responseHeaders.get(mainTokenKey)!,
-            responseHeaders.get(cardTokenKey)!
+            responseHeaders.get(signedUsername)!,
+            responseHeaders.get(signedUuid)!
         )
 
         console.log('anki response headers: ', ankiResponseHeaders)
@@ -177,9 +189,25 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
 
 export async function ankiApiIsHealthy(): Promise<boolean> {
     try {
-        return (await fetch(ANKI_API_BASE + '/health')).ok
+        return (await fetch(WOTD_API_BASE + '/health')).ok
     } catch (error) {
         console.log('anki api is not reachable')
+        return false
+    }
+}
+
+
+// TODO fix param type
+export async function ankiApiTriggerManualHousekeeping(auth_headers: any) {
+    try {
+        let out: Response = (await fetch(WOTD_ANKI_DOMAIN + '/trigger-housekeeping', {
+            method: 'GET',
+            headers: auth_headers
+        }))
+        console.log('response triggering manual housekeeping: ', out)
+
+    } catch (error) {
+        console.log('cannot trigger manual housekeeping in the backend')
         return false
     }
 }

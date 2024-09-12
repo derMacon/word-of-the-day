@@ -2,33 +2,33 @@ import {Expose} from "class-transformer";
 
 export class AnkiLoginResponseHeaders {
 
-    @Expose({name: 'main_token'})
-    private _mainToken: string
+    @Expose({name: 'username'})
+    private _signedUsername: string
 
-    @Expose({name: 'card_token'})
-    private _cardToken: string
+    @Expose({name: 'uuid'})
+    private _signedUuid: string
 
 
-    constructor(mainToken: string, cardToken: string) {
-        this._mainToken = mainToken;
-        this._cardToken = cardToken;
+    constructor(signedUsername: string, signedUuid: string) {
+        this._signedUsername = signedUsername;
+        this._signedUuid = signedUuid;
     }
 
 
-    get mainToken(): string {
-        return this._mainToken;
+    get signedUsername(): string {
+        return this._signedUsername;
     }
 
-    set mainToken(value: string) {
-        this._mainToken = value;
+    set signedUsername(value: string) {
+        this._signedUsername = value;
     }
 
-    get cardToken(): string {
-        return this._cardToken;
+    get signedUuid(): string {
+        return this._signedUuid;
     }
 
-    set cardToken(value: string) {
-        this._cardToken = value;
+    set signedUuid(value: string) {
+        this._signedUuid = value;
     }
 
 }

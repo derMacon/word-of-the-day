@@ -1,65 +1,162 @@
-from dataclasses import asdict
+import dataclasses
+import os
+from typing import List
 
 import requests
 
 from src.data.anki.anki_card import AnkiCard
-from src.data.anki.token_type import HeaderType
-from src.data.dict_input.anki_login_response_headers import AnkiLoginResponseHeaders
+from src.data.anki.anki_connect_add_notes import AnkiConnectRequestAddNotes, AnkiConnectResponseAddNotes
+from src.data.anki.anki_connect_can_add_notes import AnkiConnectRequestCanAddNotes, AnkiConnectResponseCanAddNotes
+from src.data.anki.anki_connect_create_deck import AnkiConnectRequestCreateDeck, AnkiConnectResponseCreateDeck
+from src.data.anki.anki_connect_get_deck_names import AnkiConnectRequestGetDeckNames, AnkiConnectResponseGetDeckNames
+from src.data.anki.anki_connect_get_profiles import AnkiConnectRequestGetProfiles, AnkiConnectResponseGetProfiles
+from src.data.anki.anki_connect_load_profile import AnkiConnectRequestLoadProfile
+from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
+from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
+from src.data.error.anki_connect_error import AnkiConnectError
 from src.utils.logging_config import app_log
 
 
-# TODO make functions static or use singleton decorator - only works without constants in the class (first put them into .ini file)
-class WotdApiFetcher:
-    # TODO use .ini file
-    ANKI_API_SERVER_ADDRESS = 'http://192.168.178.187:4000'
-    ANKI_API_BASE = 'http://192.168.178.187:4000/api/v1'
+class WotdAnkiConnectFetcher:
+    ANKI_CONNECT_HOST = os.environ.get('ANKI_CONNECT_HOST', 'localhost')
+    ANKI_CONNECT_DATA_PORT = os.environ.get('ANKI_CONNECT_DATA_PORT', 8765)
+    ANKI_CONNECT_LOGIN_PORT = os.environ.get('ANKI_CONNECT_LOGIN_PORT', 5900)
 
-    def health_check(self):
+    ANKI_CONNECT_DATA_ADDRESS = f'http://{ANKI_CONNECT_HOST}:{ANKI_CONNECT_DATA_PORT}'
+
+    @staticmethod
+    def health_check():
+        app_log.debug('anki connect triggering health check')
         try:
-            return requests.get(WotdApiFetcher.ANKI_API_BASE + "/health").ok
+
+            data = dataclasses.asdict(AnkiConnectRequestGetDeckNames())
+            plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+            anki_connect_response: AnkiConnectResponseGetDeckNames = AnkiConnectResponseGetDeckNames(**plain_response)
+            app_log.debug(f'anki connect response for get deck names: {anki_connect_response}')
+
+            return anki_connect_response.error is None
         except Exception as e:
             app_log.error(e)
             return False
 
-    def login(self, username: str, password: str):
-        app_log.debug(f"user '{username}' tries to login")
+    @staticmethod
+    def api_push_cards(anki_cards: List[AnkiCard], headers: UnsignedAuthHeaders) -> bool:
+        app_log.debug(f'auth headers: {headers}')
+        app_log.debug(f'push anki card: {anki_cards}')
 
-        url = self.ANKI_API_BASE + '/login'
+        profile_uuid = headers.uuid
+        WotdAnkiConnectFetcher._validate_if_profile_present(profile_uuid)
+        WotdAnkiConnectFetcher._load_profile(profile_uuid)
+        WotdAnkiConnectFetcher._create_decks_if_needed(anki_cards)
+        WotdAnkiConnectFetcher._validate_notes_can_be_added(anki_cards)
+        WotdAnkiConnectFetcher._add_notes(anki_cards)
+        WotdAnkiConnectFetcher._sync_anki_web()
 
-        data = {
-            'username': username,
-            'password': password
-        }
+        return True
 
-        headers = {
-            'Content-Type': 'application/json',  # Example header
-            # 'Authorization': 'Bearer YOUR_ACCESS_TOKEN'  # Example header for authorization
-        }
+    @staticmethod
+    def _validate_if_profile_present(profile_uuid: str) -> None:
+        if not WotdAnkiConnectFetcher.check_if_profile_present(profile_uuid):
+            raise AnkiConnectError(f'user profile not created before pushing: {profile_uuid}')
+        app_log.debug(f"profile uuid '{profile_uuid}' present in available profiles")
 
-        # Sending the POST request
-        response = requests.post(url, json=data, headers=headers)
+    @staticmethod
+    def check_if_profile_present(profile_uuid: str) -> bool:
+        app_log.debug(f'checking if profile uuid is present in anki stack: {profile_uuid}')
+        if profile_uuid is None:
+            app_log.debug('profile uuid was None - invalid uuid to look up')
+            return False
 
-        # TODO decorator similar to sql error - here for the api communication
-        # if response.status_code == 200:
-        #     print("POST request was successful.")
-        #     print("Response:", response.headers)
-        # else:
-        #     print("POST request failed with status code:", response.status_code)
+        data = dataclasses.asdict(AnkiConnectRequestGetProfiles())
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseGetProfiles = AnkiConnectResponseGetProfiles(**plain_response)
+        app_log.debug(f'anki connect response for get profiles (curr profile {profile_uuid}): {anki_connect_response}')
+        uuid_is_present = profile_uuid in anki_connect_response.result
+        app_log.debug(f'profile uuid is present: {uuid_is_present}')
+        return uuid_is_present
 
-        main_token = response.headers[HeaderType.MAIN.value.header_key]
-        card_token = response.headers[HeaderType.CARD.value.header_key]
+    @staticmethod
+    def _load_profile(profile_uuid: str) -> None:
+        app_log.debug(f"loading profile uuid '{profile_uuid}'")
+        data = dataclasses.asdict(AnkiConnectRequestLoadProfile(name=profile_uuid))
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseGetProfiles = AnkiConnectResponseGetProfiles(**plain_response)
+        app_log.debug(f'anki connect response for load profile: {anki_connect_response}')
+        app_log.debug(f'profile load successful: '
+                      f'{anki_connect_response is not None and anki_connect_response.error is None}')
 
-        app_log.debug(f"main token: '{main_token}'")
-        app_log.debug(f"card token: '{card_token}'")
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            raise AnkiConnectError(f'unable to load profile {profile_uuid} :: {anki_connect_response}')
 
-        return main_token, card_token
+    @staticmethod
+    def _create_decks_if_needed(anki_cards: List[AnkiCard]) -> None:
+        unique_decks = set([card.deck for card in anki_cards])
+        app_log.debug(f"create decks if needed, unique decks: '{unique_decks}'")
 
-    def api_push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders) -> bool:
-        app_log.debug(f'push anki card: {str(anki_card)}')
-        url = self.ANKI_API_BASE + '/add-card'
-        data = asdict(anki_card)
-        app_log.debug(f"push data '{data}' to url '{url}' with headers '{headers}'")
-        return requests.get(url, json=data, headers=headers.to_map()).ok
+        for deck_name in unique_decks:
+            if not WotdAnkiConnectFetcher._check_if_deck_is_present(deck_name):
+                WotdAnkiConnectFetcher._create_single_deck(deck_name)
 
+    @staticmethod
+    def _check_if_deck_is_present(deck_name: str) -> bool:
+        data = dataclasses.asdict(AnkiConnectRequestGetDeckNames())
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseGetDeckNames = AnkiConnectResponseGetDeckNames(**plain_response)
+        app_log.debug(f'anki connect response for get deck names: {anki_connect_response}')
 
-anki_api_fetcher = WotdApiFetcher()
+        if (anki_connect_response is None
+                or anki_connect_response.result is None
+                or anki_connect_response.error is not None):
+            raise AnkiConnectError(f'unable to retrieve deck names from api :: {anki_connect_response}')
+
+        return deck_name in anki_connect_response.result
+
+    @staticmethod
+    def _create_single_deck(deck_name: str) -> None:
+        app_log.debug(f'trying to create deck with name: {deck_name}')
+        data = dataclasses.asdict(AnkiConnectRequestCreateDeck(deck_name))
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseCreateDeck = AnkiConnectResponseCreateDeck(**plain_response)
+        app_log.debug(f'anki connect response for create deck: {anki_connect_response}')
+
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            raise AnkiConnectError(f'unable to create deck {deck_name} :: {anki_connect_response}')
+
+    @staticmethod
+    def _validate_notes_can_be_added(anki_cards: List[AnkiCard]) -> None:
+        data = dataclasses.asdict(AnkiConnectRequestCanAddNotes(anki_cards))
+        app_log.debug(f'anki connect can add notes request json: {data}')
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseCanAddNotes = AnkiConnectResponseCanAddNotes(**plain_response)
+        app_log.debug(f'anki connect response for can add notes: {anki_connect_response}')
+
+        if anki_connect_response is not None and all(anki_connect_response.result):
+            app_log.debug('all anki cards valid, can be added to vault')
+        else:
+            raise AnkiConnectError(f'cannot add all anki cards'
+                                   f' - AnkiConnectResponseCanAddNotes output: {anki_connect_response} '
+                                   f':: anki_cards: {anki_cards}')
+
+    @staticmethod
+    def _add_notes(anki_cards: List[AnkiCard]) -> None:
+        data = dataclasses.asdict(AnkiConnectRequestAddNotes(anki_cards))
+        app_log.debug(f'anki connect add notes request json: {data}')
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseAddNotes = AnkiConnectResponseAddNotes(**plain_response)
+        app_log.debug(f'anki connect response for add notes: {anki_connect_response}')
+
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            raise AnkiConnectError(f'could not push cards to anki api {anki_connect_response} '
+                                   f':: invalid cards: {anki_cards}')
+
+    @staticmethod
+    def _sync_anki_web() -> None:
+        app_log.debug('trigger sync with anki web')
+        data = dataclasses.asdict(AnkiConnectRequestSync())
+        app_log.debug(f'anki connect sync request json: {data}')
+        plain_response = requests.post(url=WotdAnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseSync = AnkiConnectResponseSync(**plain_response)
+        app_log.debug(f'anki connect response for sync: {anki_connect_response}')
+
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            raise AnkiConnectError(f'could not sync with anki web: {anki_connect_response}')

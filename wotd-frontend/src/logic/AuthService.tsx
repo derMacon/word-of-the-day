@@ -4,49 +4,49 @@ import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
 export class AuthService {
 
-    readonly EMAIL_COOKIE_KEY: string = 'anki-email'
-    readonly MAIN_TOKEN_COOKIE_KEY: string = 'main-token'
-    readonly CARD_TOKEN_COOKIE_KEY: string = 'card-token'
+    readonly PLAIN_EMAIL_COOKIE_KEY: string = 'plain-email'
+    readonly UNSIGNED_EMAIL_COOKIE_KEY: string = 'X-Wotd-Username'
+    readonly UNSIGNED_UUID_COOKIE_KEY: string = 'X-Wotd-Uuid'
     readonly IGNORE_LOGIN_PROMPT_COOKIE_KEY: string = 'ignore-login-prompt'
 
-    private _email: string;
-    private _mainToken: string;
-    private _cardToken: string;
+    private _plainUsername: string;
+    private _signedUsername: string;
+    private _signedUuid: string;
     private _ignoreLoginPrompt: boolean;
     private _cookies: Cookies;
 
 
     constructor() {
         this._cookies = new Cookies(null, {path: '/'})
-        this._email = this._cookies.get(this.EMAIL_COOKIE_KEY) ?? ''
-        this._mainToken = this._cookies.get(this.MAIN_TOKEN_COOKIE_KEY) ?? '';
-        this._cardToken = this._cookies.get(this.CARD_TOKEN_COOKIE_KEY) ?? '';
+        this._plainUsername = this._cookies.get(this.PLAIN_EMAIL_COOKIE_KEY) ?? ''
+        this._signedUsername = this._cookies.get(this.UNSIGNED_EMAIL_COOKIE_KEY) ?? ''
+        this._signedUuid = this._cookies.get(this.UNSIGNED_UUID_COOKIE_KEY) ?? '';
         this._ignoreLoginPrompt = this._cookies.get(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY) ?? false;
     }
 
 
-    get email(): string {
-        return this._email;
+    get plainUsername(): string {
+        return this._plainUsername;
     }
 
-    set email(value: string) {
-        this._email = value;
+    get signedUsername(): string {
+        return this._signedUsername;
     }
 
-    get mainToken(): string {
-        return this._mainToken;
+    set signedUsername(value: string) {
+        this._signedUsername = value;
     }
 
-    set mainToken(value: string) {
-        this._mainToken = value;
+    get signedUuid(): string {
+        return this._signedUuid;
     }
 
-    get cardToken(): string {
-        return this._cardToken;
+    set plainUsername(value: string) {
+        this._plainUsername = value;
     }
 
-    set cardToken(value: string) {
-        this._cardToken = value;
+    set signedUuid(value: string) {
+        this._signedUuid = value;
     }
 
     get ignoreLoginPrompt(): boolean {
@@ -66,9 +66,8 @@ export class AuthService {
     }
 
     userIsLoggedIn(): boolean {
-        return this._email != ''
-            && this._mainToken != ''
-            && this._cardToken != ''
+        return this._signedUsername != ''
+            && this._signedUuid != ''
     }
 
     showLoginPrompt(): boolean {
@@ -89,17 +88,16 @@ export class AuthService {
     }
 
 
-    loadAnkiLoginResponse(email: string, response: AnkiLoginResponseHeaders): void {
-        this._email = email
-        this._mainToken = response.mainToken
-        this._cardToken = response.cardToken
+    loadAnkiLoginResponse(response: AnkiLoginResponseHeaders): void {
+        this._signedUsername = response.signedUsername
+        this._signedUuid = response.signedUuid
         this.setCookie()
     }
 
     setCookie() {
-        this._cookies.set(this.EMAIL_COOKIE_KEY, this._email);
-        this._cookies.set(this.MAIN_TOKEN_COOKIE_KEY, this._mainToken);
-        this._cookies.set(this.CARD_TOKEN_COOKIE_KEY, this._cardToken);
+        this._cookies.set(this.PLAIN_EMAIL_COOKIE_KEY, this._plainUsername);
+        this._cookies.set(this.UNSIGNED_EMAIL_COOKIE_KEY, this._signedUsername);
+        this._cookies.set(this.UNSIGNED_UUID_COOKIE_KEY, this._signedUuid);
         this.writeIgnoreLoginPromptCookie()
     }
 
@@ -108,14 +106,17 @@ export class AuthService {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
-        out[this.MAIN_TOKEN_COOKIE_KEY] = this._mainToken
-        out[this.CARD_TOKEN_COOKIE_KEY] = this._cardToken
-        out[this.EMAIL_COOKIE_KEY] = this._email
+        if(this._signedUuid != null && this._signedUuid.length > 0) {
+            out[this.UNSIGNED_UUID_COOKIE_KEY] = this._signedUuid
+        }
+        if(this._signedUsername != null && this._signedUsername.length > 0) {
+            out[this.UNSIGNED_EMAIL_COOKIE_KEY] = this._signedUsername
+        }
         return out
     }
 
     toString() {
-        return `{email: ${this.email}, main-token: ${this.mainToken}, card-token: ${this.cardToken}}`
+        return `{signed-username: ${this.signedUsername}, signed-uuid: ${this.signedUuid}}`
     }
 
 }

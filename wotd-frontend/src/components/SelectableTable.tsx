@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
 import {wotdApiHealthStatus, toggleSelectedOption} from "../logic/ApiFetcher";
@@ -13,14 +13,25 @@ interface SelectableTableProps {
 
 export function SelectableTable(props: Readonly<SelectableTableProps>) {
 
-    const [highlight, setHighlight] = useState<Map<number, boolean>>(() => {
-        const initialHighlight = new Map();
+
+    // Memoize the highlight data function
+    const hightlight_data = useCallback(() => {
+        const initialHighlight = new Map<number, boolean>();
         props.apiResponse.forEach((option: DictOptionsItem) => {
+            console.log('inside api response foreach: ', option);
             initialHighlight.set(option.dictOptionsItemId, option.selected);
         });
-
         return initialHighlight;
-    });
+    }, [props.apiResponse]);
+    
+
+    const [highlight, setHighlight] = useState<Map<number, boolean>>(hightlight_data);
+
+
+    useEffect(() => {
+        setHighlight(hightlight_data)
+    }, [hightlight_data]);
+
 
     const handleSelection = (selectedOption: DictOptionsItem) => {
         wotdApiHealthStatus().then(e => {

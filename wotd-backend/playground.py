@@ -1,33 +1,33 @@
-# from src.service.persistence_service import PersistenceService
+# from src.data.anki.anki_card import AnkiCard
 #
-# print('before')
-# persistence = PersistenceService()
-# print('middle: ', persistence)
-# persistence.get_available_languages()
-# print('after: ', persistence)
-import requests
+# fst = AnkiCard(
+#     item_ids=[1, 2, 3],
+#     deck='test-deck',
+#     front='front-1',
+#     back='back-1',
+#     ts='2024-09-11 00:03:41'
+# )
+#
+# snd = AnkiCard(
+#     item_ids=[4, 5, 6],
+#     deck='test-deck',
+#     front='front-1',
+#     back='back-2',
+#     ts='2024-09-11 00:04:41'
+# )
+#
+# thrd = AnkiCard(
+#     item_ids=[4, 5, 6, 7],
+#     deck='test-deck',
+#     front='front-1',
+#     back='back-2 back-3',
+#     ts='2024-09-11 00:08:41'
+# )
+#
+# lst = [snd, thrd, fst]
+#
+# print(sorted(lst, key=lambda card: card.ts))
+from src.data.dict_input import now
 
-from src.service.autocomplete_api_fetcher import lookup_autocomplete
+print(type(now()))
 
-# response_tuples = Dict().translate(
-#     word='Behörde',
-#     from_language='en',
-#     to_language='de'
-# ).translation_tuples
-# options: List[DictOptionsItem] = from_translation_tuples(response_tuples)
-# print(f'lookup options: {options}')
-
-
-# auto_comp = lookup_autocomplete('doo')
-
-
-params = {
-    'prefix': 'doo',
-    'num': 10
-}
-
-AUTOCOMPLETE_API_SERVER_ADDRESS = 'https://api.imagineville.org'
-AUTOCOMPLETE_API_BASE = AUTOCOMPLETE_API_SERVER_ADDRESS + '/word/predict'
-
-plain_response = requests.get(AUTOCOMPLETE_API_BASE, params=params).json()
-print(f'plain response: {plain_response}')

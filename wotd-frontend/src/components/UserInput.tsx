@@ -80,8 +80,11 @@ export function UserInput(props: Readonly<UserInputProps>) {
 
     const handleDictLookup = async (word: string) => {
         let headers = props.authProvider.getHeaders()
-        let apiResponse: DictOptionsItem[] = await dictLookupWord(word, selectedFromLang, selectedToLang, headers)
+        let apiResponse: DictOptionsItem[] | null = await dictLookupWord(word, selectedFromLang, selectedToLang, headers)
         console.log('api resp options: ', apiResponse)
+        if (apiResponse == null) {
+            apiResponse = []
+        }
         props.setDictOptions(apiResponse)
     }
 

@@ -2,7 +2,7 @@ import json
 
 from flask_socketio import SocketIO
 
-from src.controller.web_controller import controller
+from src.controller.web_controller import WebController
 from src.data.dict_input.dict_request import DictRequest
 from src.utils.logging_config import app_log
 
@@ -11,7 +11,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 @socketio.on('connect')
 def handle_connect():
-    print('Client connected')
+    app_log.debug('Client connected')
 
 
 @socketio.on('autocomplete-query-event')
@@ -21,7 +21,7 @@ def handle_autocomplete_query_event(request_data):
     request = DictRequest(**json_input)
     app_log.debug(f"socket request: {request}")
 
-    lst_str_output = controller.autocomplete_dict_word(request)
+    lst_str_output = WebController().autocomplete_dict_word(request)
     app_log.debug(f"lst_str output: {lst_str_output}")
 
     try:

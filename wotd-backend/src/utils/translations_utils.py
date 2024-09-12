@@ -2,29 +2,29 @@ from typing import List
 
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.status import Status
+from src.data.dict_input.requeststatus import RequestStatus
 from src.utils.logging_config import app_log
 
-# TODO put this into .ini file
+# TODO put this in enum
 TRANSLATION_DECK = 'wotd_translations'
 DEFINITION_DECK = 'wotd_definitions'
 PRESELECTED_ITEMS_COUNT = 2
 
 
-def update_status(original_input: str, options: List[DictOptionsItem]):
-    status: Status = Status.OK
+def update_request_status(original_input: str, options: List[DictOptionsItem]):
+    status: RequestStatus = RequestStatus.OK
     if not options:
-        status = Status.NOT_FOUND
+        status = RequestStatus.NOT_FOUND
     elif not any(original_input.upper() == get_first_word_or_whole_text(option.input).upper() for option in options):
         # check if any lookup option is exactly equal to request input,
         # otherwise the input was misspelled
-        status = Status.MISSPELLED
+        status = RequestStatus.MISSPELLED
 
     for curr_option in options:
         curr_option.status = status
 
     app_log.debug(f'status: {status}')
-    if (status == Status.OK
+    if (status == RequestStatus.OK
             and options is not None
             and len(options) >= PRESELECTED_ITEMS_COUNT):
         for i in range(PRESELECTED_ITEMS_COUNT):
