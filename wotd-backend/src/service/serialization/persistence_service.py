@@ -124,15 +124,15 @@ class PersistenceService:
         return req
 
     @_database_error_decorator  # type: ignore
-    def insert_dict_request(self, dict_request: DictRequest) -> DictRequest:
+    def insert_dict_request(self, dict_request: DictRequest, auth_headers: UnsignedAuthHeaders | None) -> DictRequest:
         """
         saves the option objects into the db and fetches the generated id into a new object
         """
-
         sql_insert = (
-            "INSERT INTO dict_request (from_language_uuid, to_language_uuid, input, dict_request_ts) "
-            "VALUES (%s, %s, %s, %s) RETURNING dict_request_id;")
+            "INSERT INTO dict_request (username, from_language_uuid, to_language_uuid, input, dict_request_ts) "
+            "VALUES (%s, %s, %s, %s, %s) RETURNING dict_request_id;")
         self._cursor.execute(sql_insert, (
+            '' if auth_headers is None else auth_headers.username,
             dict_request.from_language_uuid,
             dict_request.to_language_uuid,
             dict_request.input,

@@ -56,7 +56,7 @@ class WebController:
 
     def lookup_dict_word(self, dict_request: DictRequest,
                          auth_headers: UnsignedAuthHeaders | None) -> List[DictOptionsItem]:
-        dict_request = self._persistence_service.insert_dict_request(dict_request)
+        dict_request = self._persistence_service.insert_dict_request(dict_request, auth_headers)
         response_tuples = self.dictcc_translator.translate(
             word=dict_request.input,
             from_language=dict_request.from_language_uuid,

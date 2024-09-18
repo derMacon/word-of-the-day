@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS dict_options_item (
 
 CREATE TABLE IF NOT EXISTS dict_request (
     dict_request_id SERIAL PRIMARY KEY,
+    username VARCHAR(100),
     from_language_uuid VARCHAR(50) NOT NULL,
     to_language_uuid VARCHAR(50) NOT NULL,
     FOREIGN KEY (from_language_uuid) REFERENCES language(language_uuid),
