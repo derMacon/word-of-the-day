@@ -11,8 +11,8 @@ from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.requeststatus import RequestStatus
 from src.data.error.database_error import DatabaseError
 from src.data.error.missing_headers_error import MissingHeadersError
-from src.service.persistence_service import PersistenceService
-from src.service.anki_connect_fetcher import AnkiConnectFetcher
+from src.service.serialization.persistence_service import PersistenceService
+from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 MAX_CONNECTION_TRIES = 3

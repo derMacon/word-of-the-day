@@ -6,7 +6,7 @@ from singleton_decorator import singleton
 from vncdotool import api
 
 from src.data.error.anki_vnc_error import AnkiVncError
-from src.service.anki_connect_fetcher import AnkiConnectFetcher
+from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
