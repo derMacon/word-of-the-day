@@ -10,9 +10,9 @@ from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.language_uuid import Language
 from src.data.error.database_error import DatabaseError
+from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.service.dict_translation.dict_translation_service import DictTranslationService
 from src.service.serialization.persistence_service import PersistenceService
-from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import update_request_status, update_deckname
 
