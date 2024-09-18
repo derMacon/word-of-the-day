@@ -58,3 +58,6 @@ DROP SCHEMA public CASCADE; CREATE SCHEMA public;
 ## TODO
 - Delete anki api since anki connect works better
 
+
+## Credits
+- [Logo](https://icon-icons.com/de/symbol/cloud-download/178873)
