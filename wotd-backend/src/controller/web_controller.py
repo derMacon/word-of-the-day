@@ -12,7 +12,7 @@ from src.data.dict_input.language_uuid import Language
 from src.data.error.database_error import DatabaseError
 from src.service.dict_translation_service import DictTranslationService
 from src.service.persistence_service import PersistenceService
-from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
+from src.service.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 from src.utils.translations_utils import update_request_status, update_deckname
 
@@ -29,7 +29,7 @@ class WebController:
     def health_check(self):
         status = {
             'db_connection': PersistenceService().db_connection_is_established(),
-            'anki_api_connection': WotdAnkiConnectFetcher.health_check(),
+            'anki_api_connection': AnkiConnectFetcher.health_check(),
             'wotd_api_connection': True,
         }
         app_log.debug(f"health: {status}")

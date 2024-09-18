@@ -6,14 +6,14 @@ from singleton_decorator import singleton
 from vncdotool import api
 
 from src.data.error.anki_vnc_error import AnkiVncError
-from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
+from src.service.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
 
 
 @singleton
-class WotdVncController:
+class VncController:
     """
     Since the anki connect addon does not provide the ability to login new users I implemented a simple workaround
     using a vnc viewer where it is possible to create new profiles (including setting the existing credentials for
@@ -54,14 +54,14 @@ class WotdVncController:
         profile_name = str(uuid.uuid4())
         # profile_name = 'test-profile-01'
 
-        if WotdAnkiConnectFetcher.check_if_profile_present(profile_name):
+        if AnkiConnectFetcher.check_if_profile_present(profile_name):
             raise AnkiVncError('anki profile already present - should not be the case since we want to create '
                                'a new profile')
         self._create_new_profile(profile_name)
         self._select_created_profile()
         self._login_anki_web(username, password)
 
-        if WotdAnkiConnectFetcher.check_if_profile_present(profile_name):
+        if AnkiConnectFetcher.check_if_profile_present(profile_name):
             app_log.debug(f'login mechanism run complete for new profile with uuid: {profile_name}')
             return profile_name
 

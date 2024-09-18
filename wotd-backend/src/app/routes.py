@@ -17,7 +17,7 @@ from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDi
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.signature_service import SignatureService
-from src.service.wotd_vnc_controller import WotdVncController
+from src.service.vnc_controller import VncController
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
@@ -32,7 +32,7 @@ def health_check() -> Tuple[Response, int]:
 def anki_login():
     anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
-    uuid = WotdVncController().login(
+    uuid = VncController().login(
         username=anki_login_request.username,
         password=anki_login_request.password
     )

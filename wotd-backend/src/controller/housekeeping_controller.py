@@ -12,7 +12,7 @@ from src.data.dict_input.requeststatus import RequestStatus
 from src.data.error.database_error import DatabaseError
 from src.data.error.missing_headers_error import MissingHeadersError
 from src.service.persistence_service import PersistenceService
-from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
+from src.service.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 MAX_CONNECTION_TRIES = 3
@@ -38,7 +38,7 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
             error_cnt = error_cnt + 1
             sleep(housekeeping_interval)
 
-        if PersistenceService().db_connection_is_established() and WotdAnkiConnectFetcher.health_check():
+        if PersistenceService().db_connection_is_established() and AnkiConnectFetcher.health_check():
             _push_data(housekeeping_interval, auth_headers)
         else:
             app_log.debug('not possible to push data to anki connect api - try pushing with next cleanup job')
@@ -111,7 +111,7 @@ def _push_in_batches(cards_to_push: List[AnkiCard], auth_headers: UnsignedAuthHe
     for card_batch in chunked(cards_to_push, API_CONNECT_BATCH_SIZE):
         item_ids = list(collapse([elem.item_ids for elem in card_batch]))
 
-        response_ok = WotdAnkiConnectFetcher.api_push_cards(card_batch, auth_headers)
+        response_ok = AnkiConnectFetcher.api_push_cards(card_batch, auth_headers)
         if response_ok:
             PersistenceService().update_items_status(item_ids, RequestStatus.SYNCED)
         else:
