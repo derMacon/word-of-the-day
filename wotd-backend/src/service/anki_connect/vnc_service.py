@@ -13,7 +13,7 @@ LOGIN_MAX_RETRIES = 3
 
 
 @singleton
-class VncController:
+class VncService:
     """
     Since the anki connect addon does not provide the ability to login new users I implemented a simple workaround
     using a vnc viewer where it is possible to create new profiles (including setting the existing credentials for

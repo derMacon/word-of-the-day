@@ -17,7 +17,7 @@ from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDi
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.serialization.signature_service import SignatureService
-from src.service.anki_connect.vnc_controller import VncController
+from src.service.anki_connect.vnc_service import VncService
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
@@ -32,7 +32,7 @@ def health_check() -> Tuple[Response, int]:
 def anki_login():
     anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
-    uuid = VncController().login(
+    uuid = VncService().login(
         username=anki_login_request.username,
         password=anki_login_request.password
     )
@@ -57,7 +57,7 @@ def anki_login():
 
 @main.route("/dict/available-lang")
 def dict_available_languages() -> Tuple[Response, int]:
-    available_lang = WebController().dict_available_languages()
+    available_lang = WebController().dict_available_languages_cached()
     app_log.debug(f"user queries available languages: {available_lang}")
     return jsonify(InfoResponseAvailDictLang(available_lang)), 200
 

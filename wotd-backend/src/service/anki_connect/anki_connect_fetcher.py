@@ -13,6 +13,7 @@ from src.data.anki.anki_connect_get_profiles import AnkiConnectRequestGetProfile
 from src.data.anki.anki_connect_load_profile import AnkiConnectRequestLoadProfile
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
+from src.data.dict_input.language_uuid import Language
 from src.data.error.anki_connect_error import AnkiConnectError
 from src.utils.logging_config import app_log
 
@@ -38,6 +39,7 @@ class AnkiConnectFetcher:
         except Exception as e:
             app_log.error(e)
             return False
+
 
     @staticmethod
     def api_push_cards(anki_cards: List[AnkiCard], headers: UnsignedAuthHeaders) -> bool:
@@ -94,11 +96,11 @@ class AnkiConnectFetcher:
         app_log.debug(f"create decks if needed, unique decks: '{unique_decks}'")
 
         for deck_name in unique_decks:
-            if not AnkiConnectFetcher._check_if_deck_is_present(deck_name):
+            if not AnkiConnectFetcher.check_if_deck_is_present(deck_name):
                 AnkiConnectFetcher._create_single_deck(deck_name)
 
     @staticmethod
-    def _check_if_deck_is_present(deck_name: str) -> bool:
+    def check_if_deck_is_present(deck_name: str) -> bool:
         data = dataclasses.asdict(AnkiConnectRequestGetDeckNames())
         plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
         anki_connect_response: AnkiConnectResponseGetDeckNames = AnkiConnectResponseGetDeckNames(**plain_response)

@@ -1,3 +1,4 @@
+import csv
 import os
 import threading
 from time import sleep
@@ -6,18 +7,23 @@ from typing import List, Tuple
 from more_itertools import chunked, collapse
 
 from src.data.anki.anki_card import AnkiCard
+from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.requeststatus import RequestStatus
 from src.data.error.database_error import DatabaseError
 from src.data.error.missing_headers_error import MissingHeadersError
-from src.service.serialization.persistence_service import PersistenceService
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
+from src.service.serialization.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
 
 MAX_CONNECTION_TRIES = 3
 API_CONNECT_BATCH_SIZE = 10
 DB_BATCH_SIZE = 100
+FALLBACK_CSV_PATH = 'res/fallback-decks/csv'
+FALLBACK_DECK_NAME = 'wotd::fallback'
+FALLBACK_CSV_DEFAULT_SEPERATOR = ';'
+FALLBACK_DECK_MAX_SIZE = 500
 
 
 def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
@@ -49,6 +55,50 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
 
 def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
     app_log.debug('preparing data to push to anki connect')
+    _push_fallback_decks(auth_headers)
+    _push_dict_lookups(housekeeping_interval, auth_headers)
+
+
+def _push_fallback_decks(auth_headers: UnsignedAuthHeaders):
+    if not AnkiConnectFetcher.check_if_deck_is_present(FALLBACK_DECK_NAME):
+        app_log.debug(f'fallback deck name not present: {FALLBACK_DECK_NAME}')
+        cards: List[AnkiCard] = _create_fallback_deck_cards()
+        _push_in_batches(cards, auth_headers)
+
+
+def _create_fallback_deck_cards() -> List[AnkiCard]:
+    cards: List[AnkiCard] = []
+
+    for file in os.listdir(FALLBACK_CSV_PATH):
+        app_log.debug(f'csv file to import: {file}')
+
+        for row in _read_csv(os.path.join(FALLBACK_CSV_PATH, file)):
+            front, back = row
+            cards.append(AnkiCard(
+                item_ids=[],
+                deck=FALLBACK_DECK_NAME,
+                front=front,
+                back=back,
+                ts=now()
+            ))
+
+    return cards[:FALLBACK_DECK_MAX_SIZE]
+
+
+def _read_csv(file_path: str, seperator: str = FALLBACK_CSV_DEFAULT_SEPERATOR) -> List[Tuple[str, str]]:
+    output: List[Tuple[str, str]] = []
+    with open(file_path, mode='r', newline='', encoding='ISO-8859-1') as file:
+        csv_reader = csv.reader(file, delimiter=seperator)
+
+        for row in csv_reader:
+            front, back = row
+            output.append((front, back))
+
+    return output
+
+
+def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
+    app_log.debug('push dict lookups')
     persisted_options: List[DictOptionsItem] = PersistenceService().find_expired_options_for_user(
         housekeeping_interval,
         auth_headers

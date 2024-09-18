@@ -5,7 +5,7 @@ from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.requeststatus import RequestStatus
 from src.utils.logging_config import app_log
 
-# TODO put this in enum
+# TODO put this in ini file / db
 TRANSLATION_DECK_PREFIX = 'wotd::translations'
 DEFINITION_DECK = 'wotd_definitions'
 PRESELECTED_ITEMS_COUNT = 2
