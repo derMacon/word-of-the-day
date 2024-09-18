@@ -32,9 +32,29 @@ export function TextField(props: TextFieldProps) {
         setShowAutocompleteOptions(true)
     }
 
-    useEffect(() => initSocket(setOptionsHandleShow), []);
+    // useEffect(() => initSocket(setOptionsHandleShow), []);
 
-    const handleKeyDown = (e: any) => {
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            console.log('key pressed: ', e)
+            if (e.code === 'Escape') {
+                console.log('escape pressed')
+                setShowAutocompleteOptions(false);
+                // inputRef.current?.blur(); // Optional, to blur input when Escape is pressed
+            }
+        };
+
+        // Attach event listener
+        window.addEventListener('keydown', handleGlobalKeyDown);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            window.removeEventListener('keydown', handleGlobalKeyDown);
+        };
+    }, []);
+
+
+    const handleKeyDown = (e: any): void => {
         if (e.code === 'Enter' || e.which === 13) {
             const output = e.target.value;
             props.onSubmit(output);
@@ -43,6 +63,10 @@ export function TextField(props: TextFieldProps) {
             // src: https://stackoverflow.com/questions/11845371/window-scrollto-is-not-working-in-mobile-phones
             setTimeout(() => window.scrollTo(0, 0), 100);
         }
+    }
+
+    const handleOnBlur = (e: any): void => {
+        setShowAutocompleteOptions(false)
     }
 
     const handleOnClear = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -105,6 +129,7 @@ export function TextField(props: TextFieldProps) {
                     value={input}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
+                    onBlur={handleOnBlur}
                 />
                 <InputGroup.Text onClick={handleOnClear}>
                     <FaTimes/>
