@@ -9,8 +9,8 @@ from singleton_decorator import singleton
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
-from src.data.dict_input.language import Language
+from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
+from src.data.dict_input.language_uuid import Language
 from src.data.dict_input.requeststatus import RequestStatus
 from src.data.dict_input.sensitive_env import SensitiveEnv
 from src.data.error.database_error import DatabaseError
@@ -24,6 +24,7 @@ from src.utils.logging_config import app_log
 class PersistenceService:
     _conn = None
     _cursor = None
+    _available_languages: List[Language] = []
 
     def __init__(self):
         self._lock = threading.Lock()
@@ -80,6 +81,7 @@ class PersistenceService:
 
         return decorate
 
+    # TODO use this
     def teardown(self):
         self._conn.commit()
         self._cursor.close()
@@ -89,13 +91,11 @@ class PersistenceService:
     def get_available_languages(self) -> List[Language]:
         self._cursor.execute("SELECT * FROM language;")
 
-        languages: List[Language] = []
         for entry in self._cursor.fetchall():
-            languages.append(Language(*entry))
+            self._available_languages.append(Language(*entry))
 
-        return languages
+        return self._available_languages
 
-    @_database_error_decorator  # type: ignore
     def find_language_by_uuid(self, lang_uuid: str) -> List[Language]:
         for curr_lang in self.get_available_languages():
             if curr_lang.language_uuid == lang_uuid:
@@ -103,7 +103,7 @@ class PersistenceService:
         raise LangNotFoundError(f'language with uuid {lang_uuid} not found')
 
     @_database_error_decorator  # type: ignore
-    def get_default_languages(self) -> InfoRequestDefaultDictLang:
+    def get_default_languages(self) -> InfoResponseDefaultDictLang:
         self._cursor.execute(
             "SELECT language.* FROM language "
             "INNER JOIN language_default ON language.language_uuid=language_default.dict_from_language_uuid;")
@@ -116,7 +116,7 @@ class PersistenceService:
         entry = self._cursor.fetchone()
         dict_default_to_language = Language(*entry)
 
-        req = InfoRequestDefaultDictLang(
+        req = InfoResponseDefaultDictLang(
             dict_default_to_language=dict_default_to_language,
             dict_default_from_language=dict_default_from_language
         )

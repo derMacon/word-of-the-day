@@ -13,12 +13,10 @@ from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
+from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.service.persistence_service import PersistenceService
 from src.service.signature_service import SignatureService
-from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
 from src.service.wotd_vnc_controller import WotdVncController
 from src.utils.logging_config import app_log
 
@@ -27,13 +25,7 @@ LOGIN_MAX_RETRIES = 3
 
 @main.route("/health")
 def health_check() -> Tuple[Response, int]:
-    status = {
-        'db_connection': PersistenceService().db_connection_is_established(),
-        'anki_api_connection': WotdAnkiConnectFetcher.health_check(),
-        'wotd_api_connection': True,
-    }
-    app_log.debug(f"health: {status}")
-    return jsonify(status), 200
+    return jsonify(WebController().health_check()), 200
 
 
 @main.route("/anki/login", methods=['POST'])
@@ -65,18 +57,19 @@ def anki_login():
 
 @main.route("/dict/available-lang")
 def dict_available_languages() -> Tuple[Response, int]:
-    available_lang = PersistenceService().get_available_languages()
+    available_lang = WebController().dict_available_languages()
     app_log.debug(f"user queries available languages: {available_lang}")
-    return jsonify(InfoRequestAvailDictLang(available_lang)), 200
+    return jsonify(InfoResponseAvailDictLang(available_lang)), 200
 
 
 @main.route("/dict/default-lang")
 def dict_default_languages() -> Tuple[Response, int]:
-    default_lang = PersistenceService().get_default_languages()
+    default_lang = WebController().get_default_languages()
     app_log.debug(f"user queries default languages: {default_lang}")
-    return jsonify(InfoRequestAvailDictLang(default_lang)), 200
+    return jsonify(InfoResponseAvailDictLang(default_lang)), 200
 
 
+# TODO aren't we doing this already with the socket event handler? Isn't this a duplicate?
 @main.route("/dict/autocomplete-option", methods=['POST'])
 def autocomplete_word_options() -> Tuple[Response, int]:
     request_data = request.get_json()

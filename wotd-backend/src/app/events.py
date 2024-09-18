@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 from flask_socketio import SocketIO
 
@@ -21,11 +22,11 @@ def handle_autocomplete_query_event(request_data):
     request = DictRequest(**json_input)
     app_log.debug(f"socket request: {request}")
 
-    lst_str_output = WebController().autocomplete_dict_word(request)
-    app_log.debug(f"lst_str output: {lst_str_output}")
+    recommendations: List[str] = WebController().autocomplete_dict_word(request)
+    app_log.debug(f"lst_str output: {recommendations}")
 
     try:
-        socketio.emit('update_autocorrect', lst_str_output)
+        socketio.emit('update_autocorrect', recommendations)
         socketio.stop()
     except Exception as e:
         app_log.error(f"Error sending image: {e}")

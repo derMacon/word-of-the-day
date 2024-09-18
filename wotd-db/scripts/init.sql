@@ -2,12 +2,13 @@ SET TIMEZONE TO 'Europe/Berlin';
 
 CREATE TABLE IF NOT EXISTS language (
   language_uuid VARCHAR(50) PRIMARY KEY,
-  name VARCHAR(100) NOT NULL
+  full_name VARCHAR(100) NOT NULL,
+  enchant_key VARCHAR(100) NOT NULL
 );
 
-INSERT INTO language (language_uuid, name) VALUES
-  ('DE', 'German'),
-  ('EN', 'English');
+INSERT INTO language (language_uuid, full_name, enchant_key) VALUES
+  ('DE', 'German', 'de_DE'),
+  ('EN', 'English', 'en_US');
 
 
 CREATE TABLE IF NOT EXISTS language_default (
