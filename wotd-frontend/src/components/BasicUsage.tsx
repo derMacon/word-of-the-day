@@ -1,7 +1,6 @@
 import React from 'react';
-import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
+import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp} from "react-icons/fa6";
 import Container from "react-bootstrap/Container";
-import Table from "react-bootstrap/Table";
 
 export function BasicUsage() {
 

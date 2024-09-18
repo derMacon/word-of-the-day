@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
-import {dictAutocompleteWord, dictLookupWord, socket} from "../logic/ApiFetcher";
-import {convertToLanguageUUIDEnum, LanguageUUID} from "../model/LanguageUUID";
+import {dictLookupWord, socket} from "../logic/ApiFetcher";
+import {LanguageUUID} from "../model/LanguageUUID";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import {Language} from "../model/Language";
@@ -60,7 +60,6 @@ export function UserInput(props: Readonly<UserInputProps>) {
     //     }
     //
     // }, [cookieSetFromLang, cookieSetToLang, cookies, defaultFromLang, defaultToLang]);
-
 
 
     const handleLanguageSwitch = () => {

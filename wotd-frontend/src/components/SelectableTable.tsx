@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Table from 'react-bootstrap/Table';
-import {wotdApiHealthStatus, toggleSelectedOption} from "../logic/ApiFetcher";
+import {toggleSelectedOption, wotdApiHealthStatus} from "../logic/ApiFetcher";
 import './SelectableTable.css';
 import {DictOptionsItem} from "../model/DictOptionsItem";
 
@@ -23,7 +23,7 @@ export function SelectableTable(props: Readonly<SelectableTableProps>) {
         });
         return initialHighlight;
     }, [props.apiResponse]);
-    
+
 
     const [highlight, setHighlight] = useState<Map<number, boolean>>(hightlight_data);
 

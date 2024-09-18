@@ -7,9 +7,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import {FaTimes} from "react-icons/fa";
 import Overlay from 'react-bootstrap/Overlay';
 import ListGroup from 'react-bootstrap/ListGroup';
-import Button from 'react-bootstrap/Button';
-import {ButtonGroup, Col, Row} from "react-bootstrap";
-import {socket} from "../logic/ApiFetcher";
+import {Col, Row} from "react-bootstrap";
 import {initSocket} from "../logic/SocketFetcher";
 
 

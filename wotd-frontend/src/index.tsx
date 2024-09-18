@@ -5,13 +5,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+    document.getElementById('root') as HTMLElement
 );
 root.render(
-  // TODO check if strict mode is deactivate in production (necessary for the health check / useEffect to be only called twice)
-  // <React.StrictMode>
-    <App />
-  // </React.StrictMode>
+    // TODO check if strict mode is deactivate in production (necessary for the health check / useEffect to be only called twice)
+    // <React.StrictMode>
+    <App/>
+    // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

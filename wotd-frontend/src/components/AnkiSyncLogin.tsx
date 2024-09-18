@@ -11,7 +11,6 @@ import {
     ankiApiIsHealthy,
     ankiApiLogin,
     ankiApiTriggerManualHousekeeping,
-    dictGetAvailableLang,
     dictGetInfoHousekeeping
 } from "../logic/ApiFetcher";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
