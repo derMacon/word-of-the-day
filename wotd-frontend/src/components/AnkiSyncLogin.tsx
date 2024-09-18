@@ -36,9 +36,12 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result: boolean = await ankiApiIsHealthy();
-                setHealthyApi(result);
-                dictGetInfoHousekeeping().then((e: InfoRequestHousekeeping) => setNextSync(e.nextSync))
+                const apiIsHealthy: boolean = await ankiApiIsHealthy();
+                setHealthyApi(apiIsHealthy);
+
+                if (apiIsHealthy) {
+                    dictGetInfoHousekeeping().then((e: InfoRequestHousekeeping) => setNextSync(e.nextSync))
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setHealthyApi(false);
@@ -164,12 +167,6 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                 {showSpinner ? spinner : 'Login'}
             </Button>
 
-
-            {/*<p>Word Vaults</p>*/}
-            {/*<ListGroup>*/}
-            {/*    <ListGroup.Item>English Dictionary</ListGroup.Item>*/}
-            {/*    <ListGroup.Item disabled>German Duden Definitions</ListGroup.Item>*/}
-            {/*</ListGroup>*/}
         </>
 
     return (
