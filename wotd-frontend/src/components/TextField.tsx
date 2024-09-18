@@ -46,7 +46,7 @@ export function TextField(props: TextFieldProps) {
     }
 
     const handleOnBlur = (e: any): void => {
-        // setShowAutocompleteOptions(false)
+        setShowAutocompleteOptions(false)
     }
 
     const handleOnClear = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {

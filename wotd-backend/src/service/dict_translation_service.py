@@ -20,6 +20,10 @@ class DictTranslationService:
 
     def autocomplete(self, prefix: str, language_uuid: str) -> List[str]:
         app_log.debug(f"autocomplete '{prefix}' for language uuid string '{language_uuid}'")
+
+        if prefix is None or len(prefix) == 0:
+            return []
+
         if language_uuid not in self._dict_map.keys():
             raise LangNotFoundError(f"cannot autocomplete prefix '{prefix}' for language '{language_uuid}'")
 
