@@ -32,27 +32,7 @@ export function TextField(props: TextFieldProps) {
         setShowAutocompleteOptions(true)
     }
 
-    // useEffect(() => initSocket(setOptionsHandleShow), []);
-
-    useEffect(() => {
-        const handleGlobalKeyDown = (e: KeyboardEvent) => {
-            console.log('key pressed: ', e)
-            if (e.code === 'Escape') {
-                console.log('escape pressed')
-                setShowAutocompleteOptions(false);
-                // inputRef.current?.blur(); // Optional, to blur input when Escape is pressed
-            }
-        };
-
-        // Attach event listener
-        window.addEventListener('keydown', handleGlobalKeyDown);
-
-        // Cleanup event listener on component unmount
-        return () => {
-            window.removeEventListener('keydown', handleGlobalKeyDown);
-        };
-    }, []);
-
+    useEffect(() => initSocket(setOptionsHandleShow), []);
 
     const handleKeyDown = (e: any): void => {
         if (e.code === 'Enter' || e.which === 13) {
@@ -66,7 +46,7 @@ export function TextField(props: TextFieldProps) {
     }
 
     const handleOnBlur = (e: any): void => {
-        setShowAutocompleteOptions(false)
+        // setShowAutocompleteOptions(false)
     }
 
     const handleOnClear = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
