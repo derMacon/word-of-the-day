@@ -28,6 +28,11 @@ export function DictMask() {
 
     const authProvider: AuthService = new AuthService();
 
+    const debugWrapper = (e: any) => {
+        console.log('debug wrapper: ', e)
+        setAvailLang(e)
+    }
+
 
     useEffect(() => {
         wotdApiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
@@ -36,7 +41,10 @@ export function DictMask() {
                 if (!healthStatus.dbConnection) {
                     console.error('db connection down: ', healthStatus)
                 } else {
-                    dictGetAvailableLang().then(setAvailLang)
+                    console.log('before setting avail lang')
+                    dictGetAvailableLang().then(debugWrapper)
+                    // dictGetAvailableLang().then(setAvailLang)
+                    console.log('after setting avail lang: ', availLang)
 
                     if (authProvider.showLoginPrompt()) {
                         handleShowAnkiStatusAlert()
@@ -70,6 +78,8 @@ export function DictMask() {
         console.log('update auth provider with signed email: ', ankiResponse.signedUsername)
         authProvider.loadAnkiLoginResponse(ankiResponse)
     }
+
+    console.log('avail langs during dict mask render: ', availLang)
 
     const mainPage = <>
         <LoginAlert

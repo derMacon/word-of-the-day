@@ -14,6 +14,7 @@ from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDictLang
+from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.serialization.signature_service import SignatureService
@@ -64,9 +65,9 @@ def dict_available_languages() -> Tuple[Response, int]:
 
 @main.route("/dict/default-lang")
 def dict_default_languages() -> Tuple[Response, int]:
-    default_lang = WebController().get_default_languages()
+    default_lang: InfoResponseDefaultDictLang = WebController().get_default_languages()
     app_log.debug(f"user queries default languages: {default_lang}")
-    return jsonify(InfoResponseAvailDictLang(default_lang)), 200
+    return jsonify(default_lang), 200
 
 
 # TODO aren't we doing this already with the socket event handler? Isn't this a duplicate?
