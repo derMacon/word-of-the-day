@@ -43,9 +43,6 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
         with MUTEX:
             app_log.debug(f'sync anki push with delay {housekeeping_interval} s and {auth_headers}')
 
-            sleep(5)
-            app_log.debug('after test sleep')
-
             error_cnt = 0
             while not PersistenceService().db_connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
                 error_cnt = error_cnt + 1
@@ -56,6 +53,7 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
             else:
                 app_log.debug('not possible to push data to anki connect api - try pushing with next cleanup job')
 
+            app_log.debug('finished housekeeping')
     except DatabaseError as e:
         app_log.error(f"error: '{e}'")
 
