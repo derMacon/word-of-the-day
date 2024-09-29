@@ -130,7 +130,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             <p>You are currently not logged into your Anki account.
                 In order to sync the dictionary searches with anki web please log in.</p>
 
-            <p>If you do net have an account, please register <a
+            <p>If you do not have an account, please register <a
                 href="https://ankiweb.net/account/signup">here</a> and
                 come back afterwards.</p>
             <br/>
