@@ -12,12 +12,18 @@ export class Language {
     private _full_name: string
 
 
-    constructor(language_uuid: string, full_name: string) {
-        this._enchant_key = '';
+    // constructor(language_uuid: string, full_name: string) {
+    //     this._enchant_key = '';
+    //     this._language_uuid = language_uuid;
+    //     this._full_name = full_name;
+    // }
+
+
+    constructor(enchant_key: string, language_uuid: string, full_name: string) {
+        this._enchant_key = enchant_key;
         this._language_uuid = language_uuid;
         this._full_name = full_name;
     }
-
 
     get enchant_key(): string {
         return this._enchant_key;
