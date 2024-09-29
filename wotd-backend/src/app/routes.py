@@ -6,7 +6,7 @@ from typing import Tuple
 from flask import jsonify, request, Response
 
 from src.app import main
-from src.controller.housekeeping_controller import trigger_housekeeping
+from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX
 from src.controller.web_controller import WebController
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
@@ -17,8 +17,8 @@ from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDi
 from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.service.serialization.signature_service import SignatureService
 from src.service.anki_connect.vnc_service import VncService
+from src.service.serialization.signature_service import SignatureService
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
@@ -31,29 +31,30 @@ def health_check() -> Tuple[Response, int]:
 
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
-    anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
+    with MUTEX:
+        anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
-    uuid = VncService().login(
-        username=anki_login_request.username,
-        password=anki_login_request.password
-    )
+        uuid = VncService().login(
+            username=anki_login_request.username,
+            password=anki_login_request.password
+        )
 
-    # testUUID = str(uuid.uuid4())
+        # testUUID = str(uuid.uuid4())
 
-    signed_header_obj = SignatureService().create_signed_header_dict(
-        username=anki_login_request.username,
-        # uuid=testUUID
-        uuid=uuid  # TODO use this instead of testUUID
-    )
+        signed_header_obj = SignatureService().create_signed_header_dict(
+            username=anki_login_request.username,
+            # uuid=testUUID
+            uuid=uuid  # TODO use this instead of testUUID
+        )
 
-    app_log.debug(f"signed header obj: {signed_header_obj}")
+        app_log.debug(f"signed header obj: {signed_header_obj}")
 
-    resp = Response()
-    resp.headers.extend(signed_header_obj)
-    resp.headers.add('Access-Control-Expose-Headers',
-                     f"{HeaderType.SIGNED_USERNAME.value}, {HeaderType.SIGNED_UUID.value}")
+        resp = Response()
+        resp.headers.extend(signed_header_obj)
+        resp.headers.add('Access-Control-Expose-Headers',
+                         f"{HeaderType.SIGNED_USERNAME.value}, {HeaderType.SIGNED_UUID.value}")
 
-    return resp
+        return resp
 
 
 @main.route("/dict/available-lang")

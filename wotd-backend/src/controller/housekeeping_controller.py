@@ -1,6 +1,7 @@
 import csv
 import os
 import threading
+from threading import Lock
 from time import sleep
 from typing import List, Tuple
 
@@ -25,6 +26,8 @@ FALLBACK_DECK_NAME = 'wotd::fallback'
 FALLBACK_CSV_DEFAULT_SEPERATOR = ';'
 FALLBACK_DECK_MAX_SIZE = 500
 
+MUTEX = Lock()
+
 
 def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
     if auth_headers is None:
@@ -37,17 +40,21 @@ def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
 
 def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
     try:
-        app_log.debug(f'sync anki push with delay {housekeeping_interval} s and {auth_headers}')
+        with MUTEX:
+            app_log.debug(f'sync anki push with delay {housekeeping_interval} s and {auth_headers}')
 
-        error_cnt = 0
-        while not PersistenceService().db_connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
-            error_cnt = error_cnt + 1
-            sleep(housekeeping_interval)
+            sleep(5)
+            app_log.debug('after test sleep')
 
-        if PersistenceService().db_connection_is_established() and AnkiConnectFetcher.health_check():
-            _push_data(housekeeping_interval, auth_headers)
-        else:
-            app_log.debug('not possible to push data to anki connect api - try pushing with next cleanup job')
+            error_cnt = 0
+            while not PersistenceService().db_connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
+                error_cnt = error_cnt + 1
+                sleep(housekeeping_interval)
+
+            if PersistenceService().db_connection_is_established() and AnkiConnectFetcher.health_check():
+                _push_data(housekeeping_interval, auth_headers)
+            else:
+                app_log.debug('not possible to push data to anki connect api - try pushing with next cleanup job')
 
     except DatabaseError as e:
         app_log.error(f"error: '{e}'")
