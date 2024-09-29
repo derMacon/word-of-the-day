@@ -49,6 +49,7 @@ class AnkiConnectFetcher:
         profile_uuid = headers.uuid
         AnkiConnectFetcher._validate_if_profile_present(profile_uuid)
         AnkiConnectFetcher._load_profile(profile_uuid)
+        AnkiConnectFetcher._sync_anki_web()
         AnkiConnectFetcher._create_decks_if_needed(anki_cards)
         AnkiConnectFetcher._validate_notes_can_be_added(anki_cards)
         AnkiConnectFetcher._add_notes(anki_cards)
