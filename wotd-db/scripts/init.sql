@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS language (
 
 INSERT INTO language (language_uuid, full_name, enchant_key) VALUES
   ('DE', 'German', 'de_DE'),
-  ('EN', 'English', 'en_US');
+  ('EN', 'English', 'en_US'),
+  ('FR', 'French', 'fr_FR');
 
 
 CREATE TABLE IF NOT EXISTS language_default (

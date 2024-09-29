@@ -62,3 +62,7 @@ DROP SCHEMA public CASCADE; CREATE SCHEMA public;
 ## Credits
 - [Logo](https://icon-icons.com/de/symbol/cloud-download/178873)
 - [fallback deck](https://github.com/giniedp/media_education/blob/master/drehbuch/doc/resources/vocabulary/more/Vokabellisten_Englisch/Deutsch%20-%20Englisch%20Umfangreicher%20Wortschatz%20%5B18000%5D.csv)
+
+## Installing pychant dictionaries
+- `sudo apt-get install myspell-fr`
+
