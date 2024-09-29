@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import Cookies from "universal-cookie";
 import Container from "react-bootstrap/Container";
 import {SelectableTable} from "./SelectableTable";
 import {dictGetAvailableLang, wotdApiHealthStatus} from "../logic/ApiFetcher";
@@ -16,6 +17,8 @@ import {BasicUsage} from "./BasicUsage";
 import {ErrorPage} from "./ErrorPage";
 
 
+const COOKIE_KEY_FIRST_TIME_USER: string = 'FIRST-TIME-USER'
+
 export function DictMask() {
 
     const [availLang, setAvailLang] = useState<Language[]>([])
@@ -27,6 +30,7 @@ export function DictMask() {
     const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
 
     const authProvider: AuthService = new AuthService();
+    const cookies: Cookies = new Cookies(null, {path: '/'})
 
     const debugWrapper = (e: any) => {
         console.log('debug wrapper: ', e)
@@ -57,6 +61,12 @@ export function DictMask() {
                     setShowErrorPage(true)
                 } else if (!healthStatus.ankiApiConnection) {
                     console.error('anki api not available: ', healthStatus)
+                }
+
+                const isFirstTimeUser: Boolean = cookies.get(COOKIE_KEY_FIRST_TIME_USER)
+                if (isFirstTimeUser === undefined || isFirstTimeUser) {
+                    cookies.set(COOKIE_KEY_FIRST_TIME_USER, false)
+                    setShowInfoPage(true)
                 }
 
             }

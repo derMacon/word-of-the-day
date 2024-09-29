@@ -40,9 +40,10 @@ export function UserInput(props: Readonly<UserInputProps>) {
 
     const [selectedFromLang, setSelectedFromLang] = useState<Language>(LangCookieDefaults.fromLang.defaultValue)
     const [selectedToLang, setSelectedToLang] = useState<Language>(LangCookieDefaults.toLang.defaultValue)
-    const cookies: Cookies = new Cookies(null, {path: '/'})
 
     const [isConnected, setIsConnected] = useState(socket.connected); // TODO what do we need this for?
+
+    const cookies: Cookies = new Cookies(null, {path: '/'})
 
 
     const cookieSetLanguage = (langCookieFormat: LangCookieFormat, lang: Language): void => {
