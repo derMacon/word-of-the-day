@@ -96,3 +96,6 @@ class WebController:
         app_log.debug(f"toggle item id: {item_id}")
         self._persistence_service.update_item_select(item_id)
         return True
+
+    def get_request_log(self) -> List[DictRequest]:
+        return self._persistence_service.get_all_dict_requests()

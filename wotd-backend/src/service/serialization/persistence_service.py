@@ -238,3 +238,8 @@ class PersistenceService:
             delete_query = "DELETE FROM dict_options_item WHERE dict_options_item_id IN %s;"
             self._cursor.execute(delete_query, (tuple(ids_to_delete),))
             self._conn.commit()
+
+    @_database_error_decorator  # type: ignore
+    def get_all_dict_requests(self) -> List[DictRequest]:
+        self._cursor.execute("SELECT * FROM dict_request;")
+        return self._cursor.fetchall()

@@ -1,9 +1,11 @@
 import dataclasses
+import io
+import json
 from datetime import datetime, time
 from typing import List
 from typing import Tuple
 
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, send_file
 
 from src.app import main
 from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX
@@ -98,6 +100,19 @@ def lookup_word_options() -> Tuple[Response, int]:
     app_log.debug('lookup response json: %s', json.get_json())
 
     return json, 200
+
+
+@main.route("/dict/request-log")
+def dict_request_log():
+    app_log.debug('manually trigger request log retrieval')
+    json_str: str = json.dumps(WebController().get_request_log(), default=str)
+    memory_file = io.StringIO(json_str)
+    return send_file(
+        io.BytesIO(memory_file.getvalue().encode('utf-8')),
+        mimetype='text/plain',
+        as_attachment=True,
+        download_name='requests.json'
+    )
 
 
 def _extract_unsigned_headers() -> UnsignedAuthHeaders:
