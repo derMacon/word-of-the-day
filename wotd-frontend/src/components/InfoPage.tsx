@@ -43,8 +43,9 @@ export function InfoPage() {
                             Optional: select a word which should be generated to serve as a flashcard in anki
                         </li>
                         <li>
-                            Learn stack in anki <a href="https://ankiweb.net/about">web</a> or <a
-                            href="https://apps.ankiweb.net/">client</a>
+                            Learn stack in anki <a href="https://ankiweb.net/about">web</a>, <a
+                            href="https://apps.ankiweb.net/">desktop</a> or <a
+                            href="https://play.google.com/store/apps/details?id=com.ichi2.anki&hl=de">mobile</a> client
                         </li>
                     </ol>
 
