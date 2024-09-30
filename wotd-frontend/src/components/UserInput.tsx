@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
-import {dictAutocompleteWord, dictLookupWord, socket} from "../logic/ApiFetcher";
-import {convertToLanguageUUIDEnum, LanguageUUID} from "../model/LanguageUUID";
+import {dictLookupWord, socket} from "../logic/ApiFetcher";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import {Language} from "../model/Language";
@@ -10,6 +9,7 @@ import {AuthService} from "../logic/AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import Cookies from "universal-cookie";
 import {socketAutocompleteWord} from "../logic/SocketFetcher";
+import {classToPlain, plainToClass} from "class-transformer";
 
 interface UserInputProps {
     authProvider: AuthService
@@ -19,48 +19,63 @@ interface UserInputProps {
     handleShowInfoPage: (e: any) => void
 }
 
+interface LangCookieFormat {
+    cookieKey: string;
+    defaultValue: Language;
+}
+
+const LangCookieDefaults: { fromLang: LangCookieFormat; toLang: LangCookieFormat } = {
+    fromLang: {
+        cookieKey: 'FROM-LANG',
+        defaultValue: new Language('', 'DE', 'German'),
+    },
+    toLang: {
+        cookieKey: 'TO-LANG',
+        defaultValue: new Language('', 'EN', 'English'),
+    }
+};
+
 
 export function UserInput(props: Readonly<UserInputProps>) {
 
-    const defaultFromLang = new Language(LanguageUUID.EN, 'english')
-    const defaultToLang = new Language(LanguageUUID.DE, 'german')
-
-    const [selectedFromLang, setSelectedFromLang] = useState<Language>(defaultFromLang)
-    const [selectedToLang, setSelectedToLang] = useState<Language>(defaultToLang)
+    const [selectedFromLang, setSelectedFromLang] = useState<Language>(LangCookieDefaults.fromLang.defaultValue)
+    const [selectedToLang, setSelectedToLang] = useState<Language>(LangCookieDefaults.toLang.defaultValue)
 
     const [isConnected, setIsConnected] = useState(socket.connected); // TODO what do we need this for?
 
     const cookies: Cookies = new Cookies(null, {path: '/'})
-    const fromLangCookieKey: string = 'from-lang' // TODO all caps
-    const toLangCookieKey: string = 'to-lang'
 
-    const cookieSetFromLang = (lang: Language) => {
+
+    const cookieSetLanguage = (langCookieFormat: LangCookieFormat, lang: Language): void => {
+        const plainLanguageObject = classToPlain(lang);
+        const jsonString: string = JSON.stringify(plainLanguageObject);
+        cookies.set(langCookieFormat.cookieKey, jsonString)
+    }
+
+    const cookieGetLanguage = (langCookieFormat: LangCookieFormat): Language => {
+        const cookieJson: string | undefined = cookies.get(langCookieFormat.cookieKey)
+        if (cookieJson === undefined) {
+            return langCookieFormat.defaultValue
+        }
+        return plainToClass(Language, cookieJson)
+
+    }
+
+    const cookieSetFromLang = (lang: Language): void => {
         setSelectedFromLang(lang)
-        cookies.set(fromLangCookieKey, lang.language_uuid.toString())
+        cookieSetLanguage(LangCookieDefaults.fromLang, lang)
     }
-    const cookieSetToLang = (lang: Language) => {
+
+    const cookieSetToLang = (lang: Language): void => {
         setSelectedToLang(lang)
-        cookies.set(toLangCookieKey, lang.language_uuid.toString())
+        cookieSetLanguage(LangCookieDefaults.toLang, lang)
     }
 
-    // TODO fix this
-    // useEffect(() => {
-    //     const fromLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(fromLangCookieKey))
-    //     const toLang: LanguageUUID | undefined = convertToLanguageUUIDEnum(cookies.get(toLangCookieKey))
-    //
-    //     if (fromLang !== undefined) {
-    //         cookieSetFromLang(Language.createFromUUID(fromLang))
-    //     } else {
-    //         cookieSetFromLang(defaultFromLang)
-    //     }
-    //     if (toLang !== undefined) {
-    //         cookieSetToLang(Language.createFromUUID(toLang))
-    //     } else {
-    //         cookieSetToLang(defaultToLang)
-    //     }
-    //
-    // }, [cookieSetFromLang, cookieSetToLang, cookies, defaultFromLang, defaultToLang]);
 
+    useEffect((): void => {
+        setSelectedFromLang(cookieGetLanguage(LangCookieDefaults.fromLang))
+        setSelectedToLang(cookieGetLanguage(LangCookieDefaults.toLang))
+    }, [])
 
 
     const handleLanguageSwitch = () => {

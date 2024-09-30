@@ -106,10 +106,10 @@ export class AuthService {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
-        if(this._signedUuid != null && this._signedUuid.length > 0) {
+        if (this._signedUuid != null && this._signedUuid.length > 0) {
             out[this.UNSIGNED_UUID_COOKIE_KEY] = this._signedUuid
         }
-        if(this._signedUsername != null && this._signedUsername.length > 0) {
+        if (this._signedUsername != null && this._signedUsername.length > 0) {
             out[this.UNSIGNED_EMAIL_COOKIE_KEY] = this._signedUsername
         }
         return out

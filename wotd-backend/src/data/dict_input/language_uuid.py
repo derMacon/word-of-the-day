@@ -1,6 +1,8 @@
-from enum import Enum
+from dataclasses import dataclass
 
 
-class LanguageUUID(str, Enum):
-    EN = "EN"
-    DE = "DE"
+@dataclass
+class Language:
+    language_uuid: str
+    full_name: str
+    enchant_key: str

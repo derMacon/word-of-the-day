@@ -9,6 +9,7 @@ import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
+import {InfoRequestDefaultLang} from "../model/InfoRequestDefaultLang";
 
 const HTTP_STATUS_OK: number = 200
 

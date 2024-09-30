@@ -1,7 +1,6 @@
 import {Expose} from "class-transformer";
 import {OptionStatus} from "./OptionStatus";
 import {Simulate} from "react-dom/test-utils";
-import input = Simulate.input;
 
 
 export class DictOptionsItem {

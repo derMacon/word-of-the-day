@@ -3,7 +3,7 @@ import {Language} from "./Language";
 
 export class InfoRequestAvailLang {
 
-    @Expose({ name: 'dict_available_languages'})
+    @Expose({name: 'dict_available_languages'})
     private _dictAvailableLanguages: Language[]
 
     constructor(

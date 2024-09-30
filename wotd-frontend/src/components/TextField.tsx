@@ -7,9 +7,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import {FaTimes} from "react-icons/fa";
 import Overlay from 'react-bootstrap/Overlay';
 import ListGroup from 'react-bootstrap/ListGroup';
-import Button from 'react-bootstrap/Button';
-import {ButtonGroup, Col, Row} from "react-bootstrap";
-import {socket} from "../logic/ApiFetcher";
+import {Col, Row} from "react-bootstrap";
 import {initSocket} from "../logic/SocketFetcher";
 
 
@@ -34,7 +32,7 @@ export function TextField(props: TextFieldProps) {
 
     useEffect(() => initSocket(setOptionsHandleShow), []);
 
-    const handleKeyDown = (e: any) => {
+    const handleKeyDown = (e: any): void => {
         if (e.code === 'Enter' || e.which === 13) {
             const output = e.target.value;
             props.onSubmit(output);
@@ -43,6 +41,10 @@ export function TextField(props: TextFieldProps) {
             // src: https://stackoverflow.com/questions/11845371/window-scrollto-is-not-working-in-mobile-phones
             setTimeout(() => window.scrollTo(0, 0), 100);
         }
+    }
+
+    const handleOnBlur = (e: any): void => {
+        setShowAutocompleteOptions(false)
     }
 
     const handleOnClear = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -105,6 +107,7 @@ export function TextField(props: TextFieldProps) {
                     value={input}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
+                    onBlur={handleOnBlur}
                 />
                 <InputGroup.Text onClick={handleOnClear}>
                     <FaTimes/>

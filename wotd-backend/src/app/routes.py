@@ -1,25 +1,26 @@
 import dataclasses
+import io
+import json
 from datetime import datetime, time
 from typing import List
 from typing import Tuple
 
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, send_file
 
 from src.app import main
-from src.controller.housekeeping_controller import trigger_housekeeping
+from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX
 from src.controller.web_controller import WebController
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.info_request_avail_dict_lang import InfoRequestAvailDictLang
+from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDictLang
+from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.service.persistence_service import PersistenceService
-from src.service.signature_service import SignatureService
-from src.service.wotd_api_fetcher import WotdAnkiConnectFetcher
-from src.service.wotd_vnc_controller import WotdVncController
+from src.service.anki_connect.vnc_service import VncService
+from src.service.serialization.signature_service import SignatureService
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
@@ -27,56 +28,52 @@ LOGIN_MAX_RETRIES = 3
 
 @main.route("/health")
 def health_check() -> Tuple[Response, int]:
-    status = {
-        'db_connection': PersistenceService().db_connection_is_established(),
-        'anki_api_connection': WotdAnkiConnectFetcher.health_check(),
-        'wotd_api_connection': True,
-    }
-    app_log.debug(f"health: {status}")
-    return jsonify(status), 200
+    return jsonify(WebController().health_check()), 200
 
 
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
-    anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
+    with MUTEX:
+        anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
 
-    uuid = WotdVncController().login(
-        username=anki_login_request.username,
-        password=anki_login_request.password
-    )
+        uuid = VncService().login(
+            username=anki_login_request.username,
+            password=anki_login_request.password
+        )
 
-    # testUUID = str(uuid.uuid4())
+        # testUUID = str(uuid.uuid4())
 
-    signed_header_obj = SignatureService().create_signed_header_dict(
-        username=anki_login_request.username,
-        # uuid=testUUID
-        uuid=uuid  # TODO use this instead of testUUID
-    )
+        signed_header_obj = SignatureService().create_signed_header_dict(
+            username=anki_login_request.username,
+            # uuid=testUUID
+            uuid=uuid  # TODO use this instead of testUUID
+        )
 
-    app_log.debug(f"signed header obj: {signed_header_obj}")
+        app_log.debug(f"signed header obj: {signed_header_obj}")
 
-    resp = Response()
-    resp.headers.extend(signed_header_obj)
-    resp.headers.add('Access-Control-Expose-Headers',
-                     f"{HeaderType.SIGNED_USERNAME.value}, {HeaderType.SIGNED_UUID.value}")
+        resp = Response()
+        resp.headers.extend(signed_header_obj)
+        resp.headers.add('Access-Control-Expose-Headers',
+                         f"{HeaderType.SIGNED_USERNAME.value}, {HeaderType.SIGNED_UUID.value}")
 
-    return resp
+        return resp
 
 
 @main.route("/dict/available-lang")
 def dict_available_languages() -> Tuple[Response, int]:
-    available_lang = PersistenceService().get_available_languages()
+    available_lang = WebController().dict_available_languages_cached()
     app_log.debug(f"user queries available languages: {available_lang}")
-    return jsonify(InfoRequestAvailDictLang(available_lang)), 200
+    return jsonify(InfoResponseAvailDictLang(available_lang)), 200
 
 
 @main.route("/dict/default-lang")
 def dict_default_languages() -> Tuple[Response, int]:
-    default_lang = PersistenceService().get_default_languages()
+    default_lang: InfoResponseDefaultDictLang = WebController().get_default_languages()
     app_log.debug(f"user queries default languages: {default_lang}")
-    return jsonify(InfoRequestAvailDictLang(default_lang)), 200
+    return jsonify(default_lang), 200
 
 
+# TODO aren't we doing this already with the socket event handler? Isn't this a duplicate?
 @main.route("/dict/autocomplete-option", methods=['POST'])
 def autocomplete_word_options() -> Tuple[Response, int]:
     request_data = request.get_json()
@@ -103,6 +100,19 @@ def lookup_word_options() -> Tuple[Response, int]:
     app_log.debug('lookup response json: %s', json.get_json())
 
     return json, 200
+
+
+@main.route("/dict/request-log")
+def dict_request_log():
+    app_log.debug('manually trigger request log retrieval')
+    json_str: str = json.dumps(WebController().get_request_log(), default=str)
+    memory_file = io.StringIO(json_str)
+    return send_file(
+        io.BytesIO(memory_file.getvalue().encode('utf-8')),
+        mimetype='text/plain',
+        as_attachment=True,
+        download_name='requests.json'
+    )
 
 
 def _extract_unsigned_headers() -> UnsignedAuthHeaders:

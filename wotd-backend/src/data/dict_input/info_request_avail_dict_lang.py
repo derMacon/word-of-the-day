@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
-from src.data.dict_input.language import Language
+from src.data.dict_input.language_uuid import Language
 
 
 @dataclass
-# TODO wouldn't the correct name be InfoResponseAvailDictLang
-class InfoRequestAvailDictLang:
+class InfoResponseAvailDictLang:
     dict_available_languages: List[Language]

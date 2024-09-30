@@ -1,4 +1,4 @@
-import React, {Key} from 'react';
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -18,9 +18,11 @@ export function LanguageSelect(props: Readonly<DropdownSelectProps>) {
     const items: JSX.Element[] = []
     props.availableLanguages.forEach((language: Language) => items.push(
         <Dropdown.Item key={language.language_uuid} onClick={() => props.onSelect(language)}>
-            {language.name}
+            {language.full_name}
         </Dropdown.Item>
     ));
+
+    console.log('props in lang select: ', props.selectedElem)
 
     const title: string = props.selectedElem.language_uuid
 

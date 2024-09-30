@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
-from src.data.dict_input.language import Language
+from src.data.dict_input.language_uuid import Language
 
 
 @dataclass
-# TODO wouldn't the correct name be InfoResponseDefaultDictLang
-class InfoRequestDefaultDictLang:
+class InfoResponseDefaultDictLang:
     dict_default_from_language: Language
     dict_default_to_language: Language

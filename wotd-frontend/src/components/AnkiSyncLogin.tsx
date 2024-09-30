@@ -11,7 +11,6 @@ import {
     ankiApiIsHealthy,
     ankiApiLogin,
     ankiApiTriggerManualHousekeeping,
-    dictGetAvailableLang,
     dictGetInfoHousekeeping
 } from "../logic/ApiFetcher";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
@@ -36,9 +35,12 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result: boolean = await ankiApiIsHealthy();
-                setHealthyApi(result);
-                dictGetInfoHousekeeping().then((e: InfoRequestHousekeeping) => setNextSync(e.nextSync))
+                const apiIsHealthy: boolean = await ankiApiIsHealthy();
+                setHealthyApi(apiIsHealthy);
+
+                if (apiIsHealthy) {
+                    dictGetInfoHousekeeping().then((e: InfoRequestHousekeeping) => setNextSync(e.nextSync))
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setHealthyApi(false);
@@ -128,7 +130,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             <p>You are currently not logged into your Anki account.
                 In order to sync the dictionary searches with anki web please log in.</p>
 
-            <p>If you do net have an account, please register <a
+            <p>If you do not have an account, please register <a
                 href="https://ankiweb.net/account/signup">here</a> and
                 come back afterwards.</p>
             <br/>
@@ -164,12 +166,6 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                 {showSpinner ? spinner : 'Login'}
             </Button>
 
-
-            {/*<p>Word Vaults</p>*/}
-            {/*<ListGroup>*/}
-            {/*    <ListGroup.Item>English Dictionary</ListGroup.Item>*/}
-            {/*    <ListGroup.Item disabled>German Duden Definitions</ListGroup.Item>*/}
-            {/*</ListGroup>*/}
         </>
 
     return (

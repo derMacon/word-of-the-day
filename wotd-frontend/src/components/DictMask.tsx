@@ -1,11 +1,10 @@
 import React, {useEffect, useState} from 'react';
+import Cookies from "universal-cookie";
 import Container from "react-bootstrap/Container";
 import {SelectableTable} from "./SelectableTable";
-import {wotdApiHealthStatus, dictGetAvailableLang} from "../logic/ApiFetcher";
-import {Button} from "react-bootstrap";
+import {dictGetAvailableLang, wotdApiHealthStatus} from "../logic/ApiFetcher";
 import {Language} from "../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
-import Form from 'react-bootstrap/Form';
 import AnkiSyncLogin from "./AnkiSyncLogin";
 import {AuthService} from "../logic/AuthService";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
@@ -13,11 +12,12 @@ import {DictOptionsItem} from "../model/DictOptionsItem";
 import {InfoPage} from "./InfoPage";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {UserInput} from "./UserInput";
-import Modal from 'react-bootstrap/Modal';
 import LoginAlert from "./LoginAlert";
 import {BasicUsage} from "./BasicUsage";
 import {ErrorPage} from "./ErrorPage";
 
+
+const COOKIE_KEY_FIRST_TIME_USER: string = 'FIRST-TIME-USER'
 
 export function DictMask() {
 
@@ -30,6 +30,12 @@ export function DictMask() {
     const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
 
     const authProvider: AuthService = new AuthService();
+    const cookies: Cookies = new Cookies(null, {path: '/'})
+
+    const debugWrapper = (e: any) => {
+        console.log('debug wrapper: ', e)
+        setAvailLang(e)
+    }
 
 
     useEffect(() => {
@@ -39,7 +45,10 @@ export function DictMask() {
                 if (!healthStatus.dbConnection) {
                     console.error('db connection down: ', healthStatus)
                 } else {
-                    dictGetAvailableLang().then(setAvailLang)
+                    console.log('before setting avail lang')
+                    dictGetAvailableLang().then(debugWrapper)
+                    // dictGetAvailableLang().then(setAvailLang)
+                    console.log('after setting avail lang: ', availLang)
 
                     if (authProvider.showLoginPrompt()) {
                         handleShowAnkiStatusAlert()
@@ -52,6 +61,12 @@ export function DictMask() {
                     setShowErrorPage(true)
                 } else if (!healthStatus.ankiApiConnection) {
                     console.error('anki api not available: ', healthStatus)
+                }
+
+                const isFirstTimeUser: Boolean = cookies.get(COOKIE_KEY_FIRST_TIME_USER)
+                if (isFirstTimeUser === undefined || isFirstTimeUser) {
+                    cookies.set(COOKIE_KEY_FIRST_TIME_USER, false)
+                    setShowInfoPage(true)
                 }
 
             }
@@ -73,6 +88,8 @@ export function DictMask() {
         console.log('update auth provider with signed email: ', ankiResponse.signedUsername)
         authProvider.loadAnkiLoginResponse(ankiResponse)
     }
+
+    console.log('avail langs during dict mask render: ', availLang)
 
     const mainPage = <>
         <LoginAlert

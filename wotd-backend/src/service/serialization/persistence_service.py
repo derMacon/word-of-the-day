@@ -8,10 +8,11 @@ from singleton_decorator import singleton
 
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
-from src.data.dict_input.info_request_default_dict_lang import InfoRequestDefaultDictLang
-from src.data.dict_input.language import Language
-from src.data.dict_input.sensitive_env import SensitiveEnv
+from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
+from src.data.dict_input.language_uuid import Language
 from src.data.dict_input.requeststatus import RequestStatus
+from src.data.dict_input.sensitive_env import SensitiveEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log
@@ -23,6 +24,7 @@ from src.utils.logging_config import app_log
 class PersistenceService:
     _conn = None
     _cursor = None
+    _available_languages: List[Language] = []
 
     def __init__(self):
         self._lock = threading.Lock()
@@ -79,6 +81,7 @@ class PersistenceService:
 
         return decorate
 
+    # TODO use this
     def teardown(self):
         self._conn.commit()
         self._cursor.close()
@@ -88,13 +91,11 @@ class PersistenceService:
     def get_available_languages(self) -> List[Language]:
         self._cursor.execute("SELECT * FROM language;")
 
-        languages: List[Language] = []
         for entry in self._cursor.fetchall():
-            languages.append(Language(*entry))
+            self._available_languages.append(Language(*entry))
 
-        return languages
+        return self._available_languages
 
-    @_database_error_decorator  # type: ignore
     def find_language_by_uuid(self, lang_uuid: str) -> List[Language]:
         for curr_lang in self.get_available_languages():
             if curr_lang.language_uuid == lang_uuid:
@@ -102,7 +103,7 @@ class PersistenceService:
         raise LangNotFoundError(f'language with uuid {lang_uuid} not found')
 
     @_database_error_decorator  # type: ignore
-    def get_default_languages(self) -> InfoRequestDefaultDictLang:
+    def get_default_languages(self) -> InfoResponseDefaultDictLang:
         self._cursor.execute(
             "SELECT language.* FROM language "
             "INNER JOIN language_default ON language.language_uuid=language_default.dict_from_language_uuid;")
@@ -115,20 +116,42 @@ class PersistenceService:
         entry = self._cursor.fetchone()
         dict_default_to_language = Language(*entry)
 
-        req = InfoRequestDefaultDictLang(
+        req = InfoResponseDefaultDictLang(
             dict_default_to_language=dict_default_to_language,
             dict_default_from_language=dict_default_from_language
         )
 
         return req
 
+    @_database_error_decorator  # type: ignore
+    def insert_dict_request(self, dict_request: DictRequest, auth_headers: UnsignedAuthHeaders | None) -> DictRequest:
+        """
+        saves the option objects into the db and fetches the generated id into a new object
+        """
+        sql_insert = (
+            "INSERT INTO dict_request (username, from_language_uuid, to_language_uuid, input, dict_request_ts) "
+            "VALUES (%s, %s, %s, %s, %s) RETURNING dict_request_id;")
+        self._cursor.execute(sql_insert, (
+            '' if auth_headers is None else auth_headers.username,
+            dict_request.from_language_uuid,
+            dict_request.to_language_uuid,
+            dict_request.input,
+            dict_request.dict_request_ts,
+        ))
+        dict_request.dict_request_id = self._cursor.fetchone()
+        self._conn.commit()
+
+        return dict_request
+
+    @_database_error_decorator  # type: ignore
     def insert_dict_options(self, options: List[DictOptionsItem]) -> List[DictOptionsItem]:
         """
         saves the option objects into the db and fetches the generated id into a new object
         """
         for curr_opt in options:
-            sql_insert = ("INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
-                          "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
+            sql_insert = (
+                "INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
             self._cursor.execute(sql_insert, (
                 curr_opt.username,
                 curr_opt.deck,
@@ -215,3 +238,8 @@ class PersistenceService:
             delete_query = "DELETE FROM dict_options_item WHERE dict_options_item_id IN %s;"
             self._cursor.execute(delete_query, (tuple(ids_to_delete),))
             self._conn.commit()
+
+    @_database_error_decorator  # type: ignore
+    def get_all_dict_requests(self) -> List[DictRequest]:
+        self._cursor.execute("SELECT * FROM dict_request;")
+        return self._cursor.fetchall()
