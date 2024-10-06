@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS language_default (
   FOREIGN KEY (dict_to_language_uuid) REFERENCES language(language_uuid)
 );
 
-INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VALUES
-  ('EN', 'DE');
+-- INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VALUES
+--   ('EN', 'DE');
 
 CREATE TABLE IF NOT EXISTS dict_options_item (
   dict_options_item_id SERIAL PRIMARY KEY,
@@ -43,4 +43,10 @@ CREATE TABLE IF NOT EXISTS dict_request (
     FOREIGN KEY (to_language_uuid) REFERENCES language(language_uuid),
     input VARCHAR(1000) NOT NULL,
     dict_request_ts timestamp NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS anki_backlog (
+    anki_id SERIAL PRIMARY KEY,
+    front VARCHAR(1000) NOT NULL,
+    back VARCHAR(1000) NOT NULL
 );

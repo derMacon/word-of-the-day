@@ -43,10 +43,7 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
         with MUTEX:
             app_log.debug(f'sync anki push with delay {housekeeping_interval} s and {auth_headers}')
 
-            error_cnt = 0
-            while not PersistenceService().db_connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
-                error_cnt = error_cnt + 1
-                sleep(housekeeping_interval)
+            _wait_for_connection(housekeeping_interval)
 
             if PersistenceService().db_connection_is_established() and AnkiConnectFetcher.health_check():
                 _push_data(housekeeping_interval, auth_headers)
@@ -56,6 +53,13 @@ def sync_anki_push(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
             app_log.debug('finished housekeeping')
     except DatabaseError as e:
         app_log.error(f"error: '{e}'")
+
+
+def _wait_for_connection(housekeeping_interval):
+    error_cnt = 0
+    while not PersistenceService().db_connection_is_established() and error_cnt < MAX_CONNECTION_TRIES:
+        error_cnt = error_cnt + 1
+        sleep(housekeeping_interval)
 
 
 def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
@@ -68,7 +72,7 @@ def _push_fallback_decks(auth_headers: UnsignedAuthHeaders):
     if not AnkiConnectFetcher.check_if_deck_is_present(FALLBACK_DECK_NAME):
         app_log.debug(f'fallback deck name not present: {FALLBACK_DECK_NAME}')
         cards: List[AnkiCard] = _create_fallback_deck_cards()
-        _push_in_batches(cards, auth_headers)
+        _push_anki_connect_in_batches(cards, auth_headers)
 
 
 def _create_fallback_deck_cards() -> List[AnkiCard]:
@@ -113,7 +117,8 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     cards_to_push = _merge_duplicates(cards_to_push)
     # TODO flip and append cards to create more
     cards_to_push = _sort_by_ts(cards_to_push)
-    _push_in_batches(cards_to_push, auth_headers)
+    _push_anki_connect_in_batches(cards_to_push, auth_headers)
+    _persist_anki_cards(cards_to_push)
     _delete_elems_in_batches(ids_to_delete)
 
 
@@ -147,6 +152,9 @@ def _sort_by_ts(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
     return sorted(cards_to_push, key=lambda card: card.ts)
 
 
+# def _find_pushed_duplicates(cards_to_push: List[AnkiCard]) ->
+
+
 def _merge_duplicates(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
     mapping: dict[str, List[AnkiCard]] = {}
     for card in cards_to_push:
@@ -162,15 +170,23 @@ def _merge_duplicates(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
     return merged_stack
 
 
-def _push_in_batches(cards_to_push: List[AnkiCard], auth_headers: UnsignedAuthHeaders) -> None:
+def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: UnsignedAuthHeaders) -> None:
     for card_batch in chunked(cards_to_push, API_CONNECT_BATCH_SIZE):
         item_ids = list(collapse([elem.item_ids for elem in card_batch]))
 
-        response_ok = AnkiConnectFetcher.api_push_cards(card_batch, auth_headers)
-        if response_ok:
+        push_response = AnkiConnectFetcher.api_push_cards(card_batch, auth_headers)
+        if push_response is not None and push_response.error is None:
+
+            for (generated_id, anki_card) in zip(push_response.result, cards_to_push):
+                anki_card.anki_id = generated_id
+
             PersistenceService().update_items_status(item_ids, RequestStatus.SYNCED)
         else:
-            app_log.error(f"not able to push card batch {card_batch}")
+            app_log.error(f"not able to push card batch {card_batch} - push response: {push_response}")
+
+
+def _persist_anki_cards(cards: List[AnkiCard]) -> None:
+    app_log.debug(f'persisting card: {cards}')
 
 
 def _delete_elems_in_batches(ids_to_delete: List[int]):

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
-from src.data.dict_input import parse_datetime_from_string
 from src.data.error.logic_error import LogicError
 
 MERGING_SEPERATOR = ' | '
@@ -10,14 +9,16 @@ MERGING_SEPERATOR = ' | '
 
 @dataclass
 class AnkiCard:
+    anki_id: int # ID generated when card is pushed to anki connect - will be persisted in db table
     # can have multiple elem ids since multiple selectable options can be merged together before push to api
-    item_ids: List[int]
+    item_ids: List[int]  # IDs used when user selects option
     deck: str
     front: str
     back: set[str]
     ts: datetime
 
     def __init__(self, item_ids: List[int], deck: str, front: str, back: str, ts: datetime):
+        self.anki_id = -1
         self.item_ids = item_ids
         self.deck = deck
         self.front = front

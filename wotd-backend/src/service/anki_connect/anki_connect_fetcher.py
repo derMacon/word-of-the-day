@@ -42,7 +42,7 @@ class AnkiConnectFetcher:
 
 
     @staticmethod
-    def api_push_cards(anki_cards: List[AnkiCard], headers: UnsignedAuthHeaders) -> bool:
+    def api_push_cards(anki_cards: List[AnkiCard], headers: UnsignedAuthHeaders) -> AnkiConnectResponseAddNotes:
         app_log.debug(f'auth headers: {headers}')
         app_log.debug(f'push anki card: {anki_cards}')
 
@@ -52,10 +52,10 @@ class AnkiConnectFetcher:
         AnkiConnectFetcher._sync_anki_web()
         AnkiConnectFetcher._create_decks_if_needed(anki_cards)
         AnkiConnectFetcher._validate_notes_can_be_added(anki_cards)
-        AnkiConnectFetcher._add_notes(anki_cards)
+        push_response: AnkiConnectResponseAddNotes = AnkiConnectFetcher._add_notes(anki_cards)
         AnkiConnectFetcher._sync_anki_web()
 
-        return True
+        return push_response
 
     @staticmethod
     def _validate_if_profile_present(profile_uuid: str) -> None:
@@ -141,7 +141,7 @@ class AnkiConnectFetcher:
                                    f':: anki_cards: {anki_cards}')
 
     @staticmethod
-    def _add_notes(anki_cards: List[AnkiCard]) -> None:
+    def _add_notes(anki_cards: List[AnkiCard]) -> AnkiConnectResponseAddNotes:
         data = dataclasses.asdict(AnkiConnectRequestAddNotes(anki_cards))
         app_log.debug(f'anki connect add notes request json: {data}')
         plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
@@ -151,6 +151,8 @@ class AnkiConnectFetcher:
         if anki_connect_response is None or anki_connect_response.error is not None:
             raise AnkiConnectError(f'could not push cards to anki api {anki_connect_response} '
                                    f':: invalid cards: {anki_cards}')
+
+        return anki_connect_response
 
     @staticmethod
     def _sync_anki_web() -> None:

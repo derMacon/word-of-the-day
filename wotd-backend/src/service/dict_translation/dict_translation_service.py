@@ -25,7 +25,8 @@ class DictTranslationService:
             return []
 
         if language_uuid not in self._dict_map.keys():
-            raise LangNotFoundError(f"cannot autocomplete prefix '{prefix}' for language '{language_uuid}'")
+            raise LangNotFoundError(
+                f"language '{language_uuid}' not present in available languages: '{self._dict_map.keys()}'")
 
         suggestions = self._dict_map[language_uuid].suggest(prefix)
         return [word for word in suggestions if word.startswith(prefix)][:DEFAULT_RESULT_NUM]
