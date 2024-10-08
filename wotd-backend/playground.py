@@ -29,10 +29,10 @@
 # print(sorted(lst, key=lambda card: card.ts))
 
 
-import time
-import nltk
-from nltk.corpus import wordnet as wn
-
+# import time
+# import nltk
+# from nltk.corpus import wordnet as wn
+#
 # Ensure wordnet is downloaded
 # nltk.download('wordnet')
 
@@ -47,31 +47,34 @@ from nltk.corpus import wordnet as wn
 #     return completions
 
 
-import enchant
+# import enchant
+
+#
+# def autocomplete_word(prefix):
+#     # Create a dictionary for English
+#     d = enchant.Dict("de_DE")
+#     # d = enchant.Dict("en_US")
+#
+#     # Get suggestions that start with the prefix
+#     suggestions = d.suggest(prefix)
+#
+#     # Filter to only include words starting with the prefix (autocomplete behavior)
+#     return [word for word in suggestions if word.startswith(prefix)]
+#
+#
+# # Example usage
+# prefix = "wasse"
+#
+# start = time.time()
+# suggestions = autocomplete_word(prefix)
+# end = time.time()
+# print(f'elapsed api call: {end - start}')
+#
+# print(suggestions[:10])  # Show only the first 10 suggestions
+#
 
 
-def autocomplete_word(prefix):
-    # Create a dictionary for English
-    d = enchant.Dict("de_DE")
-    # d = enchant.Dict("en_US")
 
-    # Get suggestions that start with the prefix
-    suggestions = d.suggest(prefix)
+MERGING_SEPERATOR = ' | '
 
-    # Filter to only include words starting with the prefix (autocomplete behavior)
-    return [word for word in suggestions if word.startswith(prefix)]
-
-
-# Example usage
-prefix = "wasse"
-
-start = time.time()
-suggestions = autocomplete_word(prefix)
-end = time.time()
-print(f'elapsed api call: {end - start}')
-
-print(suggestions[:10])  # Show only the first 10 suggestions
-
-
-
-
+print('out: ', MERGING_SEPERATOR.join([None, 'snd']))

@@ -71,11 +71,11 @@ def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
 def _push_fallback_decks(auth_headers: UnsignedAuthHeaders):
     if not AnkiConnectFetcher.check_if_deck_is_present(FALLBACK_DECK_NAME):
         app_log.debug(f'fallback deck name not present: {FALLBACK_DECK_NAME}')
-        cards: List[AnkiCard] = _create_fallback_deck_cards()
+        cards: List[AnkiCard] = _create_fallback_deck_cards(auth_headers.username)
         _push_anki_connect_in_batches(cards, auth_headers)
 
 
-def _create_fallback_deck_cards() -> List[AnkiCard]:
+def _create_fallback_deck_cards(username: str) -> List[AnkiCard]:
     cards: List[AnkiCard] = []
 
     for file in os.listdir(FALLBACK_CSV_PATH):
@@ -85,6 +85,7 @@ def _create_fallback_deck_cards() -> List[AnkiCard]:
             front, back = row
             cards.append(AnkiCard(
                 item_ids=[],
+                username=username,
                 deck=FALLBACK_DECK_NAME,
                 front=front,
                 back=back,
@@ -118,7 +119,7 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     # TODO flip and append cards to create more
     cards_to_push = _sort_by_ts(cards_to_push)
     _push_anki_connect_in_batches(cards_to_push, auth_headers)
-    _persist_anki_cards(cards_to_push)
+    _persist_anki_cards_in_batches(cards_to_push)
     _delete_elems_in_batches(ids_to_delete)
 
 
@@ -135,6 +136,7 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCa
             cards_to_push.append(
                 AnkiCard(
                     item_ids=[curr_option.dict_options_item_id],
+                    username=curr_option.username,
                     deck=curr_option.deck,
                     front=curr_option.input,
                     back=curr_option.output,
@@ -185,8 +187,9 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
             app_log.error(f"not able to push card batch {card_batch} - push response: {push_response}")
 
 
-def _persist_anki_cards(cards: List[AnkiCard]) -> None:
-    app_log.debug(f'persisting card: {cards}')
+def _persist_anki_cards_in_batches(cards: List[AnkiCard]) -> None:
+    for card_batch in chunked(cards, DB_BATCH_SIZE):
+        PersistenceService().insert_anki_cards(card_batch)
 
 
 def _delete_elems_in_batches(ids_to_delete: List[int]):

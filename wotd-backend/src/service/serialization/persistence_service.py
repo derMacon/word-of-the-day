@@ -6,6 +6,7 @@ from typing import List
 import psycopg2
 from singleton_decorator import singleton
 
+from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
@@ -243,3 +244,26 @@ class PersistenceService:
     def get_all_dict_requests(self) -> List[DictRequest]:
         self._cursor.execute("SELECT * FROM dict_request;")
         return self._cursor.fetchall()
+
+    @_database_error_decorator  # type: ignore
+    def insert_anki_cards(self, cards: List[AnkiCard]) -> List[AnkiCard]:
+        app_log.debug(f'persisting cards: {cards}')
+
+        for curr_card in cards:
+            sql_insert = (
+                "INSERT INTO anki_backlog (username, deck, front, back) "
+                "VALUES (%s, %s, %s, %s) RETURNING anki_id;")
+            self._cursor.execute(sql_insert, (
+                curr_card.username,
+                curr_card.deck,
+                curr_card.front,
+                curr_card.back
+            ))
+            app_log.debug('after insert')
+            curr_card.anki_id = self._cursor.fetchone()[0]
+            app_log.debug('after fetchone')
+
+        self._conn.commit()
+        app_log.debug('after commit')
+        return cards
+

@@ -12,17 +12,19 @@ class AnkiCard:
     anki_id: int # ID generated when card is pushed to anki connect - will be persisted in db table
     # can have multiple elem ids since multiple selectable options can be merged together before push to api
     item_ids: List[int]  # IDs used when user selects option
+    username: str
     deck: str
     front: str
-    back: set[str]
+    back: str
     ts: datetime
 
-    def __init__(self, item_ids: List[int], deck: str, front: str, back: str, ts: datetime):
+    def __init__(self, username: str, item_ids: List[int], deck: str, front: str, back: str, ts: datetime):
         self.anki_id = -1
         self.item_ids = item_ids
+        self.username = username
         self.deck = deck
         self.front = front
-        self.back = {back}
+        self.back = back
         self.ts = ts
 
     def to_anki_connect_params_format(self):
@@ -57,6 +59,6 @@ class AnkiCard:
 
         for card in other_cards:
             self.item_ids.extend(card.item_ids)
-            self.back.update(card.back)
+            self.back = self.back if self.back is None or self.back == '' else card.back
 
         return self
