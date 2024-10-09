@@ -31,16 +31,17 @@ CREATE TABLE IF NOT EXISTS dict_options_item (
   output VARCHAR(1000) NOT NULL,
   selected BOOLEAN NOT NULL,
   status VARCHAR(100) NOT NULL,
-  option_response_ts timestamp NOT NULL
+  option_response_ts timestamp NOT NULL,
+  CONSTRAINT unique_dict_option UNIQUE (deck, input, output, status)
 );
 
 CREATE TABLE IF NOT EXISTS dict_request (
-    dict_request_id SERIAL PRIMARY KEY,
-    username VARCHAR(100),
-    from_language_uuid VARCHAR(50) NOT NULL,
-    to_language_uuid VARCHAR(50) NOT NULL,
-    FOREIGN KEY (from_language_uuid) REFERENCES language(language_uuid),
-    FOREIGN KEY (to_language_uuid) REFERENCES language(language_uuid),
-    input VARCHAR(1000) NOT NULL,
-    dict_request_ts timestamp NOT NULL
+  dict_request_id SERIAL PRIMARY KEY,
+  username VARCHAR(100),
+  from_language_uuid VARCHAR(50) NOT NULL,
+  to_language_uuid VARCHAR(50) NOT NULL,
+  FOREIGN KEY (from_language_uuid) REFERENCES language(language_uuid),
+  FOREIGN KEY (to_language_uuid) REFERENCES language(language_uuid),
+  input VARCHAR(1000) NOT NULL,
+  dict_request_ts timestamp NOT NULL
 );

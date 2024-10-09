@@ -6,7 +6,6 @@ from typing import List
 import psycopg2
 from singleton_decorator import singleton
 
-from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
@@ -16,7 +15,7 @@ from src.data.dict_input.requeststatus import RequestStatus
 from src.data.dict_input.sensitive_env import SensitiveEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
-from src.utils.logging_config import app_log
+from src.utils.logging_config import app_log, sql_log
 
 
 # TODO use singleton decorator in other services / controllers
@@ -74,7 +73,9 @@ class PersistenceService:
                     self._establish_db_connection()
 
                 try:
-                    return foo(self, *args, **kwargs)
+                    out = foo(self, *args, **kwargs)
+                    sql_log.debug(self._cursor.query)
+                    return out
                 except Exception as e:
                     app_log.error(f"{e}")
                     raise DatabaseError(e, e)
@@ -150,9 +151,13 @@ class PersistenceService:
         saves the option objects into the db and fetches the generated id into a new object
         """
         for curr_opt in options:
+            app_log.debug('persisting dict options')
             sql_insert = (
                 "INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
+                "VALUES (%s, %s, %s, %s, %s, %s, %s) "
+                "ON CONFLICT (deck, input, output, status) DO NOTHING "
+                "RETURNING dict_options_item_id;"
+            )
             self._cursor.execute(sql_insert, (
                 curr_opt.username,
                 curr_opt.deck,
@@ -162,6 +167,7 @@ class PersistenceService:
                 curr_opt.status,
                 curr_opt.option_response_ts,
             ))
+            sql_log.debug(self._cursor.query)
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
 
         self._conn.commit()
@@ -244,7 +250,6 @@ class PersistenceService:
     def get_all_dict_requests(self) -> List[DictRequest]:
         self._cursor.execute("SELECT * FROM dict_request;")
         return self._cursor.fetchall()
-
 
     # TODO delete this once it's clear that it's not being used
     # @_database_error_decorator  # type: ignore
