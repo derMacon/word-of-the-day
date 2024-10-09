@@ -57,7 +57,7 @@ class AnkiCard:
 
         for card in other_cards:
             self.item_ids.extend(card.item_ids)
-            self.back = self.back if self.back is None or self.back == '' else card.back
+            self.back = self.back if card.back is None or card.back == '' else self.back + MERGING_SEPERATOR + card.back
 
         return self
 

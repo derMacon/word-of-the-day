@@ -11,7 +11,6 @@ from src.data.anki.anki_connect_card_info import AnkiConnectRequestCardsInfo, An
 from src.data.anki.anki_connect_create_deck import AnkiConnectRequestCreateDeck, AnkiConnectResponseCreateDeck
 from src.data.anki.anki_connect_delete_notes import AnkiConnectRequestDeleteNotes, AnkiConnectResponseDeleteNotes
 from src.data.anki.anki_connect_find_cards import AnkiConnectRequestFindCards, AnkiConnectResponseFindCards
-from src.data.anki.anki_connect_find_notes import AnkiConnectRequestFindNotes, AnkiConnectResponseFindNotes
 from src.data.anki.anki_connect_get_deck_names import AnkiConnectRequestGetDeckNames, AnkiConnectResponseGetDeckNames
 from src.data.anki.anki_connect_get_profiles import AnkiConnectRequestGetProfiles, AnkiConnectResponseGetProfiles
 from src.data.anki.anki_connect_load_profile import AnkiConnectRequestLoadProfile
@@ -19,10 +18,8 @@ from src.data.anki.anki_connect_notes_info import AnkiConnectRequestNotesInfo, A
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
 from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
-from src.data.dict_input.language_uuid import Language
 from src.data.error.anki_connect_error import AnkiConnectError
 from src.utils.logging_config import app_log
-import json
 
 
 class AnkiConnectFetcher:
@@ -159,7 +156,10 @@ class AnkiConnectFetcher:
         anki_connect_response: AnkiConnectResponseFindCards = AnkiConnectResponseFindCards(**plain_response)
         app_log.debug(f'anki connect response for find cards: {anki_connect_response}')
 
-        if anki_connect_response is None or anki_connect_response.error is not None:
+        if anki_connect_response is None \
+                or anki_connect_response.error is not None \
+                or anki_connect_response.result is None \
+                or len(anki_connect_response.result) == 0:
             raise AnkiConnectError(f'could not find cards for {anki_connect_response} '
                                    f':: invalid card: {anki_card}')
 

@@ -115,6 +115,7 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     )
 
     cards_to_push, ids_to_delete = _filter_elems_to_push(persisted_options)
+    _create_decks(cards_to_push)
     duplicate_remote_cards = _find_pushed_duplicates(cards_to_push)
     _delete_pushed_duplicates(duplicate_remote_cards)
 
@@ -172,6 +173,13 @@ def _filter_elems_to_push(persisted_options: List[DictOptionsItem]) -> Tuple[Lis
             ids_to_delete.append(curr_option.dict_options_item_id)
 
     return cards_to_push, ids_to_delete
+
+
+def _create_decks(anki_cards: List[AnkiCard]) -> None:
+    for deck in set([opt.deck for opt in anki_cards]):
+        if not AnkiConnectFetcher.check_if_deck_is_present(deck):
+            app_log.debug(f"deck '{deck}' not present need to create it")
+            AnkiConnectFetcher._create_single_deck(deck)
 
 
 def _sort_by_ts(cards_to_push: List[AnkiCard]) -> None:
