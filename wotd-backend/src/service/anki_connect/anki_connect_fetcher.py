@@ -10,10 +10,12 @@ from src.data.anki.anki_connect_can_add_notes import AnkiConnectRequestCanAddNot
 from src.data.anki.anki_connect_card_info import AnkiConnectRequestCardsInfo, AnkiConnectResponseCardsInfo
 from src.data.anki.anki_connect_create_deck import AnkiConnectRequestCreateDeck, AnkiConnectResponseCreateDeck
 from src.data.anki.anki_connect_delete_notes import AnkiConnectRequestDeleteNotes, AnkiConnectResponseDeleteNotes
+from src.data.anki.anki_connect_find_cards import AnkiConnectRequestFindCards, AnkiConnectResponseFindCards
 from src.data.anki.anki_connect_find_notes import AnkiConnectRequestFindNotes, AnkiConnectResponseFindNotes
 from src.data.anki.anki_connect_get_deck_names import AnkiConnectRequestGetDeckNames, AnkiConnectResponseGetDeckNames
 from src.data.anki.anki_connect_get_profiles import AnkiConnectRequestGetProfiles, AnkiConnectResponseGetProfiles
 from src.data.anki.anki_connect_load_profile import AnkiConnectRequestLoadProfile
+from src.data.anki.anki_connect_notes_info import AnkiConnectRequestNotesInfo, AnkiConnectResponseNotesInfo
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
 from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
@@ -151,14 +153,14 @@ class AnkiConnectFetcher:
 
     @staticmethod
     def _find_pushed_anki_id(anki_card: AnkiCard) -> int:
-        data = dataclasses.asdict(AnkiConnectRequestFindNotes(anki_card))
-        app_log.debug(f'anki connect find notes request json: {data}')
+        data = dataclasses.asdict(AnkiConnectRequestFindCards(anki_card))
+        app_log.debug(f'anki connect find cards request json: {data}')
         plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
-        anki_connect_response: AnkiConnectResponseFindNotes = AnkiConnectResponseFindNotes(**plain_response)
-        app_log.debug(f'anki connect response for find notes: {anki_connect_response}')
+        anki_connect_response: AnkiConnectResponseFindCards = AnkiConnectResponseFindCards(**plain_response)
+        app_log.debug(f'anki connect response for find cards: {anki_connect_response}')
 
         if anki_connect_response is None or anki_connect_response.error is not None:
-            raise AnkiConnectError(f'could not find notes for {anki_connect_response} '
+            raise AnkiConnectError(f'could not find cards for {anki_connect_response} '
                                    f':: invalid card: {anki_card}')
 
         return anki_connect_response.result[0]
@@ -176,8 +178,6 @@ class AnkiConnectFetcher:
             raise AnkiConnectError(f'could not delete notes for {anki_connect_response} '
                                    f':: duplicate cards: {duplicate_cards}')
 
-
-
     @staticmethod
     def _get_card_by_id(anki_card_id: int) -> AnkiCard:
         data = dataclasses.asdict(AnkiConnectRequestCardsInfo(anki_card_id))
@@ -192,13 +192,30 @@ class AnkiConnectFetcher:
 
         result_map = anki_connect_response.result[0]
         return AnkiCard(
-            anki_id=anki_card_id,
+            anki_id=result_map['note'],
             deck=result_map['deckName'],
-            front=result_map['fields']['Front'],
-            back=result_map['fields']['Back'],
+            front=result_map['fields']['Front']['value'],
+            back=result_map['fields']['Back']['value'],
             ts=now()
         )
 
+    @staticmethod
+    def _get_card_id_by_note_id(anki_card_id: int) -> int:
+        data = dataclasses.asdict(AnkiConnectRequestNotesInfo(anki_card_id))
+        app_log.debug(f'anki connect notes info request json: {data}')
+        plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseNotesInfo = AnkiConnectResponseNotesInfo(**plain_response)
+        app_log.debug(f'anki connect response for notes info: {anki_connect_response}')
+
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            raise AnkiConnectError(f'could get notes info from anki api {anki_connect_response} '
+                                   f':: invalid notes id: {anki_card_id}')
+        try:
+            return anki_connect_response.result[0]['cards'][0]
+        except:
+            raise AnkiConnectError(
+                f'trouble unwrapping anki response for notes info request, response: {anki_connect_response} '
+                f':: invalid notes id: {anki_card_id}')
 
     @staticmethod
     def _add_notes(anki_cards: List[AnkiCard]) -> AnkiConnectResponseAddNotes:

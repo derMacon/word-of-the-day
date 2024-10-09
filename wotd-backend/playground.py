@@ -27,7 +27,11 @@
 # lst = [snd, thrd, fst]
 #
 # print(sorted(lst, key=lambda card: card.ts))
+import json
 
+from src.data.anki.anki_card import AnkiCard
+from src.data.dict_input import now
+from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 
 # import time
 # import nltk
@@ -74,7 +78,18 @@
 #
 
 
+# MERGING_SEPERATOR = ' | '
+#
+# print('out: ', MERGING_SEPERATOR.join([None, 'snd']))
 
-MERGING_SEPERATOR = ' | '
 
-print('out: ', MERGING_SEPERATOR.join([None, 'snd']))
+curr_card = AnkiCard(
+    deck='wotd::translations::DE-EN',
+    front='treehouse [spv.]',
+    back='Baumhaus {n}',
+    ts=now()
+)
+
+anki_card_id = AnkiConnectFetcher._find_pushed_anki_id(curr_card)
+anki_card = AnkiConnectFetcher._get_card_by_id(anki_card_id)
+print(anki_card)

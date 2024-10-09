@@ -69,4 +69,4 @@ class AnkiCard:
 
     # Overriding __hash__ because __eq__ is overridden
     def __hash__(self):
-        return hash((self.front, self.back))
+        return hash((self.deck, self.front, self.back))
