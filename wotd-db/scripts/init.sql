@@ -44,11 +44,3 @@ CREATE TABLE IF NOT EXISTS dict_request (
     input VARCHAR(1000) NOT NULL,
     dict_request_ts timestamp NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS anki_backlog (
-    anki_id SERIAL PRIMARY KEY,
-    username VARCHAR(1000) NOT NULL,
-    deck VARCHAR(1000) NOT NULL,
-    front VARCHAR(1000) NOT NULL,
-    back VARCHAR(1000) NOT NULL
-);

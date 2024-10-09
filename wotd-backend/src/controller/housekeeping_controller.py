@@ -1,3 +1,4 @@
+import copy
 import csv
 import os
 import threading
@@ -7,7 +8,7 @@ from typing import List, Tuple
 
 from more_itertools import chunked, collapse
 
-from src.data.anki.anki_card import AnkiCard
+from src.data.anki.anki_card import AnkiCard, MERGING_SEPERATOR
 from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
@@ -84,8 +85,6 @@ def _create_fallback_deck_cards(username: str) -> List[AnkiCard]:
         for row in _read_csv(os.path.join(FALLBACK_CSV_PATH, file)):
             front, back = row
             cards.append(AnkiCard(
-                item_ids=[],
-                username=username,
                 deck=FALLBACK_DECK_NAME,
                 front=front,
                 back=back,
@@ -114,16 +113,41 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
         auth_headers
     )
 
-    cards_to_push, ids_to_delete = _filter_elems(persisted_options)
-    cards_to_push = _merge_duplicates(cards_to_push)
+    cards_to_push, ids_to_delete = _filter_elems_to_push(persisted_options)
+    duplicate_remote_cards = _find_pushed_duplicates(cards_to_push)
+    _delete_pushed_duplicates(duplicate_remote_cards)
+
+    cards_to_push.extend(duplicate_remote_cards)
+    _delete_exact_duplicates(cards_to_push)
+    _merge_duplicate_fronts(cards_to_push)
+
     # TODO flip and append cards to create more
-    cards_to_push = _sort_by_ts(cards_to_push)
+    _sort_by_ts(cards_to_push)
     _push_anki_connect_in_batches(cards_to_push, auth_headers)
-    _persist_anki_cards_in_batches(cards_to_push)
+    # _persist_anki_cards_in_batches(cards_to_push)
     _delete_elems_in_batches(ids_to_delete)
 
 
-def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCard], List[int]]:
+def _find_pushed_duplicates(anki_cards: List[AnkiCard]) -> List[AnkiCard]:
+    card_status = AnkiConnectFetcher._cards_can_be_added(anki_cards)
+    duplicates: List[AnkiCard] = []
+    for curr_card, card_can_be_added in zip(anki_cards, card_status):
+        if not card_can_be_added:
+            anki_card_id = AnkiConnectFetcher._find_pushed_anki_id(curr_card)
+            duplicates.append(AnkiConnectFetcher._get_card_by_id(anki_card_id))
+
+    return duplicates
+
+
+def _delete_pushed_duplicates(duplicate_cards: List[AnkiCard]) -> None:
+    # TODO also persist in db before deleting them remote - in selectable items db table
+
+    # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
+    for curr_card_batch in chunked(duplicate_cards, API_CONNECT_BATCH_SIZE):
+        AnkiConnectFetcher._delete_cards(curr_card_batch)
+
+
+def _filter_elems_to_push(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCard], List[int]]:
     cards_to_push: List[AnkiCard] = []
     ids_to_delete: List[int] = []
 
@@ -136,7 +160,6 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCa
             cards_to_push.append(
                 AnkiCard(
                     item_ids=[curr_option.dict_options_item_id],
-                    username=curr_option.username,
                     deck=curr_option.deck,
                     front=curr_option.input,
                     back=curr_option.output,
@@ -150,17 +173,29 @@ def _filter_elems(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCa
     return cards_to_push, ids_to_delete
 
 
-def _sort_by_ts(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
-    return sorted(cards_to_push, key=lambda card: card.ts)
+def _sort_by_ts(cards_to_push: List[AnkiCard]) -> None:
+    # def _sort_by_ts(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
+    # sorted(cards_to_push, key=lambda card: card.ts)
+    cards_to_push.sort(key=lambda card: card.ts)
 
 
-# def _find_pushed_duplicates(cards_to_push: List[AnkiCard]) ->
+def _delete_exact_duplicates(cards_to_push: List[AnkiCard]) -> None:
+    unique_lst_copy = list(set(copy.deepcopy(cards_to_push)))
+    cards_to_push.clear()
+    cards_to_push.extend(unique_lst_copy)
 
 
-def _merge_duplicates(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
+def _merge_duplicate_fronts(cards_to_push: List[AnkiCard]) -> None:
+    # used_decks = list(set([card.deck for card in cards_to_push]))
+    # deck_mapping = {}
+    # for deckname in used_decks:
+    #     cards_from_deck = [card for card in cards_to_push if card.deck == deckname]
+    #     deck_mapping.setdefault(deckname, []).append(cards_from_deck)
+
     mapping: dict[str, List[AnkiCard]] = {}
     for card in cards_to_push:
-        mapping.setdefault(card.front, []).append(card)
+        tuple_key_identifier = (card.deck, card.front)
+        mapping.setdefault(tuple_key_identifier, []).append(card)
 
     merged_stack: List[AnkiCard] = []
     duplicates: list[AnkiCard]
@@ -169,7 +204,8 @@ def _merge_duplicates(cards_to_push: List[AnkiCard]) -> List[AnkiCard]:
         merged_elems = duplicates[0].merge_cards(duplicates[1:])
         merged_stack.append(merged_elems)
 
-    return merged_stack
+    cards_to_push.clear()
+    cards_to_push.extend(merged_stack)
 
 
 def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: UnsignedAuthHeaders) -> None:
@@ -188,11 +224,14 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
 
 
 def _persist_anki_cards_in_batches(cards: List[AnkiCard]) -> None:
-    for card_batch in chunked(cards, DB_BATCH_SIZE):
-        PersistenceService().insert_anki_cards(card_batch)
+    # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
+    # for card_batch in chunked(cards, DB_BATCH_SIZE):
+    #     PersistenceService().insert_anki_cards(card_batch)
+    pass
 
 
 def _delete_elems_in_batches(ids_to_delete: List[int]):
+    # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
     for id_batch in chunked(ids_to_delete, DB_BATCH_SIZE):
         app_log.debug(f'id_to_delete: {id_batch}')
         PersistenceService().delete_items_with_ids(id_batch)
