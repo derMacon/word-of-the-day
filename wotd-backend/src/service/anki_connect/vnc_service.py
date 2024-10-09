@@ -1,3 +1,5 @@
+import filecmp
+from pathlib import Path
 import os
 import time
 import uuid
@@ -10,6 +12,8 @@ from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
+NEED_TO_LOGIN_SCREENSHOT = 'res/vnc/expected-screens/need-to-download-collection-after-login.png'
+CURR_SCREENSHOT_PATH = 'res/vnc/screenshots-at-runtime/screenshot.png'
 
 
 @singleton
@@ -91,6 +95,7 @@ class VncService:
         self._press_combination(['enter'], delay_after_action=2)
         self._press_combination(['y'])
         self._press_combination(['d'])
+        self._select_pop_up()
 
     def _press_combination(self, keys, repetitions=1, delay_after_action=.5):
         for _ in range(repetitions):
@@ -111,3 +116,15 @@ class VncService:
     #     data = asdict(anki_card)
     #     app_log.debug(f"push data '{data}' to url '{url}' with headers '{headers}'")
     #     return requests.get(url, json=data, headers=headers.to_map()).ok
+
+    def _select_pop_up(self):
+        app_log.debug('before capturing screenshot')
+        self._client.captureScreen(CURR_SCREENSHOT_PATH)
+        user_needs_to_select_remote_download = filecmp.cmp(CURR_SCREENSHOT_PATH, NEED_TO_LOGIN_SCREENSHOT)
+        app_log.debug(f'user needs to select remote download from pop up: {user_needs_to_select_remote_download}')
+
+        if user_needs_to_select_remote_download:
+            app_log.debug('user clicking button download button')
+            self._client.mouseMove(480, 510)
+            self._client.mouseDown(1)
+            self._client.mouseUp(1)

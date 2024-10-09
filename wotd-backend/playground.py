@@ -32,6 +32,7 @@ import json
 from src.data.anki.anki_card import AnkiCard
 from src.data.dict_input import now
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
+from src.service.anki_connect.vnc_service import VncService
 
 # import time
 # import nltk
@@ -90,6 +91,13 @@ curr_card = AnkiCard(
     ts=now()
 )
 
-anki_card_id = AnkiConnectFetcher._find_pushed_anki_id(curr_card)
-anki_card = AnkiConnectFetcher._get_card_by_id(anki_card_id)
-print(anki_card)
+# anki_card_id = AnkiConnectFetcher._find_pushed_anki_id(curr_card)
+# anki_card = AnkiConnectFetcher._get_card_by_id(anki_card_id)
+# print(anki_card)
+
+# AnkiConnectFetcher._sync_anki_web()
+
+# VncService()._press_combination(['b'])
+VncService().test()
+
+
