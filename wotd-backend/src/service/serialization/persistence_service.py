@@ -38,7 +38,7 @@ class PersistenceService:
         if (SensitiveEnv.ENV_PASSWORD.value not in os.environ) \
                 or (SensitiveEnv.ENV_USER.value not in os.environ) \
                 or (SensitiveEnv.ENV_DB_NAME.value not in os.environ):
-            print('invalid environment - shutting down')
+            app_log.error('invalid environment - shutting down')
             # TODO handle this differently
             exit(1)
 

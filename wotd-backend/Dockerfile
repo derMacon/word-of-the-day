@@ -1,7 +1,6 @@
+FROM python:3.9-slim
 # FROM python:3.10.13-bookworm
-# FROM python:3.9.18-slim-bullseye
-
-FROM arm32v7/alpine:3.18.4
+#FROM arm32v7/alpine:3.18.4
 
 WORKDIR /app
 
@@ -11,9 +10,13 @@ COPY ./requirements.txt .
 COPY ./src/ ./src/
 COPY ./res/ ./res/
 
-RUN apk update \
-	&& apk add --no-cache python3 py3-pip \
-	&& pip install -r requirements.txt
+#RUN apk update \
+#	&& apk add --no-cache python3 py3-pip \
+#	&& pip install -r requirements.txt
+
+# RUN apt-get update \
+# 	&& pip install -r requirements.txt
 
 EXPOSE 5000
-CMD python3 main.py
+# CMD python3 main.py
+CMD tail -f /dev/null

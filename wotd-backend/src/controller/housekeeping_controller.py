@@ -35,7 +35,7 @@ def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
     if auth_headers is None:
         raise MissingHeadersError('missing headers when syncing anki push')
 
-    delay_sec = float(os.environ['HOUSEKEEPING_INTERVAL_SEC'])  # TODO dont hardcode this
+    delay_sec = float(os.environ.get('HOUSEKEEPING_INTERVAL_SEC', 0)  # TODO dont hardcode this
     app_log.debug(f'triggering housekeeping in {delay_sec} secs')
     threading.Timer(delay_sec, sync_anki_push, args=(delay_sec, auth_headers,)).start()
 
