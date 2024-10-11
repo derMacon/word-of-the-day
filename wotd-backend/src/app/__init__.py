@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask import Flask
 from flask_cors import CORS
 
+# TODO clean this up
 # import src.app.routes
 # from .routes import main
 # import src.app.routes

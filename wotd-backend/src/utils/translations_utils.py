@@ -24,10 +24,8 @@ def update_request_status(original_input: str, options: List[DictOptionsItem]):
         curr_option.status = status
 
     app_log.debug(f'status: {status}')
-    if (status == RequestStatus.OK
-            and options is not None
-            and len(options) >= PRESELECTED_ITEMS_COUNT):
-        for i in range(PRESELECTED_ITEMS_COUNT):
+    if status == RequestStatus.OK and options is not None:
+        for i in range(min(len(options), PRESELECTED_ITEMS_COUNT)):
             options[i].selected = True  # preselect first n entries
             i += 1
     else:

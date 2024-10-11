@@ -15,7 +15,7 @@ from src.data.dict_input.requeststatus import RequestStatus
 from src.data.dict_input.sensitive_env import SensitiveEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
-from src.utils.logging_config import app_log
+from src.utils.logging_config import app_log, sql_log
 
 
 # TODO use singleton decorator in other services / controllers
@@ -38,7 +38,7 @@ class PersistenceService:
         if (SensitiveEnv.ENV_PASSWORD.value not in os.environ) \
                 or (SensitiveEnv.ENV_USER.value not in os.environ) \
                 or (SensitiveEnv.ENV_DB_NAME.value not in os.environ):
-            print('invalid environment - shutting down')
+            app_log.error('invalid environment - shutting down')
             # TODO handle this differently
             exit(1)
 
@@ -61,6 +61,7 @@ class PersistenceService:
             self._establish_db_connection()
         except DatabaseError as e:
             app_log.error(e)
+            return False
 
         return self._cursor is not None
 
@@ -73,7 +74,9 @@ class PersistenceService:
                     self._establish_db_connection()
 
                 try:
-                    return foo(self, *args, **kwargs)
+                    out = foo(self, *args, **kwargs)
+                    sql_log.debug(self._cursor.query)
+                    return out
                 except Exception as e:
                     app_log.error(f"{e}")
                     raise DatabaseError(e, e)
@@ -149,9 +152,13 @@ class PersistenceService:
         saves the option objects into the db and fetches the generated id into a new object
         """
         for curr_opt in options:
+            app_log.debug('persisting dict options')
             sql_insert = (
                 "INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING dict_options_item_id;")
+                "VALUES (%s, %s, %s, %s, %s, %s, %s) "
+                "ON CONFLICT (deck, input, output, status) DO NOTHING "
+                "RETURNING dict_options_item_id;"
+            )
             self._cursor.execute(sql_insert, (
                 curr_opt.username,
                 curr_opt.deck,
@@ -161,6 +168,7 @@ class PersistenceService:
                 curr_opt.status,
                 curr_opt.option_response_ts,
             ))
+            sql_log.debug(self._cursor.query)
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
 
         self._conn.commit()
@@ -243,3 +251,27 @@ class PersistenceService:
     def get_all_dict_requests(self) -> List[DictRequest]:
         self._cursor.execute("SELECT * FROM dict_request;")
         return self._cursor.fetchall()
+
+    # TODO delete this once it's clear that it's not being used
+    # @_database_error_decorator  # type: ignore
+    # def insert_anki_cards(self, cards: List[AnkiCard]) -> List[AnkiCard]:
+    #     app_log.debug(f'persisting cards: {cards}')
+    #
+    #     for curr_card in cards:
+    #         sql_insert = (
+    #             "INSERT INTO anki_backlog (username, deck, front, back) "
+    #             "VALUES (%s, %s, %s, %s) RETURNING anki_id;")
+    #         self._cursor.execute(sql_insert, (
+    #             curr_card.username,
+    #             curr_card.deck,
+    #             curr_card.front,
+    #             curr_card.back
+    #         ))
+    #         app_log.debug('after insert')
+    #         curr_card.anki_id = self._cursor.fetchone()[0]
+    #         app_log.debug('after fetchone')
+    #
+    #     self._conn.commit()
+    #     app_log.debug('after commit')
+    #     return cards
+    #

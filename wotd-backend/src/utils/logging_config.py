@@ -1,5 +1,6 @@
 import logging
 import os
+from logging.handlers import RotatingFileHandler
 
 APP_LOG_FILENAME = "./tmp/logs/app.logs"
 APP_LOG_LEVEL = logging.DEBUG
@@ -11,7 +12,7 @@ SQL_LOG_LEVEL = logging.DEBUG
 def configure_logger(logger_name, log_file, log_level):
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
     logging_format = '%(asctime)s - %(levelname)-6s: %(filename)s %(funcName)s - %(message)s'
-    file_handler = logging.FileHandler(log_file, mode="a", encoding=None, delay=False)
+    file_handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=10)
     file_handler.setFormatter(logging.Formatter(logging_format))
 
     logging.basicConfig(

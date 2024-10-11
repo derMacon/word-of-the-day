@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import Dict
 
 from src.data.anki import ANKI_CONNECT_VERSION
-from src.data.anki.anki_card import AnkiCard
 
 
 @dataclass
@@ -11,7 +10,7 @@ class AnkiConnectRequestCanAddNotes:
     version: int = ANKI_CONNECT_VERSION
     params: Dict[str, str] = None
 
-    def __init__(self, anki_cards: List[AnkiCard]):
+    def __init__(self, anki_cards):
         self.params = {
             'notes': [
                 card.to_anki_connect_params_format() for card in anki_cards
@@ -21,5 +20,5 @@ class AnkiConnectRequestCanAddNotes:
 
 @dataclass(frozen=True)
 class AnkiConnectResponseCanAddNotes:
-    result: List[bool]
+    result: str
     error: str

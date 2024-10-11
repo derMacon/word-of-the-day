@@ -9,7 +9,7 @@ from flask import jsonify, request, Response, send_file
 
 from src.app import main
 from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX
-from src.controller.web_controller import WebController
+from src.controller.web_controller import WebController, health_check_wrapper
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
@@ -28,7 +28,7 @@ LOGIN_MAX_RETRIES = 3
 
 @main.route("/health")
 def health_check() -> Tuple[Response, int]:
-    return jsonify(WebController().health_check()), 200
+    return jsonify(health_check_wrapper()), 200
 
 
 @main.route("/anki/login", methods=['POST'])

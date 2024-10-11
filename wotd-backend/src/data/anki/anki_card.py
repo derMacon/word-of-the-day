@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
-from src.data.dict_input import parse_datetime_from_string
 from src.data.error.logic_error import LogicError
 
 MERGING_SEPERATOR = ' | '
@@ -10,18 +9,20 @@ MERGING_SEPERATOR = ' | '
 
 @dataclass
 class AnkiCard:
+    anki_id: int  # ID generated when card is pushed to anki connect - will be persisted in db table
     # can have multiple elem ids since multiple selectable options can be merged together before push to api
-    item_ids: List[int]
+    item_ids: List[int]  # IDs used when user selects option
     deck: str
     front: str
-    back: set[str]
+    back: str
     ts: datetime
 
-    def __init__(self, item_ids: List[int], deck: str, front: str, back: str, ts: datetime):
+    def __init__(self, deck: str, front: str, back: str, ts: datetime, anki_id: int = -1, item_ids: List[int] = []):
+        self.anki_id = anki_id
         self.item_ids = item_ids
         self.deck = deck
         self.front = front
-        self.back = {back}
+        self.back = back
         self.ts = ts
 
     def to_anki_connect_params_format(self):
@@ -33,7 +34,7 @@ class AnkiCard:
             "modelName": "Basic",
             "fields": {
                 "Front": self.front,
-                "Back": MERGING_SEPERATOR.join(self.back)
+                "Back": self.back
             }
         }
 
@@ -56,6 +57,16 @@ class AnkiCard:
 
         for card in other_cards:
             self.item_ids.extend(card.item_ids)
-            self.back.update(card.back)
+            self.back = self.back if card.back is None or card.back == '' else self.back + MERGING_SEPERATOR + card.back
 
         return self
+
+    # Overriding __eq__ to compare only front and back
+    def __eq__(self, other):
+        if isinstance(other, AnkiCard):
+            return self.front == other.front and self.back == other.back and self.deck == other.deck
+        return False
+
+    # Overriding __hash__ because __eq__ is overridden
+    def __hash__(self):
+        return hash((self.deck, self.front, self.back))
