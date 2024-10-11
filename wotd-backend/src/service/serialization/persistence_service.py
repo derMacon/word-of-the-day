@@ -61,6 +61,7 @@ class PersistenceService:
             self._establish_db_connection()
         except DatabaseError as e:
             app_log.error(e)
+            return False
 
         return self._cursor is not None
 

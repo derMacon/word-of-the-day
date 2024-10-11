@@ -15,11 +15,11 @@ COPY ./res/ ./res/
 #	&& apk add --no-cache python3 py3-pip \
 #	&& pip install -r requirements.txt
 
-RUN apt-get update
-
-# RUN apt-get update \
-# 	&& pip install -r requirements.txt
+RUN apt-get update \
+	&& apt-get -y install enchant-2 \
+	&& pip install -r requirements.txt
 
 EXPOSE 5000
+CMD waitress-serve --host 0.0.0.0 --port 5000 --call src.app:create_app
 # CMD python3 main.py
-CMD tail -f /dev/null
+# CMD tail -f /dev/null

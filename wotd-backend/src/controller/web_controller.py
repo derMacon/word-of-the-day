@@ -17,6 +17,16 @@ from src.utils.logging_config import app_log
 from src.utils.translations_utils import update_request_status, update_deckname
 
 
+def health_check_wrapper():
+    status = {
+        'db_connection': PersistenceService().db_connection_is_established(),
+        'anki_api_connection': AnkiConnectFetcher.health_check(),
+        'wotd_api_connection': True,
+    }
+    app_log.debug(f"health: {status}")
+    return status
+
+
 @singleton
 class WebController:
 
@@ -26,14 +36,6 @@ class WebController:
         self._available_languages: List[Language] = self._persistence_service.get_available_languages()
         self._dict_translator: DictTranslationService = DictTranslationService(self._available_languages)
 
-    def health_check(self):
-        status = {
-            'db_connection': PersistenceService().db_connection_is_established(),
-            'anki_api_connection': AnkiConnectFetcher.health_check(),
-            'wotd_api_connection': True,
-        }
-        app_log.debug(f"health: {status}")
-        return status
 
     def get_default_languages(self) -> InfoResponseDefaultDictLang:
         return PersistenceService().get_default_languages()
