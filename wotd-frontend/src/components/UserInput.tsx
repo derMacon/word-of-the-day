@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import TextField from "./TextField";
 import LanguageSelect from "./LanguageSelect";
-import {dictLookupWord, socket} from "../logic/ApiFetcher";
+import {dictLookupWord} from "../logic/ApiFetcher";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import {Language} from "../model/Language";
 import {AuthService} from "../logic/AuthService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import Cookies from "universal-cookie";
-import {socketAutocompleteWord} from "../logic/SocketFetcher";
+import {socket, socketAutocompleteWord} from "../logic/SocketFetcher";
 import {classToPlain, plainToClass} from "class-transformer";
 
 interface UserInputProps {

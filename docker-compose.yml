@@ -23,14 +23,14 @@ services:
     env_file:
       - ./wotd-db/config/.env
 
-  backend:
-    image: "dermacon/wotd_backend:1.0"
-    build: ./wotd-backend/
-    env_file: .env
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./logs/wotd_backend/:/app/tmp/logs/
+#   backend:
+#     image: "dermacon/wotd_backend:1.0"
+#     build: ./wotd-backend/
+#     env_file: .env
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - ./logs/wotd_backend/:/app/tmp/logs/
 
   # frontend:
   #   depends_on:
