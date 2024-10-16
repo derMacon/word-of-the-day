@@ -1,5 +1,4 @@
 import filecmp
-from pathlib import Path
 import os
 import time
 import uuid
@@ -10,6 +9,7 @@ from vncdotool import api
 from src.data.error.anki_vnc_error import AnkiVncError
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
+import socket
 
 LOGIN_MAX_RETRIES = 3
 NEED_TO_LOGIN_SCREENSHOT = 'res/vnc/expected-screens/need-to-download-collection-after-login.png'
@@ -26,10 +26,12 @@ class VncService:
     """
 
     def __init__(self):
-        anki_connect_host = os.environ.get('ANKI_CONNECT_HOST', 'localhost')
+        anki_connect_hostname = os.environ.get('ANKI_CONNECT_HOST', 'localhost')
+        anki_connect_ip = socket.gethostbyname(anki_connect_hostname)
         anki_connect_login_port = os.environ.get('ANKI_CONNECT_LOGIN_PORT', 5900)
 
-        self.anki_connect_login_address_vnc = f'{anki_connect_host}::{anki_connect_login_port}'
+        self.anki_connect_login_address_vnc = f'{anki_connect_ip}::{anki_connect_login_port}'
+        app_log.debug(f"init vnc client with login address: '{self.anki_connect_login_address_vnc}'")
         self.anki_connect_login_password = os.environ.get('ANKI_CONNECT_LOGIN_PASSWORD', '')
 
         self._client = api.connect(

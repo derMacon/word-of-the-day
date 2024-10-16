@@ -1,5 +1,3 @@
-// TODO read this from props or some kind .ini, do not hardcode it
-import {io} from 'socket.io-client';
 import {InfoRequestAvailLang} from "../model/InfoRequestAvailLang";
 import {instanceToPlain, plainToClass} from "class-transformer";
 import {DictRequest} from "../model/DictRequest";
@@ -9,16 +7,14 @@ import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
-import {InfoRequestDefaultLang} from "../model/InfoRequestDefaultLang";
 
-const HTTP_STATUS_OK: number = 200
+const WOTD_BACKEND_HOST: string = process.env.WOTD_BACKEND_HOST || 'localhost'
+const WOTD_BACKEND_PORT: string = process.env.WOTD_BACKEND_PORT || '5000'
 
-// TODO read this from .ini or .env - don't hardcode it
-export const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://localhost:5000'
+export const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://' + WOTD_BACKEND_HOST + ":" + WOTD_BACKEND_PORT
 export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
 export const WOTD_ANKI_DOMAIN: string = WOTD_API_BASE + '/anki'
 export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
-
 
 
 const DEFAULT_HEADERS = {
@@ -152,9 +148,10 @@ export async function ankiApiLogin(email: string, password: string): Promise<Ank
     try {
 
         let input: AnkiLoginRequest = new AnkiLoginRequest(email, password)
-        console.log('anki login request: ', JSON.stringify(instanceToPlain(input)))
+        const url: string = WOTD_ANKI_DOMAIN + '/login'
+        console.log('anki login request: ' + input.username + ' - ' + url)
 
-        let out: Response = (await fetch(WOTD_ANKI_DOMAIN + '/login', {
+        let out: Response = (await fetch(url, {
             method: 'POST',
             headers: DEFAULT_HEADERS,
             body: JSON.stringify(instanceToPlain(input))

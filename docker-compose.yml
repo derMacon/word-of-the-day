@@ -11,6 +11,12 @@ services:
       - myapp:/data
     networks:
       - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 100
 
   db:
     image: postgres:alpine3.19
@@ -24,6 +30,12 @@ services:
       - ./wotd-db/config/.env
     networks:
       - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 20
 
   backend:
     depends_on:
@@ -45,21 +57,32 @@ services:
       - app_network
     volumes:
       - ./logs/wotd_backend/:/app/tmp/logs/
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 20
 
-  test:
-    image: python:3.10.12-slim-bullseye
-    container_name: wotd_test
+  frontend:
+    depends_on:
+        - backend
+    container_name: wotd_frontend
+    image: "dermacon/wotd_frontend"
+    build: ./wotd-frontend/
+    environment:
+      - WOTD_BACKEND_HOST=backend
+      - WOTD_BACKEND_PORT=5000
+    ports:
+      - "3000:80"
     networks:
       - app_network
-    command: tail -f /dev/null
-
-  # frontend:
-  #   depends_on:
-  #       - backend
-  #   image: "dermacon/checklist-paste-bin_frontend:1.0"
-  #   build: ./frontend/
-  #   ports:
-  #     - "8080:80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 20
 
 networks:
   app_network:
