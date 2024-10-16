@@ -2,10 +2,10 @@ dict.cc.py==3.1.0
 dictcc==0.1
 Flask_Cors==4.0.0
 Flask_SocketIO==5.3.6
+gevent==24.10.2
 psycopg2_binary==2.9.9
 pyenchant==3.2.2
 Requests==2.32.3
 singleton_decorator==1.0.0
 vncdotool==1.2.0
 more-itertools==10.5.0
-waitress==3.0.0

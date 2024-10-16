@@ -22,6 +22,7 @@ def health_check_wrapper():
     status = {
         'db_connection': PersistenceService().db_connection_is_established(),
         'anki_api_connection': AnkiConnectFetcher.health_check(),
+        'wotd_api_connection': True,
     }
     app_log.debug(f"health: {status}")
     return status

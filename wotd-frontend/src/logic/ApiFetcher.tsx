@@ -14,7 +14,7 @@ import {InfoRequestDefaultLang} from "../model/InfoRequestDefaultLang";
 const HTTP_STATUS_OK: number = 200
 
 // TODO read this from .ini or .env - don't hardcode it
-export const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://192.168.178.187:5000'
+export const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://localhost:5000'
 export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
 export const WOTD_ANKI_DOMAIN: string = WOTD_API_BASE + '/anki'
 export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'

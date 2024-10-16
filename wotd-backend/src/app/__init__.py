@@ -7,6 +7,9 @@ from flask_cors import CORS
 # from .routes import main
 # import src.app.routes
 
+from gevent import monkey
+monkey.patch_all()
+
 main = Blueprint('main', __name__, url_prefix='/api/v1')
 
 from . import error_handler

@@ -16,5 +16,5 @@ COPY ./src/ ./src/
 COPY ./res/ ./res/
 
 EXPOSE 5000
-CMD waitress-serve --host 0.0.0.0 --port 5000 --call src.app:create_app
+CMD python main.py
 #CMD tail -f /dev/null
