@@ -61,9 +61,6 @@ class AnkiConnectFetcher:
 
         return push_response
 
-    # @staticmethod
-    # def _filter_out_invalid_cards():
-
     @staticmethod
     def _validate_if_profile_present(profile_uuid: str) -> None:
         if not AnkiConnectFetcher.check_if_profile_present(profile_uuid):

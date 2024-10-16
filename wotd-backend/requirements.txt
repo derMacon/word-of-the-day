@@ -9,4 +9,3 @@ singleton_decorator==1.0.0
 vncdotool==1.2.0
 more-itertools==10.5.0
 waitress==3.0.0
-enchant==0.0.1

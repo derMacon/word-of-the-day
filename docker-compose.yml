@@ -22,6 +22,8 @@ services:
       - ./wotd-db/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ./wotd-db/config/.env
+    networks:
+      - app_network
 
   backend:
     depends_on:
@@ -39,8 +41,17 @@ services:
       - ANKI_CONNECT_LOGIN_PORT=5900
     ports:
       - "5000:5000"
+    networks:
+      - app_network
     volumes:
       - ./logs/wotd_backend/:/app/tmp/logs/
+
+  test:
+    image: python:3.10.12-slim-bullseye
+    container_name: wotd_test
+    networks:
+      - app_network
+    command: tail -f /dev/null
 
   # frontend:
   #   depends_on:
