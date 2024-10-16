@@ -23,14 +23,24 @@ services:
     env_file:
       - ./wotd-db/config/.env
 
-#   backend:
-#     image: "dermacon/wotd_backend:1.0"
-#     build: ./wotd-backend/
-#     env_file: .env
-#     ports:
-#       - "5000:5000"
-#     volumes:
-#       - ./logs/wotd_backend/:/app/tmp/logs/
+  backend:
+    depends_on:
+      - db
+      - anki_connect
+    image: "dermacon/wotd_backend:1.0"
+    container_name: wotd_backend
+    build: ./wotd-backend/
+    env_file: .env
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - ANKI_CONNECT_HOST=anki_connect
+      - ANKI_CONNECT_DATA_PORT=8765
+      - ANKI_CONNECT_LOGIN_PORT=5900
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs/wotd_backend/:/app/tmp/logs/
 
   # frontend:
   #   depends_on:

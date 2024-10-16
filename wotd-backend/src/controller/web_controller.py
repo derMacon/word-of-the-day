@@ -18,10 +18,10 @@ from src.utils.translations_utils import update_request_status, update_deckname
 
 
 def health_check_wrapper():
+    app_log.debug('triggering health check')
     status = {
         'db_connection': PersistenceService().db_connection_is_established(),
         'anki_api_connection': AnkiConnectFetcher.health_check(),
-        'wotd_api_connection': True,
     }
     app_log.debug(f"health: {status}")
     return status

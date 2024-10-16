@@ -18,20 +18,21 @@ from src.data.anki.anki_connect_notes_info import AnkiConnectRequestNotesInfo, A
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
 from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
+from src.data.dict_input.env_collection import ConnectionEnv
 from src.data.error.anki_connect_error import AnkiConnectError
 from src.utils.logging_config import app_log
 
 
 class AnkiConnectFetcher:
-    ANKI_CONNECT_HOST = os.environ.get('ANKI_CONNECT_HOST', 'localhost')
-    ANKI_CONNECT_DATA_PORT = os.environ.get('ANKI_CONNECT_DATA_PORT', 8765)
-    ANKI_CONNECT_LOGIN_PORT = os.environ.get('ANKI_CONNECT_LOGIN_PORT', 5900)
+    ANKI_CONNECT_HOST = os.environ.get(ConnectionEnv.ENV_ANKI_CONNECT_HOST, 'localhost')
+    ANKI_CONNECT_DATA_PORT = os.environ.get(ConnectionEnv.ENV_ANKI_CONNECT_DATA_PORT, 8765)
+    ANKI_CONNECT_LOGIN_PORT = os.environ.get(ConnectionEnv.ENV_ANKI_CONNECT_LOGIN_PORT, 5900)
 
     ANKI_CONNECT_DATA_ADDRESS = f'http://{ANKI_CONNECT_HOST}:{ANKI_CONNECT_DATA_PORT}'
 
     @staticmethod
     def health_check():
-        app_log.debug('anki connect triggering health check')
+        app_log.debug(f"anki connect triggering health check at - '{AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS}'")
         try:
 
             data = dataclasses.asdict(AnkiConnectRequestGetDeckNames())

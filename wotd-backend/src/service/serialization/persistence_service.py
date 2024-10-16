@@ -12,7 +12,7 @@ from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.language_uuid import Language
 from src.data.dict_input.requeststatus import RequestStatus
-from src.data.dict_input.sensitive_env import SensitiveEnv
+from src.data.dict_input.env_collection import SensitiveEnv, ConnectionEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log, sql_log
@@ -43,12 +43,17 @@ class PersistenceService:
             exit(1)
 
         try:
+            host = os.getenv(ConnectionEnv.ENV_DB_HOST.value, "localhost")
+            port = os.getenv(ConnectionEnv.ENV_DB_PORT.value, "5432")
+            app_log.debug(f"connecting to db: host - '{host}', port - '{port}'")
+
             self._conn = psycopg2.connect(
                 database=os.environ[SensitiveEnv.ENV_DB_NAME.value],
-                host="localhost",
+                host=host,
                 user=os.environ[SensitiveEnv.ENV_USER.value],
                 password=os.environ[SensitiveEnv.ENV_PASSWORD.value],
-                port="5432"
+                port=port,
+                connect_timeout=3
             )
             self._cursor = self._conn.cursor()
         except Exception as e:
