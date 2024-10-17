@@ -14,14 +14,14 @@ import {
     dictGetInfoHousekeeping
 } from "../logic/ApiFetcher";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
-import {AuthService} from "../logic/AuthService";
+import {CookieService} from "../logic/CookieService";
 import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
 
 
 interface AnkiSyncLoginProps {
     handleAnkiLogin: (ankiResponse: AnkiLoginResponseHeaders) => void
     handleClose: () => void
-    authProvider: AuthService
+    cookieProvider: CookieService
 }
 
 export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
@@ -54,7 +54,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
     const handleEmailChange = (e: any): void => {
         let email = e.target.value
         setEmail(email)
-        props.authProvider.plainUsername = email
+        props.cookieProvider.plainUsername = email
     }
 
     const handlePasswordChange = (e: any): void => {
@@ -108,18 +108,18 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
         <Alert variant="success">
             <Alert.Heading>Anki Web Login</Alert.Heading>
             <p>
-                You are currently logged into your anki web account under <b>{props.authProvider.plainUsername}</b>.
+                You are currently logged into your anki web account under <b>{props.cookieProvider.plainUsername}</b>.
             </p>
             <p>
                 The next synchronization with Anki web will take place on {nextSync}.
             </p>
             <hr/>
             <div className="d-flex">
-                <Button onClick={() => ankiApiTriggerManualHousekeeping(props.authProvider.getHeaders())}
+                <Button onClick={() => ankiApiTriggerManualHousekeeping(props.cookieProvider.getHeaders())}
                         variant="success" className="me-2">
                     Sync Now!
                 </Button>
-                <Button onClick={() => props.authProvider.cleanCookies()} variant="outline-success">
+                <Button onClick={() => props.cookieProvider.cleanAllCookies()} variant="outline-success">
                     Logout
                 </Button>
             </div>
@@ -176,7 +176,7 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
                 </Offcanvas.Header>
                 <Offcanvas.Body>
                     {healthyApi
-                        ? (props.authProvider.userIsLoggedIn() ? loggedInStatus : loginForm)
+                        ? (props.cookieProvider.userIsLoggedIn() ? loggedInStatus : loginForm)
                         : ankiApiDownReport
                     }
                 </Offcanvas.Body>

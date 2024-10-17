@@ -2,11 +2,11 @@ import React, {useEffect, useState} from 'react';
 import Cookies from "universal-cookie";
 import Container from "react-bootstrap/Container";
 import {SelectableTable} from "./SelectableTable";
-import {dictGetAvailableLang, wotdApiHealthStatus} from "../logic/ApiFetcher";
+import {ankiApiUserLoggedIn, dictGetAvailableLang, wotdApiHealthStatus} from "../logic/ApiFetcher";
 import {Language} from "../model/Language";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import AnkiSyncLogin from "./AnkiSyncLogin";
-import {AuthService} from "../logic/AuthService";
+import {CookieService} from "../logic/CookieService";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import {InfoPage} from "./InfoPage";
@@ -15,6 +15,7 @@ import {UserInput} from "./UserInput";
 import LoginAlert from "./LoginAlert";
 import {BasicUsage} from "./BasicUsage";
 import {ErrorPage} from "./ErrorPage";
+import {ApiAnkiUserLoggedIn} from "../model/ApiAnkiUserLoggedIn";
 
 
 const COOKIE_KEY_FIRST_TIME_USER: string = 'FIRST-TIME-USER'
@@ -29,7 +30,7 @@ export function DictMask() {
     const [showInfoPage, setShowInfoPage] = useState(false);
     const [apiHealth, setApiHealth] = useState<ApiHealthInformation>(ApiHealthInformation.createInvalidStatus)
 
-    const authProvider: AuthService = new AuthService();
+    const cookieProvider: CookieService = new CookieService();
     const cookies: Cookies = new Cookies(null, {path: '/'})
 
     const debugWrapper = (e: any) => {
@@ -41,37 +42,56 @@ export function DictMask() {
     useEffect(() => {
         wotdApiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
                 setApiHealth(healthStatus)
-
-                if (!healthStatus.dbConnection) {
-                    console.error('db connection down: ', healthStatus)
-                } else {
-                    console.log('before setting avail lang')
-                    dictGetAvailableLang().then(debugWrapper)
-                    // dictGetAvailableLang().then(setAvailLang)
-                    console.log('after setting avail lang: ', availLang)
-
-                    if (authProvider.showLoginPrompt()) {
-                        handleShowAnkiStatusAlert()
-                    }
-                }
-
-                if (!healthStatus.wotdApiConnection) {
-                    console.error('wotd api not available: ', healthStatus)
-                    // alert('Backend API not available - not possible to lookup words. Please try again later.')
-                    setShowErrorPage(true)
-                } else if (!healthStatus.ankiApiConnection) {
-                    console.error('anki api not available: ', healthStatus)
-                }
-
-                const isFirstTimeUser: Boolean = cookies.get(COOKIE_KEY_FIRST_TIME_USER)
-                if (isFirstTimeUser === undefined || isFirstTimeUser) {
-                    cookies.set(COOKIE_KEY_FIRST_TIME_USER, false)
-                    setShowInfoPage(true)
-                }
-
+                handleDbConnection(healthStatus)
+                handleUserLogin(healthStatus)
+                handleFirstTimeUser()
             }
         )
     }, []);
+
+
+    const handleDbConnection = (healthStatus: ApiHealthInformation): void => {
+        if (!healthStatus.dbConnection) {
+            console.error('db connection down: ', healthStatus)
+        } else {
+            console.log('before setting avail lang')
+            // dictGetAvailableLang().then(debugWrapper)
+            dictGetAvailableLang().then(setAvailLang)
+            console.log('after setting avail lang: ', availLang)
+
+        }
+    }
+
+    const handleUserLogin = (healthStatus: ApiHealthInformation): void => {
+        if (!healthStatus.wotdApiConnection) {
+            console.error('wotd api not available: ', healthStatus)
+            // alert('Backend API not available - not possible to lookup words. Please try again later.')
+            setShowErrorPage(true)
+        } else if (!healthStatus.ankiApiConnection) {
+            console.error('anki api not available: ', healthStatus)
+        } else {
+            ankiApiUserLoggedIn(cookieProvider.getHeaders()).then((credentialStatus: ApiAnkiUserLoggedIn): void => {
+                if (!credentialStatus.ankiUserLoggedIn) {
+                    console.log('anki user not logged in')
+                    cookieProvider.cleanAllCookies(false)
+                    if (!cookieProvider.ignoreLoginPrompt && !showAnkiStatusAlert) {
+                        console.log('show anki status alert')
+                        handleShowAnkiStatusAlert()
+                    }
+                }
+            })
+        }
+    }
+
+    const handleFirstTimeUser = (): void => {
+        if (cookieProvider.firstTimeUser) {
+            console.log('user is first time user')
+            cookieProvider.firstTimeUser = false
+            cookieProvider.setCookies()
+            setShowInfoPage(true)
+        }
+    }
+
 
     const handleCloseAnkiLogin = () => setShowAnkiLogin(false)
     const handleShowAnkiLogin = () => setShowAnkiLogin(true)
@@ -86,7 +106,7 @@ export function DictMask() {
 
     const handleAnkiLogin = (ankiResponse: AnkiLoginResponseHeaders): void => {
         console.log('update auth provider with signed email: ', ankiResponse.signedUsername)
-        authProvider.loadAnkiLoginResponse(ankiResponse)
+        cookieProvider.loadAnkiLoginResponse(ankiResponse)
     }
 
     console.log('avail langs during dict mask render: ', availLang)
@@ -96,11 +116,11 @@ export function DictMask() {
             showAnkiStatusAlert={showAnkiStatusAlert}
             handleCloseAnkiStatusAlert={handleCloseAnkiStatusAlert}
             handleShowAnkiLogin={handleShowAnkiLogin}
-            authProvider={authProvider}
+            authProvider={cookieProvider}
         />
 
         {apiHealth.wotdApiConnection
-            && <UserInput authProvider={authProvider}
+            && <UserInput authProvider={cookieProvider}
                           setDictOptions={setDictOptions}
                           availLang={availLang}
                           handleShowInfoPage={handleShowInfoPage}
@@ -110,7 +130,7 @@ export function DictMask() {
             {dictOptions !== undefined && dictOptions.length > 0
                 ? <SelectableTable
                     apiResponse={dictOptions}
-                    userIsLoggedIn={authProvider.userIsLoggedIn()}/>
+                    userIsLoggedIn={cookieProvider.userIsLoggedIn()}/>
                 : <BasicUsage/>}
         </div>
     </>
@@ -130,7 +150,7 @@ export function DictMask() {
                 <AnkiSyncLogin
                     handleAnkiLogin={handleAnkiLogin}
                     handleClose={handleCloseAnkiLogin}
-                    authProvider={authProvider}
+                    cookieProvider={cookieProvider}
                 />
             </Offcanvas>
 

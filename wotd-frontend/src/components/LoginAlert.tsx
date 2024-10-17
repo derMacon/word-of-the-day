@@ -3,14 +3,14 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import {Button} from "react-bootstrap";
-import {AuthService} from "../logic/AuthService";
+import {CookieService} from "../logic/CookieService";
 
 
 interface LoginPromptProps {
     showAnkiStatusAlert: boolean
     handleCloseAnkiStatusAlert: () => void
     handleShowAnkiLogin: () => void
-    authProvider: AuthService
+    authProvider: CookieService
 }
 
 export function LoginAlert(props: Readonly<LoginPromptProps>) {

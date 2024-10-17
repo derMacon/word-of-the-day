@@ -5,14 +5,14 @@ import {dictLookupWord} from "../logic/ApiFetcher";
 import {Button, ButtonGroup, Col, Row} from "react-bootstrap";
 import {FaArrowsRotate, FaCircleInfo, FaCloudArrowUp, FaCloudBolt} from "react-icons/fa6";
 import {Language} from "../model/Language";
-import {AuthService} from "../logic/AuthService";
+import {CookieService} from "../logic/CookieService";
 import {DictOptionsItem} from "../model/DictOptionsItem";
 import Cookies from "universal-cookie";
 import {socket, socketAutocompleteWord} from "../logic/SocketFetcher";
 import {classToPlain, plainToClass} from "class-transformer";
 
 interface UserInputProps {
-    authProvider: AuthService
+    authProvider: CookieService
     setDictOptions: (options: DictOptionsItem[]) => void
     availLang: Language[]
     handleShowAnkiLogin: (e: any) => void

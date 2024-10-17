@@ -84,12 +84,12 @@ from src.service.anki_connect.vnc_service import VncService
 # print('out: ', MERGING_SEPERATOR.join([None, 'snd']))
 
 
-curr_card = AnkiCard(
-    deck='wotd::translations::DE-EN',
-    front='treehouse [spv.]',
-    back='Baumhaus {n}',
-    ts=now()
-)
+# curr_card = AnkiCard(
+#     deck='wotd::translations::DE-EN',
+#     front='treehouse [spv.]',
+#     back='Baumhaus {n}',
+#     ts=now()
+# )
 
 # anki_card_id = AnkiConnectFetcher._find_pushed_anki_id(curr_card)
 # anki_card = AnkiConnectFetcher._get_card_by_id(anki_card_id)
@@ -98,6 +98,6 @@ curr_card = AnkiCard(
 # AnkiConnectFetcher._sync_anki_web()
 
 # VncService()._press_combination(['b'])
-VncService().test()
+VncService()._invalid_credentials()
 
 

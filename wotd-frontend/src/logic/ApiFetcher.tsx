@@ -7,6 +7,7 @@ import {AnkiLoginRequest} from "../model/AnkiLoginRequest";
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
+import {ApiAnkiUserLoggedIn} from "../model/ApiAnkiUserLoggedIn";
 
 const WOTD_BACKEND_HOST: string = process.env.WOTD_BACKEND_HOST || 'localhost'
 const WOTD_BACKEND_PORT: string = process.env.WOTD_BACKEND_PORT || '5000'
@@ -206,6 +207,22 @@ export async function ankiApiTriggerManualHousekeeping(auth_headers: any) {
     } catch (error) {
         console.log('cannot trigger manual housekeeping in the backend')
         return false
+    }
+}
+
+export async function ankiApiUserLoggedIn(auth_headers: any): Promise<ApiAnkiUserLoggedIn> {
+    try {
+        let out: Response = (await fetch(WOTD_ANKI_DOMAIN + '/user-is-logged-in', {
+            method: 'GET',
+            headers: auth_headers
+        }))
+        let jsonObject: Object = await out.json() as Object
+        let requestWrapper: ApiAnkiUserLoggedIn = plainToClass(ApiAnkiUserLoggedIn, jsonObject)
+        console.log('response to anki user is logged in: ', requestWrapper)
+        return requestWrapper
+    } catch (error) {
+        console.log('cannot get information about the users login status')
+        return new ApiAnkiUserLoggedIn(false)
     }
 }
 

@@ -9,6 +9,7 @@ from src.data.dict_input.dict_options_item import DictOptionsItem, from_translat
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.language_uuid import Language
+from src.data.error.anki_connect_error import AnkiConnectError
 from src.data.error.database_error import DatabaseError
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.service.dict_translation.dict_translation_service import DictTranslationService
@@ -36,7 +37,6 @@ class WebController:
         self._persistence_service = PersistenceService()
         self._available_languages: List[Language] = self._persistence_service.get_available_languages()
         self._dict_translator: DictTranslationService = DictTranslationService(self._available_languages)
-
 
     def get_default_languages(self) -> InfoResponseDefaultDictLang:
         return PersistenceService().get_default_languages()
@@ -102,3 +102,8 @@ class WebController:
 
     def get_request_log(self) -> List[DictRequest]:
         return self._persistence_service.get_all_dict_requests()
+
+    def anki_user_logged_in(self, auth_headers: UnsignedAuthHeaders | None) -> bool:
+        return auth_headers is not None \
+            and auth_headers.uuid is not None \
+            and AnkiConnectFetcher.check_if_profile_present(auth_headers.uuid)

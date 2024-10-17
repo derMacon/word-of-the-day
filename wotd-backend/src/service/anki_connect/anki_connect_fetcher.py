@@ -52,12 +52,12 @@ class AnkiConnectFetcher:
 
         profile_uuid = headers.uuid
         AnkiConnectFetcher._validate_if_profile_present(profile_uuid)
-        AnkiConnectFetcher._load_profile(profile_uuid)
-        AnkiConnectFetcher._sync_anki_web()
+        AnkiConnectFetcher.load_profile(profile_uuid)
+        AnkiConnectFetcher.sync_anki_web()
         AnkiConnectFetcher._create_decks_if_needed(anki_cards)
 
         push_response: AnkiConnectResponseAddNotes = AnkiConnectFetcher._add_notes(anki_cards)
-        AnkiConnectFetcher._sync_anki_web()
+        AnkiConnectFetcher.sync_anki_web()
 
         return push_response
 
@@ -83,7 +83,7 @@ class AnkiConnectFetcher:
         return uuid_is_present
 
     @staticmethod
-    def _load_profile(profile_uuid: str) -> None:
+    def load_profile(profile_uuid: str) -> None:
         app_log.debug(f"loading profile uuid '{profile_uuid}'")
         data = dataclasses.asdict(AnkiConnectRequestLoadProfile(name=profile_uuid))
         plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
@@ -230,7 +230,7 @@ class AnkiConnectFetcher:
         return anki_connect_response
 
     @staticmethod
-    def _sync_anki_web() -> None:
+    def sync_anki_web() -> None:
         app_log.debug('trigger sync with anki web')
         data = dataclasses.asdict(AnkiConnectRequestSync())
         app_log.debug(f'anki connect sync request json: {data}')

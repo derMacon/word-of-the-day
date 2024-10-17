@@ -13,6 +13,8 @@ import socket
 
 LOGIN_MAX_RETRIES = 3
 NEED_TO_LOGIN_SCREENSHOT = 'res/vnc/expected-screens/need-to-download-collection-after-login.png'
+INVALID_CREDENTIALS = 'res/vnc/expected-screens/invalid-credentials.png'
+ACCOUNT_REQUIRED = 'res/vnc/expected-screens/account-required-pop-up.png'
 CURR_SCREENSHOT_PATH = 'res/vnc/screenshots-at-runtime/screenshot.png'
 
 
@@ -67,7 +69,7 @@ class VncService:
         self._select_created_profile()
         self._login_anki_web(username, password)
 
-        if AnkiConnectFetcher.check_if_profile_present(profile_name):
+        if not self._invalid_credentials() and AnkiConnectFetcher.check_if_profile_present(profile_name):
             app_log.debug(f'login mechanism run complete for new profile with uuid: {profile_name}')
             return profile_name
 
@@ -89,15 +91,20 @@ class VncService:
 
     def _login_anki_web(self, username, password):
         app_log.debug(f'login into anki web for user: {username}')
-        self._press_combination(['y'])
-        self._press_combination(['tab'], repetitions=2)
-        self._type_str(username)
-        self._press_combination(['tab'])
-        self._type_str(password)
-        self._press_combination(['enter'], delay_after_action=2)
-        self._press_combination(['y'])
-        self._press_combination(['d'])
-        self._select_pop_up()
+        self._press_combination(['y'], delay_after_action=2)
+
+        if self._account_required_screen():
+            app_log.debug('entering credentials')
+            self._click_mouse(450, 403)
+            self._type_str(username)
+            self._press_combination(['tab'])
+            self._type_str(password)
+            self._press_combination(['enter'], delay_after_action=2)
+            self._press_combination(['y'])
+            self._press_combination(['d'])
+            self._select_need_to_download_content_pop_up()
+
+        app_log.debug(f'after loging in for user: {username}')
 
     def _press_combination(self, keys, repetitions=1, delay_after_action=.5):
         for _ in range(repetitions):
@@ -106,6 +113,13 @@ class VncService:
             for curr_key in keys:
                 self._client.keyUp(curr_key)
         time.sleep(delay_after_action)
+
+
+    def _click_mouse(self, x_pos: int, y_pos: int):
+        app_log.debug(f'clicking mouse at: ({x_pos}, {y_pos})')
+        self._client.mouseMove(x_pos, y_pos)
+        self._client.mouseDown(1)
+        self._client.mouseUp(1)
 
     def _type_str(self, content, delay_after_action=.5):
         for curr_char in content:
@@ -119,7 +133,13 @@ class VncService:
     #     app_log.debug(f"push data '{data}' to url '{url}' with headers '{headers}'")
     #     return requests.get(url, json=data, headers=headers.to_map()).ok
 
-    def _select_pop_up(self):
+    # def _sync_credentials_were_confirmed(self):
+    #     app_log.debug('before capturing screenshot')
+    #     self._client.captureScreen(CURR_SCREENSHOT_PATH)
+    #     # user_needs_to_select_remote_download = filecmp.cmp(CURR_SCREENSHOT_PATH, NEED_TO_LOGIN_SCREENSHOT)
+    #     # app_log.debug(f'user needs to select remote download from pop up: {user_needs_to_select_remote_download}')
+
+    def _select_need_to_download_content_pop_up(self):
         app_log.debug('before capturing screenshot')
         self._client.captureScreen(CURR_SCREENSHOT_PATH)
         user_needs_to_select_remote_download = filecmp.cmp(CURR_SCREENSHOT_PATH, NEED_TO_LOGIN_SCREENSHOT)
@@ -127,6 +147,26 @@ class VncService:
 
         if user_needs_to_select_remote_download:
             app_log.debug('user clicking button download button')
-            self._client.mouseMove(480, 510)
-            self._client.mouseDown(1)
-            self._client.mouseUp(1)
+            # self._client.mouseMove(480, 510)
+            # self._client.mouseDown(1)
+            # self._client.mouseUp(1)
+            self._click_mouse(480, 510)
+
+    def _invalid_credentials(self) -> bool:
+        app_log.debug('before capturing credential screen screenshot')
+        self._client.captureScreen(CURR_SCREENSHOT_PATH)
+        invalid_credentials = filecmp.cmp(CURR_SCREENSHOT_PATH, INVALID_CREDENTIALS)
+        app_log.debug(f'user needs provided invalid credentials: {invalid_credentials}')
+
+        if invalid_credentials:
+            self._press_combination(['enter']) # acknowledge invalid creds screen
+            self._click_mouse(560, 470) # cancel account required pop up
+
+        return invalid_credentials
+
+    def _account_required_screen(self) -> bool:
+        app_log.debug('before capturing credential screen screenshot')
+        self._client.captureScreen(CURR_SCREENSHOT_PATH)
+        account_required = filecmp.cmp(CURR_SCREENSHOT_PATH, ACCOUNT_REQUIRED)
+        app_log.debug(f'user needs to provide credentials: {account_required}')
+        return account_required
