@@ -31,6 +31,11 @@ def health_check() -> Tuple[Response, int]:
     return jsonify(health_check_wrapper()), 200
 
 
+@main.route("/version")
+def version() -> Tuple[Response, int]:
+    return jsonify({'version': '1.0.1'}), 200
+
+
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
     with MUTEX:

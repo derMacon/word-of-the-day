@@ -91,7 +91,8 @@ class VncService:
 
     def _login_anki_web(self, username, password):
         app_log.debug(f'login into anki web for user: {username}')
-        self._press_combination(['y'], delay_after_action=2)
+        if not self._account_required_screen():
+            self._press_combination(['y'], delay_after_action=2)
 
         if self._account_required_screen():
             app_log.debug('entering credentials')
@@ -103,6 +104,8 @@ class VncService:
             self._press_combination(['y'])
             self._press_combination(['d'])
             self._select_need_to_download_content_pop_up()
+        else:
+            app_log.debug('no account required screen shown')
 
         app_log.debug(f'after loging in for user: {username}')
 
