@@ -38,15 +38,12 @@ class WebController:
         self._available_languages: List[Language] = self._persistence_service.get_available_languages()
         self._dict_translator: DictTranslationService = DictTranslationService(self._available_languages)
 
-    def get_default_languages(self) -> InfoResponseDefaultDictLang:
-        return PersistenceService().get_default_languages()
-
     def dict_available_languages_cached(self):
         if os.environ.get('PERSISTENCE_CACHE_LANGUAGES', True) \
                 and len(self._available_languages) > 0:
             return self._available_languages
 
-        self._available_languages = PersistenceService().get_default_languages()
+        self._available_languages = self._persistence_service.get_available_languages()
         return self._available_languages
 
     def autocomplete_dict_word(self, dict_request: DictRequest) -> List[str]:

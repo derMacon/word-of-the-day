@@ -11,18 +11,6 @@ INSERT INTO language (language_uuid, full_name, enchant_key) VALUES
   ('EN', 'English', 'en_US'),
   ('FR', 'French', 'fr_FR');
 
-
-CREATE TABLE IF NOT EXISTS language_default (
-  language_default_id SERIAL PRIMARY KEY,
-  dict_from_language_uuid VARCHAR(50) NOT NULL,
-  dict_to_language_uuid VARCHAR(50) NOT NULL,
-  FOREIGN KEY (dict_from_language_uuid) REFERENCES language(language_uuid),
-  FOREIGN KEY (dict_to_language_uuid) REFERENCES language(language_uuid)
-);
-
--- INSERT INTO language_default (dict_from_language_uuid, dict_to_language_uuid) VALUES
---   ('EN', 'DE');
-
 CREATE TABLE IF NOT EXISTS dict_options_item (
   dict_options_item_id SERIAL PRIMARY KEY,
   username VARCHAR(100) NOT NULL,

@@ -9,10 +9,9 @@ from singleton_decorator import singleton
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
+from src.data.dict_input.env_collection import SensitiveEnv, ConnectionEnv
 from src.data.dict_input.language_uuid import Language
 from src.data.dict_input.requeststatus import RequestStatus
-from src.data.dict_input.env_collection import SensitiveEnv, ConnectionEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log, sql_log
@@ -109,27 +108,6 @@ class PersistenceService:
             if curr_lang.language_uuid == lang_uuid:
                 return curr_lang
         raise LangNotFoundError(f'language with uuid {lang_uuid} not found')
-
-    @_database_error_decorator  # type: ignore
-    def get_default_languages(self) -> InfoResponseDefaultDictLang:
-        self._cursor.execute(
-            "SELECT language.* FROM language "
-            "INNER JOIN language_default ON language.language_uuid=language_default.dict_from_language_uuid;")
-        entry = self._cursor.fetchone()
-        app_log.debug(f"get_default_languages: {entry}")
-        dict_default_from_language = Language(*entry)
-
-        self._cursor.execute("SELECT language.* FROM language "
-                             "INNER JOIN language_default ON language.language_uuid=language_default.dict_to_language_uuid;")
-        entry = self._cursor.fetchone()
-        dict_default_to_language = Language(*entry)
-
-        req = InfoResponseDefaultDictLang(
-            dict_default_to_language=dict_default_to_language,
-            dict_default_from_language=dict_default_from_language
-        )
-
-        return req
 
     @_database_error_decorator  # type: ignore
     def insert_dict_request(self, dict_request: DictRequest, auth_headers: UnsignedAuthHeaders | None) -> DictRequest:
