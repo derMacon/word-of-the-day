@@ -16,8 +16,8 @@ from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDictLang
-from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
+from src.data.dict_input.info_response_user_logged_in import InfoResponseUserLoggedIn
 from src.data.dict_input.option_select_request import OptionSelectRequest
 from src.service.anki_connect.vnc_service import VncService
 from src.service.serialization.signature_service import SignatureService
@@ -31,6 +31,11 @@ def health_check() -> Tuple[Response, int]:
     return jsonify(health_check_wrapper()), 200
 
 
+@main.route("/version")
+def version() -> Tuple[Response, int]:
+    return jsonify({'version': '1.0.1'}), 200
+
+
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
     with MUTEX:
@@ -41,12 +46,9 @@ def anki_login():
             password=anki_login_request.password
         )
 
-        # testUUID = str(uuid.uuid4())
-
         signed_header_obj = SignatureService().create_signed_header_dict(
             username=anki_login_request.username,
-            # uuid=testUUID
-            uuid=uuid  # TODO use this instead of testUUID
+            uuid=uuid
         )
 
         app_log.debug(f"signed header obj: {signed_header_obj}")
@@ -64,13 +66,6 @@ def dict_available_languages() -> Tuple[Response, int]:
     available_lang = WebController().dict_available_languages_cached()
     app_log.debug(f"user queries available languages: {available_lang}")
     return jsonify(InfoResponseAvailDictLang(available_lang)), 200
-
-
-@main.route("/dict/default-lang")
-def dict_default_languages() -> Tuple[Response, int]:
-    default_lang: InfoResponseDefaultDictLang = WebController().get_default_languages()
-    app_log.debug(f"user queries default languages: {default_lang}")
-    return jsonify(default_lang), 200
 
 
 # TODO aren't we doing this already with the socket event handler? Isn't this a duplicate?
@@ -132,6 +127,15 @@ def _extract_unsigned_headers() -> UnsignedAuthHeaders:
     else:
         app_log.debug(f'header not available: {request.headers}')
     return auth_headers
+
+
+@main.route("/anki/user-is-logged-in")
+def anki_user_is_logged_in():
+    headers: UnsignedAuthHeaders | None = _extract_unsigned_headers()
+    app_log.debug(f'checking if user is logged in: {headers}')
+    user_is_logged_in = WebController().anki_user_logged_in(headers)
+    app_log.debug(f'user is logged in: {user_is_logged_in}')
+    return jsonify(InfoResponseUserLoggedIn(user_is_logged_in)), 200
 
 
 @main.route("/anki/trigger-housekeeping")

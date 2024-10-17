@@ -1,10 +1,16 @@
 import {Language} from "../model/Language";
 import {DictRequest} from "../model/DictRequest";
 import {instanceToPlain} from "class-transformer";
-import {socket} from "./ApiFetcher";
 
+import {io} from "socket.io-client";
+import {WOTD_BACKEND_SERVER_ADDRESS} from "./ApiFetcher";
 
 const AUTOCORRECT_OPTION_COUNT = 8
+
+export const socket = io(WOTD_BACKEND_SERVER_ADDRESS, {
+    reconnectionAttempts: 2
+})
+
 
 export function initSocket(
     optionSetter: (autocorrectOptions: string[]) => void

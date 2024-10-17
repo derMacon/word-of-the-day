@@ -9,6 +9,8 @@ import Overlay from 'react-bootstrap/Overlay';
 import ListGroup from 'react-bootstrap/ListGroup';
 import {Col, Row} from "react-bootstrap";
 import {initSocket} from "../logic/SocketFetcher";
+import {dictGetAvailableLang, wotdApiHealthStatus} from "../logic/ApiFetcher";
+import {ApiHealthInformation} from "../model/ApiHealthInformation";
 
 
 interface TextFieldProps {
@@ -30,7 +32,14 @@ export function TextField(props: TextFieldProps) {
         setShowAutocompleteOptions(true)
     }
 
-    useEffect(() => initSocket(setOptionsHandleShow), []);
+    useEffect(() => {
+        wotdApiHealthStatus().then((healthStatus: ApiHealthInformation): void => {
+            if (healthStatus.ankiApiConnection) {
+                console.log('backend api is availble')
+                initSocket(setOptionsHandleShow)
+            }
+        })
+    }, []);
 
     const handleKeyDown = (e: any): void => {
         if (e.code === 'Enter' || e.which === 13) {

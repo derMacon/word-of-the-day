@@ -9,10 +9,9 @@ from singleton_decorator import singleton
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
+from src.data.dict_input.env_collection import SensitiveEnv, ConnectionEnv
 from src.data.dict_input.language_uuid import Language
 from src.data.dict_input.requeststatus import RequestStatus
-from src.data.dict_input.sensitive_env import SensitiveEnv
 from src.data.error.database_error import DatabaseError
 from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log, sql_log
@@ -43,12 +42,17 @@ class PersistenceService:
             exit(1)
 
         try:
+            host = os.getenv(ConnectionEnv.ENV_DB_HOST.value, "localhost")
+            port = os.getenv(ConnectionEnv.ENV_DB_PORT.value, "5432")
+            app_log.debug(f"connecting to db: host - '{host}', port - '{port}'")
+
             self._conn = psycopg2.connect(
                 database=os.environ[SensitiveEnv.ENV_DB_NAME.value],
-                host="localhost",
+                host=host,
                 user=os.environ[SensitiveEnv.ENV_USER.value],
                 password=os.environ[SensitiveEnv.ENV_PASSWORD.value],
-                port="5432"
+                port=port,
+                connect_timeout=3
             )
             self._cursor = self._conn.cursor()
         except Exception as e:
@@ -106,27 +110,6 @@ class PersistenceService:
         raise LangNotFoundError(f'language with uuid {lang_uuid} not found')
 
     @_database_error_decorator  # type: ignore
-    def get_default_languages(self) -> InfoResponseDefaultDictLang:
-        self._cursor.execute(
-            "SELECT language.* FROM language "
-            "INNER JOIN language_default ON language.language_uuid=language_default.dict_from_language_uuid;")
-        entry = self._cursor.fetchone()
-        app_log.debug(f"get_default_languages: {entry}")
-        dict_default_from_language = Language(*entry)
-
-        self._cursor.execute("SELECT language.* FROM language "
-                             "INNER JOIN language_default ON language.language_uuid=language_default.dict_to_language_uuid;")
-        entry = self._cursor.fetchone()
-        dict_default_to_language = Language(*entry)
-
-        req = InfoResponseDefaultDictLang(
-            dict_default_to_language=dict_default_to_language,
-            dict_default_from_language=dict_default_from_language
-        )
-
-        return req
-
-    @_database_error_decorator  # type: ignore
     def insert_dict_request(self, dict_request: DictRequest, auth_headers: UnsignedAuthHeaders | None) -> DictRequest:
         """
         saves the option objects into the db and fetches the generated id into a new object
@@ -156,7 +139,7 @@ class PersistenceService:
             sql_insert = (
                 "INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s) "
-                "ON CONFLICT (deck, input, output, status) DO NOTHING "
+                "ON CONFLICT (deck, input, output) DO UPDATE SET status = %s "
                 "RETURNING dict_options_item_id;"
             )
             self._cursor.execute(sql_insert, (
@@ -167,6 +150,7 @@ class PersistenceService:
                 curr_opt.selected,
                 curr_opt.status,
                 curr_opt.option_response_ts,
+                curr_opt.status,
             ))
             sql_log.debug(self._cursor.query)
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
@@ -205,11 +189,6 @@ class PersistenceService:
         app_log.debug(f'sql update id placeholder: {id_placeholder}')
 
         self._conn.commit()
-        self._cursor.execute(
-            "select selected from dict_options_item "
-            f"where dict_options_item_id in {id_placeholder};")
-        selected_state = not self._cursor.fetchone()[0]
-        app_log.debug(f"new selected state of items with ids {item_ids}: {selected_state}")
 
         # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "

@@ -24,7 +24,7 @@ export class ApiHealthInformation {
 
 
     get ankiApiConnection(): boolean {
-        return this._ankiApiConnection || false;
+        return this._ankiApiConnection || true;
     }
 
     set ankiApiConnection(value: boolean) {

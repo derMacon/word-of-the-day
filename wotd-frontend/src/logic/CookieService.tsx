@@ -2,17 +2,19 @@ import Cookies from 'universal-cookie';
 import {AnkiLoginResponseHeaders} from "../model/AnkiLoginResponseHeaders";
 
 
-export class AuthService {
+export class CookieService {
 
     readonly PLAIN_EMAIL_COOKIE_KEY: string = 'plain-email'
     readonly UNSIGNED_EMAIL_COOKIE_KEY: string = 'X-Wotd-Username'
     readonly UNSIGNED_UUID_COOKIE_KEY: string = 'X-Wotd-Uuid'
     readonly IGNORE_LOGIN_PROMPT_COOKIE_KEY: string = 'ignore-login-prompt'
+    readonly FIRST_TIME_USER_COOKIE_KEY: string = 'FIRST-TIME-USER'
 
     private _plainUsername: string;
     private _signedUsername: string;
     private _signedUuid: string;
     private _ignoreLoginPrompt: boolean;
+    private _firstTimeUser: boolean;
     private _cookies: Cookies;
 
 
@@ -21,6 +23,7 @@ export class AuthService {
         this._plainUsername = this._cookies.get(this.PLAIN_EMAIL_COOKIE_KEY) ?? ''
         this._signedUsername = this._cookies.get(this.UNSIGNED_EMAIL_COOKIE_KEY) ?? ''
         this._signedUuid = this._cookies.get(this.UNSIGNED_UUID_COOKIE_KEY) ?? '';
+        this._firstTimeUser = this._cookies.get(this.FIRST_TIME_USER_COOKIE_KEY) ?? true;
         this._ignoreLoginPrompt = this._cookies.get(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY) ?? false;
     }
 
@@ -57,6 +60,14 @@ export class AuthService {
         this._ignoreLoginPrompt = value;
     }
 
+    get firstTimeUser(): boolean {
+        return this._firstTimeUser;
+    }
+
+    set firstTimeUser(value: boolean) {
+        this._firstTimeUser = value;
+    }
+
     get cookies(): Cookies {
         return this._cookies;
     }
@@ -79,25 +90,43 @@ export class AuthService {
         this._cookies.set(this.IGNORE_LOGIN_PROMPT_COOKIE_KEY, this._ignoreLoginPrompt);
     }
 
-    cleanCookies() {
+    cleanAllCookies(
+        reload: boolean = true,
+        value_exceptions: string[] = [this.FIRST_TIME_USER_COOKIE_KEY, this.IGNORE_LOGIN_PROMPT_COOKIE_KEY]
+    ): void {
         let allCookies = this._cookies.getAll();
+
         Object.keys(allCookies).forEach(cookieName => {
-            this._cookies.remove(cookieName);
+            if (!value_exceptions.includes(cookieName)) {
+                this._cookies.remove(cookieName);
+            }
         });
-        window.location.reload();
+
+        if (reload) {
+            window.location.reload();
+        }
     }
 
 
     loadAnkiLoginResponse(response: AnkiLoginResponseHeaders): void {
         this._signedUsername = response.signedUsername
         this._signedUuid = response.signedUuid
-        this.setCookie()
+        this.setCookies()
     }
 
-    setCookie() {
-        this._cookies.set(this.PLAIN_EMAIL_COOKIE_KEY, this._plainUsername);
-        this._cookies.set(this.UNSIGNED_EMAIL_COOKIE_KEY, this._signedUsername);
-        this._cookies.set(this.UNSIGNED_UUID_COOKIE_KEY, this._signedUuid);
+    setCookies() {
+        if (this._plainUsername != null && this._plainUsername.length > 0) {
+            this._cookies.set(this.PLAIN_EMAIL_COOKIE_KEY, this._plainUsername);
+        }
+        if (this._signedUsername != null && this._signedUsername.length > 0) {
+            this._cookies.set(this.UNSIGNED_EMAIL_COOKIE_KEY, this._signedUsername);
+        }
+        if (this._signedUuid != null && this._signedUuid.length > 0) {
+            this._cookies.set(this.UNSIGNED_UUID_COOKIE_KEY, this._signedUuid);
+        }
+        if (this._firstTimeUser != null) {
+            this._cookies.set(this.FIRST_TIME_USER_COOKIE_KEY, this._firstTimeUser);
+        }
         this.writeIgnoreLoginPromptCookie()
     }
 

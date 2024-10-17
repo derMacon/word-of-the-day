@@ -9,6 +9,7 @@ from src.data.dict_input.dict_options_item import DictOptionsItem, from_translat
 from src.data.dict_input.dict_request import DictRequest
 from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.language_uuid import Language
+from src.data.error.anki_connect_error import AnkiConnectError
 from src.data.error.database_error import DatabaseError
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.service.dict_translation.dict_translation_service import DictTranslationService
@@ -18,6 +19,7 @@ from src.utils.translations_utils import update_request_status, update_deckname
 
 
 def health_check_wrapper():
+    app_log.debug('triggering health check')
     status = {
         'db_connection': PersistenceService().db_connection_is_established(),
         'anki_api_connection': AnkiConnectFetcher.health_check(),
@@ -36,16 +38,12 @@ class WebController:
         self._available_languages: List[Language] = self._persistence_service.get_available_languages()
         self._dict_translator: DictTranslationService = DictTranslationService(self._available_languages)
 
-
-    def get_default_languages(self) -> InfoResponseDefaultDictLang:
-        return PersistenceService().get_default_languages()
-
     def dict_available_languages_cached(self):
         if os.environ.get('PERSISTENCE_CACHE_LANGUAGES', True) \
                 and len(self._available_languages) > 0:
             return self._available_languages
 
-        self._available_languages = PersistenceService().get_default_languages()
+        self._available_languages = self._persistence_service.get_available_languages()
         return self._available_languages
 
     def autocomplete_dict_word(self, dict_request: DictRequest) -> List[str]:
@@ -101,3 +99,8 @@ class WebController:
 
     def get_request_log(self) -> List[DictRequest]:
         return self._persistence_service.get_all_dict_requests()
+
+    def anki_user_logged_in(self, auth_headers: UnsignedAuthHeaders | None) -> bool:
+        return auth_headers is not None \
+            and auth_headers.uuid is not None \
+            and AnkiConnectFetcher.check_if_profile_present(auth_headers.uuid)

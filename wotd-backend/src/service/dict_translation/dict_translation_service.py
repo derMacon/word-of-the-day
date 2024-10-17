@@ -14,6 +14,7 @@ DEFAULT_RESULT_NUM = 10
 class DictTranslationService:
 
     def __init__(self, available_languages: List[Language]):
+        app_log.debug(f'initialized dict translation service with languages: {available_languages}')
         self._dict_map = {
             member.language_uuid: enchant.Dict(member.enchant_key) for member in available_languages
         }

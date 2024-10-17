@@ -1,6 +1,5 @@
 import copy
 import csv
-import logging
 import os
 import threading
 from threading import Lock
@@ -120,6 +119,7 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     _delete_pushed_duplicates(duplicate_remote_cards)
 
     cards_to_push.extend(duplicate_remote_cards)
+    _unmerge_backsides(cards_to_push)
     _delete_exact_duplicates(cards_to_push)
     _merge_duplicate_fronts(cards_to_push)
 
@@ -194,6 +194,23 @@ def _delete_exact_duplicates(cards_to_push: List[AnkiCard]) -> None:
     cards_to_push.extend(unique_lst_copy)
 
 
+def _unmerge_backsides(cards_to_push: List[AnkiCard]) -> None:
+    new_cards = []
+    for card in cards_to_push:
+        variations = card.back.split(MERGING_SEPERATOR)
+        for curr_variation in variations:
+            new_cards.append(AnkiCard(
+                item_ids=card.item_ids,
+                deck=card.deck,
+                front=card.front,
+                back=curr_variation,
+                ts=now()
+            ))
+
+    cards_to_push.clear()
+    cards_to_push.extend(new_cards)
+
+
 def _merge_duplicate_fronts(cards_to_push: List[AnkiCard]) -> None:
     # used_decks = list(set([card.deck for card in cards_to_push]))
     # deck_mapping = {}
@@ -230,13 +247,6 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
             PersistenceService().update_items_status(item_ids, RequestStatus.SYNCED)
         else:
             app_log.error(f"not able to push card batch {card_batch} - push response: {push_response}")
-
-
-def _persist_anki_cards_in_batches(cards: List[AnkiCard]) -> None:
-    # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
-    # for card_batch in chunked(cards, DB_BATCH_SIZE):
-    #     PersistenceService().insert_anki_cards(card_batch)
-    pass
 
 
 def _delete_elems_in_batches(ids_to_delete: List[int]):

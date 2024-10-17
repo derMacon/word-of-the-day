@@ -11,6 +11,12 @@ services:
       - myapp:/data
     networks:
       - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 100
 
   db:
     image: postgres:alpine3.19
@@ -22,23 +28,61 @@ services:
       - ./wotd-db/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ./wotd-db/config/.env
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 20
 
   backend:
+    depends_on:
+      - db
+      - anki_connect
     image: "dermacon/wotd_backend:1.0"
+    container_name: wotd_backend
     build: ./wotd-backend/
     env_file: .env
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - ANKI_CONNECT_HOST=anki_connect
+      - ANKI_CONNECT_DATA_PORT=8765
+      - ANKI_CONNECT_LOGIN_PORT=5900
     ports:
       - "5000:5000"
+    networks:
+      - app_network
     volumes:
       - ./logs/wotd_backend/:/app/tmp/logs/
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 20
 
-  # frontend:
-  #   depends_on:
-  #       - backend
-  #   image: "dermacon/checklist-paste-bin_frontend:1.0"
-  #   build: ./frontend/
-  #   ports:
-  #     - "8080:80"
+  frontend:
+    depends_on:
+        - backend
+    container_name: wotd_frontend
+    image: "dermacon/wotd_frontend"
+    build: ./wotd-frontend/
+    environment:
+      - WOTD_BACKEND_HOST=backend
+      - WOTD_BACKEND_PORT=5000
+    ports:
+      - "3000:80"
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+          pids: 20
 
 networks:
   app_network:
