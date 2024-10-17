@@ -362,3 +362,4 @@ frontend/node_modules/
 **/auth_cookies.db
 **/_volumes/
 **/playground*
+**/tmp/

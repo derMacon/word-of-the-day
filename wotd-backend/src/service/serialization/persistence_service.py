@@ -139,7 +139,7 @@ class PersistenceService:
             sql_insert = (
                 "INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s) "
-                "ON CONFLICT (deck, input, output, status) DO NOTHING "
+                "ON CONFLICT (deck, input, output) DO UPDATE SET status = %s "
                 "RETURNING dict_options_item_id;"
             )
             self._cursor.execute(sql_insert, (
@@ -150,6 +150,7 @@ class PersistenceService:
                 curr_opt.selected,
                 curr_opt.status,
                 curr_opt.option_response_ts,
+                curr_opt.status,
             ))
             sql_log.debug(self._cursor.query)
             curr_opt.dict_options_item_id = self._cursor.fetchone()[0]
@@ -188,11 +189,6 @@ class PersistenceService:
         app_log.debug(f'sql update id placeholder: {id_placeholder}')
 
         self._conn.commit()
-        self._cursor.execute(
-            "select selected from dict_options_item "
-            f"where dict_options_item_id in {id_placeholder};")
-        selected_state = not self._cursor.fetchone()[0]
-        app_log.debug(f"new selected state of items with ids {item_ids}: {selected_state}")
 
         # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "

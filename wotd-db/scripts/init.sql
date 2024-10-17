@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS dict_options_item (
   selected BOOLEAN NOT NULL,
   status VARCHAR(100) NOT NULL,
   option_response_ts timestamp NOT NULL,
-  CONSTRAINT unique_dict_option UNIQUE (deck, input, output, status)
+  CONSTRAINT unique_dict_option UNIQUE (deck, input, output)
 );
 
 CREATE TABLE IF NOT EXISTS dict_request (
