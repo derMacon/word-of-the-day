@@ -5,6 +5,15 @@ FROM node:lts-slim as build-stage
 
 WORKDIR /app
 
+
+ARG WOTD_VERSION
+ARG WOTD_BACKEND_PORT
+
+# Set environment variables for the React app
+ENV WOTD_VERSION=${WOTD_VERSION}
+ENV WOTD_BACKEND_PORT=${WOTD_BACKEND_PORT}
+
+
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 

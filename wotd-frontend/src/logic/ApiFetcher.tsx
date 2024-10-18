@@ -9,14 +9,15 @@ import {ApiHealthInformation} from "../model/ApiHealthInformation";
 import {InfoRequestHousekeeping} from "../model/InfoRequestHousekeeping";
 import {ApiAnkiUserLoggedIn} from "../model/ApiAnkiUserLoggedIn";
 
-const WOTD_BACKEND_HOST: string = process.env.WOTD_BACKEND_HOST || 'localhost'
-const WOTD_BACKEND_PORT: string = process.env.WOTD_BACKEND_PORT || '5000'
+const WOTD_BACKEND_HOST: string = process.env.REACT_APP_WOTD_BACKEND_HOST || 'localhost'
+const WOTD_BACKEND_PORT: string = process.env.REACT_APP_WOTD_BACKEND_PORT || '5000'
 
 export const WOTD_BACKEND_SERVER_ADDRESS: string = 'http://' + WOTD_BACKEND_HOST + ":" + WOTD_BACKEND_PORT
 export const WOTD_API_BASE: string = WOTD_BACKEND_SERVER_ADDRESS + '/api/v1'
 export const WOTD_ANKI_DOMAIN: string = WOTD_API_BASE + '/anki'
 export const WOTD_DICTIONARY_BASE: string = WOTD_API_BASE + '/dict'
 
+console.log('backend address: ', WOTD_BACKEND_SERVER_ADDRESS)
 
 const DEFAULT_HEADERS = {
     'Accept': 'application/json',

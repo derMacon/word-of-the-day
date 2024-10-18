@@ -1,6 +1,7 @@
 import dataclasses
 import io
 import json
+import os
 from datetime import datetime, time
 from typing import List
 from typing import Tuple
@@ -15,6 +16,7 @@ from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.env_collection import GeneralEnv
 from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.info_response_user_logged_in import InfoResponseUserLoggedIn
@@ -33,7 +35,9 @@ def health_check() -> Tuple[Response, int]:
 
 @main.route("/version")
 def version() -> Tuple[Response, int]:
-    return jsonify({'version': '1.0.1'}), 200
+    wotd_version = os.getenv(GeneralEnv.ENV_WOTD_VERSION.value, 'no version specified')
+    app_log.info(f'wotd version: {wotd_version}')
+    return jsonify({'version': wotd_version}), 200
 
 
 @main.route("/anki/login", methods=['POST'])

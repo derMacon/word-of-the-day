@@ -1,5 +1,8 @@
 version: '3.8'
 
+x-common-variables: &common-variables
+  WOTD_VERSION: '2.0.1'
+
 services:
   anki_connect:
     image: "thisisnttheway/headless-anki:main"
@@ -46,11 +49,12 @@ services:
     build: ./wotd-backend/
     env_file: .env
     environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - ANKI_CONNECT_HOST=anki_connect
-      - ANKI_CONNECT_DATA_PORT=8765
-      - ANKI_CONNECT_LOGIN_PORT=5900
+      <<: *common-variables
+      POSTGRES_HOST: 'db'
+      POSTGRES_PORT: '5432'
+      ANKI_CONNECT_HOST: 'anki_connect'
+      ANKI_CONNECT_DATA_PORT: '8765'
+      ANKI_CONNECT_LOGIN_PORT: '5900'
     ports:
       - "5000:5000"
     networks:
@@ -69,10 +73,11 @@ services:
         - backend
     container_name: wotd_frontend
     image: "dermacon/wotd_frontend"
-    build: ./wotd-frontend/
-    environment:
-      - WOTD_BACKEND_HOST=backend
-      - WOTD_BACKEND_PORT=5000
+    build:
+      context: ./wotd-frontend/
+      args:
+        <<: *common-variables
+        WOTD_BACKEND_PORT: '5000'
     ports:
       - "3000:80"
     networks:
