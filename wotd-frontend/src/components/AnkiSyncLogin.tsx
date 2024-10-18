@@ -1,6 +1,6 @@
 import Offcanvas from "react-bootstrap/Offcanvas";
+import {Button, ButtonGroup, Col} from "react-bootstrap";
 import Form from "react-bootstrap/Form";
-import {Button} from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import React, {useEffect, useState} from "react";
 import Alert from 'react-bootstrap/Alert';
@@ -96,19 +96,28 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
         </Alert>
 
     const spinner: React.JSX.Element =
-        <Spinner
-            as="span"
-            animation="grow"
-            size="sm"
-            role="status"
-            aria-hidden="true"
-        />
+        <>
+            <div className="d-flex">
+                <div>
+                    <Spinner
+                        as="span"
+                        animation="grow"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+
+                    />
+                </div>
+                <p className="px-3">Might take up to a minute to setup</p>
+            </div>
+        </>
 
     const loggedInStatus: React.JSX.Element =
         <Alert variant="success">
             <Alert.Heading>Anki Web Login</Alert.Heading>
             <p>
-                You are currently logged into your anki web account under <b>{props.cookieProvider.plainUsername}</b>.
+                You are currently logged into your anki web account
+                under <b>{props.cookieProvider.plainUsername}</b>.
             </p>
             <p>
                 The next synchronization with Anki web will take place on {nextSync}.
