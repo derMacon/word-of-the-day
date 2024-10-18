@@ -8,7 +8,7 @@ echo "** Word of the day **"
 echo "*********************"
 echo " - starting wotd project at $(pwd)"
 
-if [ ! -e ./.env2 ]; then
+if [ ! -e ./.env ]; then
     echo " - .env file does not exist, not able to start cluster"
     echo " - take a look at the example .env file at ./invalid-example.env"
     echo "-----------"
