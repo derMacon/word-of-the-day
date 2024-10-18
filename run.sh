@@ -15,8 +15,9 @@ if [ ! -e ./.env ]; then
     cat ./invalid-example.env
     echo -e "-----------\n"
 else
-    echo "- starting all wotd docker containers"
-    echo "- logs are available at ./logs"
+    echo " - starting all wotd docker containers"
+    echo -e " - logs are available at ./logs\n"
     docker-compose up -d
+    echo ""
 fi
 
