@@ -124,10 +124,10 @@ export function AnkiSyncLogin(props: Readonly<AnkiSyncLoginProps>) {
             </p>
             <hr/>
             <div className="d-flex">
-                <Button onClick={() => ankiApiTriggerManualHousekeeping(props.cookieProvider.getHeaders())}
+                {/* <Button onClick={() => ankiApiTriggerManualHousekeeping(props.cookieProvider.getHeaders())}
                         variant="success" className="me-2">
                     Sync Now!
-                </Button>
+                </Button> */}
                 <Button onClick={() => props.cookieProvider.cleanAllCookies()} variant="outline-success">
                     Logout
                 </Button>

@@ -106,6 +106,10 @@ class AnkiConnectFetcher:
 
     @staticmethod
     def check_if_deck_is_present(deck_name: str) -> bool:
+        return deck_name in AnkiConnectFetcher.get_all_deck_names()
+
+    @staticmethod
+    def get_all_deck_names() -> List[str]:
         data = dataclasses.asdict(AnkiConnectRequestGetDeckNames())
         plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
         anki_connect_response: AnkiConnectResponseGetDeckNames = AnkiConnectResponseGetDeckNames(**plain_response)
@@ -116,7 +120,7 @@ class AnkiConnectFetcher:
                 or anki_connect_response.error is not None):
             raise AnkiConnectError(f'unable to retrieve deck names from api :: {anki_connect_response}')
 
-        return deck_name in anki_connect_response.result
+        return anki_connect_response.result
 
     @staticmethod
     def _create_single_deck(deck_name: str) -> None:
@@ -239,4 +243,20 @@ class AnkiConnectFetcher:
         app_log.debug(f'anki connect response for sync: {anki_connect_response}')
 
         if anki_connect_response is None or anki_connect_response.error is not None:
-            raise AnkiConnectError(f'could not sync with anki web: {anki_connect_response}')
+            app_log.error(f'could not sync with anki web: {anki_connect_response}')
+
+    @staticmethod
+    def create_init_sync() -> None:
+        app_log.debug('create initial sync')
+        deck = 'wotd'  # TODO use constant
+        AnkiConnectFetcher._create_single_deck(deck)
+        anki_cards: AnkiCard = AnkiCard(
+            deck=deck,
+            front='version',
+            back=os.getenv('WOTD_VERSION', '1.0.0'),
+            ts=now(),
+        )
+
+        AnkiConnectFetcher._create_decks_if_needed([anki_cards])
+        AnkiConnectFetcher._add_notes([anki_cards])
+        AnkiConnectFetcher.sync_anki_web()

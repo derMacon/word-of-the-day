@@ -44,11 +44,7 @@ def version() -> Tuple[Response, int]:
 def anki_login():
     with MUTEX:
         anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
-
-        uuid = VncService().login(
-            username=anki_login_request.username,
-            password=anki_login_request.password
-        )
+        uuid = WebController().login(anki_login_request)
 
         signed_header_obj = SignatureService().create_signed_header_dict(
             username=anki_login_request.username,

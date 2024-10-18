@@ -253,20 +253,40 @@ class PersistenceService:
 
     @_database_error_decorator
     def get_all_auth_headers(self) -> List[UnsignedAuthHeaders]:
-        self._cursor.execute("SELECT * FROM unsigned_auth_headers;")
-        return self._cursor.fetchall()
-
-
-    @_database_error_decorator
-    def delete_auth_header(self, auth_header: List[UnsignedAuthHeaders]) -> None:
-        for curr_header in auth_header:
-            if self._auth_header_exists(curr_header):
-                app_log.debug(f"deleting auth header: {curr_header}")
-            else:
-                app_log.error(f"header should be deleted but does not exist: {curr_header}")
+        self._cursor.execute("SELECT * FROM unsigned_auth_header;")
+        output: List[UnsignedAuthHeaders] = []
+        for curr_tuple in self._cursor.fetchall():
+            output.append(UnsignedAuthHeaders(
+                username=curr_tuple[1],
+                uuid=curr_tuple[2],
+            ))
+        app_log.debug(f'get all auth headers: {output}')
+        return output
 
     @_database_error_decorator
-    def _auth_header_exists(self, auth_header_pk) -> bool:
-        app_log.debug(f"checking if auth header with pk exists: {auth_header_pk}")
-        # TODO
-        return True
+    def delete_auth_header(self, auth_header: UnsignedAuthHeaders) -> None:
+        app_log.debug(f'delete auth header: {auth_header}')
+        sql = "DELETE FROM unsigned_auth_header WHERE username=%s and uuid=%s;"
+        self._cursor.execute(sql, (
+            auth_header.username,
+            auth_header.uuid,
+        ))
+        self._conn.commit()
+
+        # if self._auth_header_exists(auth_header):
+        #     app_log.debug(f"deleting auth header: {auth_header}")
+        # else:
+        #     app_log.error(f"header should be deleted but does not exist: {auth_header}")
+
+    # @_database_error_decorator
+    # def _auth_header_exists(self, auth_header: UnsignedAuthHeaders) -> bool:
+    #     app_log.debug(f"checking if auth header with pk exists: {auth_header}")
+    #     sql = "SELECT * FROM unsigned_auth_header WHERE username=%s and uuid=%s;"
+    #     self._cursor.execute(sql, (
+    #         auth_header.username,
+    #         auth_header.uuid,
+    #     ))
+    #     res = self._cursor.fetchall()
+    #     header_exist = res is not None or len(res) > 0
+    #     app_log.debug(f'auth header exists: {header_exist} - {auth_header}')
+    #     return header_exist

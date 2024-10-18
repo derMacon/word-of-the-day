@@ -4,14 +4,14 @@ from typing import List
 from dictcc import Dict
 from singleton_decorator import singleton
 
+from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem, from_translation_tuples
 from src.data.dict_input.dict_request import DictRequest
-from src.data.dict_input.info_request_default_dict_lang import InfoResponseDefaultDictLang
 from src.data.dict_input.language_uuid import Language
-from src.data.error.anki_connect_error import AnkiConnectError
 from src.data.error.database_error import DatabaseError
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
+from src.service.anki_connect.vnc_service import VncService
 from src.service.dict_translation.dict_translation_service import DictTranslationService
 from src.service.serialization.persistence_service import PersistenceService
 from src.utils.logging_config import app_log
@@ -37,6 +37,18 @@ class WebController:
         self._persistence_service = PersistenceService()
         self._available_languages: List[Language] = self._persistence_service.get_available_languages()
         self._dict_translator: DictTranslationService = DictTranslationService(self._available_languages)
+
+    def login(self, anki_login_request: AnkiLoginRequest) -> str:
+        vnc_service = VncService()
+        uuid = vnc_service.login(
+            username=anki_login_request.username,
+            password=anki_login_request.password
+        )
+        # check if no decks present - need to init with some cards in order to be able to sync later on
+        if len(AnkiConnectFetcher.get_all_deck_names()) < 2:
+            vnc_service.confirm_sync()
+            AnkiConnectFetcher.create_init_sync()
+        return uuid
 
     def dict_available_languages_cached(self):
         if os.environ.get('PERSISTENCE_CACHE_LANGUAGES', True) \
