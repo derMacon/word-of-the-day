@@ -231,26 +231,42 @@ class PersistenceService:
         self._cursor.execute("SELECT * FROM dict_request;")
         return self._cursor.fetchall()
 
-    # TODO delete this once it's clear that it's not being used
-    # @_database_error_decorator  # type: ignore
-    # def insert_anki_cards(self, cards: List[AnkiCard]) -> List[AnkiCard]:
-    #     app_log.debug(f'persisting cards: {cards}')
-    #
-    #     for curr_card in cards:
-    #         sql_insert = (
-    #             "INSERT INTO anki_backlog (username, deck, front, back) "
-    #             "VALUES (%s, %s, %s, %s) RETURNING anki_id;")
-    #         self._cursor.execute(sql_insert, (
-    #             curr_card.username,
-    #             curr_card.deck,
-    #             curr_card.front,
-    #             curr_card.back
-    #         ))
-    #         app_log.debug('after insert')
-    #         curr_card.anki_id = self._cursor.fetchone()[0]
-    #         app_log.debug('after fetchone')
-    #
-    #     self._conn.commit()
-    #     app_log.debug('after commit')
-    #     return cards
-    #
+    @_database_error_decorator  # type: ignore
+    def insert_single_auth_headers(self, auth_header: UnsignedAuthHeaders) -> None:
+        """
+        saves the auth headers into the db. Useful to keep track who committed something in order to be able to
+        keep track of what needs to be pushed during housekeeping
+        """
+        app_log.debug(f'persisting auth header: {auth_header}')
+        sql_insert = (
+            "INSERT INTO unsigned_auth_header (username, uuid) "
+            "VALUES (%s, %s)"
+            "ON CONFLICT (username, uuid) DO NOTHING;"
+        )
+        self._cursor.execute(sql_insert, (
+            auth_header.username,
+            auth_header.uuid,
+        ))
+        sql_log.debug(self._cursor.query)
+
+        self._conn.commit()
+
+    @_database_error_decorator
+    def get_all_auth_headers(self) -> List[UnsignedAuthHeaders]:
+        self._cursor.execute("SELECT * FROM unsigned_auth_headers;")
+        return self._cursor.fetchall()
+
+
+    @_database_error_decorator
+    def delete_auth_header(self, auth_header: List[UnsignedAuthHeaders]) -> None:
+        for curr_header in auth_header:
+            if self._auth_header_exists(curr_header):
+                app_log.debug(f"deleting auth header: {curr_header}")
+            else:
+                app_log.error(f"header should be deleted but does not exist: {curr_header}")
+
+    @_database_error_decorator
+    def _auth_header_exists(self, auth_header_pk) -> bool:
+        app_log.debug(f"checking if auth header with pk exists: {auth_header_pk}")
+        # TODO
+        return True

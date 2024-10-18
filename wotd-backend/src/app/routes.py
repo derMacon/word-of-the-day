@@ -8,7 +8,7 @@ from typing import Tuple
 from flask import jsonify, request, Response, send_file
 
 from src.app import main
-from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX
+from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX, trigger_complete_cycle
 from src.controller.web_controller import WebController, health_check_wrapper
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
@@ -143,6 +143,16 @@ def manually_trigger_housekeeping():
     app_log.debug('manually triggering housekeeping')
     headers: UnsignedAuthHeaders = _extract_unsigned_headers()
     trigger_housekeeping(headers)
+    return '', 200
+
+@main.route("/anki/trigger-cycle")
+def manually_trigger_cycle():
+    """
+    difference to the individual housekeeping trigger: trigger housekeeping for all persisted auth headers
+    @return: empty http response
+    """
+    app_log.debug('manually trigger cycle')
+    trigger_complete_cycle()
     return '', 200
 
 

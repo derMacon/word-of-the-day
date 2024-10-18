@@ -30,6 +30,15 @@ FALLBACK_DECK_MAX_SIZE = 500
 MUTEX = Lock()
 
 
+def trigger_complete_cycle():
+    app_log.info('triggering complete housekeeping cycle')
+    # persistence_service_singleton: PersistenceService = PersistenceService()
+    # for curr_header in persistence_service_singleton.get_all_auth_headers():
+    #     trigger_housekeeping(curr_header)
+    #     persistence_service_singleton.delete_auth_header(curr_header)
+    app_log.info('finished housekeeping cycle')
+
+
 def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
     if auth_headers is None:
         raise MissingHeadersError('missing headers when syncing anki push')

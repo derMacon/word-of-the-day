@@ -74,6 +74,8 @@ class WebController:
             for index, item in enumerate(options):
                 item.dict_options_item_id = index
             return options
+        else:
+            self._persistence_service.insert_single_auth_headers(auth_headers)
 
         update_request_status(
             original_input=dict_request.input,
