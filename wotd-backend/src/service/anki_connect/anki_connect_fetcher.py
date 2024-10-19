@@ -13,12 +13,14 @@ from src.data.anki.anki_connect_delete_notes import AnkiConnectRequestDeleteNote
 from src.data.anki.anki_connect_find_cards import AnkiConnectRequestFindCards, AnkiConnectResponseFindCards
 from src.data.anki.anki_connect_get_deck_names import AnkiConnectRequestGetDeckNames, AnkiConnectResponseGetDeckNames
 from src.data.anki.anki_connect_get_profiles import AnkiConnectRequestGetProfiles, AnkiConnectResponseGetProfiles
+from src.data.anki.anki_connect_gui_deck_browser import AnkiConnectRequestGuiDeckBrowser, \
+    AnkiConnectResponseGuiDeckBrowser
 from src.data.anki.anki_connect_load_profile import AnkiConnectRequestLoadProfile
 from src.data.anki.anki_connect_notes_info import AnkiConnectRequestNotesInfo, AnkiConnectResponseNotesInfo
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
 from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
-from src.data.dict_input.env_collection import ConnectionEnv
+from src.data.dict_input.env_collection import ConnectionEnv, GeneralEnv
 from src.data.error.anki_connect_error import AnkiConnectError
 from src.utils.logging_config import app_log
 
@@ -106,6 +108,10 @@ class AnkiConnectFetcher:
 
     @staticmethod
     def check_if_deck_is_present(deck_name: str) -> bool:
+        return deck_name in AnkiConnectFetcher.get_all_deck_names()
+
+    @staticmethod
+    def get_all_deck_names() -> List[str]:
         data = dataclasses.asdict(AnkiConnectRequestGetDeckNames())
         plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
         anki_connect_response: AnkiConnectResponseGetDeckNames = AnkiConnectResponseGetDeckNames(**plain_response)
@@ -116,7 +122,7 @@ class AnkiConnectFetcher:
                 or anki_connect_response.error is not None):
             raise AnkiConnectError(f'unable to retrieve deck names from api :: {anki_connect_response}')
 
-        return deck_name in anki_connect_response.result
+        return anki_connect_response.result
 
     @staticmethod
     def _create_single_deck(deck_name: str) -> None:
@@ -239,4 +245,34 @@ class AnkiConnectFetcher:
         app_log.debug(f'anki connect response for sync: {anki_connect_response}')
 
         if anki_connect_response is None or anki_connect_response.error is not None:
-            raise AnkiConnectError(f'could not sync with anki web: {anki_connect_response}')
+            app_log.error(f'could not sync with anki web: {anki_connect_response}')
+
+    @staticmethod
+    def create_init_sync() -> None:
+        app_log.debug('create initial sync')
+        deck = 'wotd'  # TODO use constant
+        AnkiConnectFetcher._create_single_deck(deck)
+        anki_cards: AnkiCard = AnkiCard(
+            deck=deck,
+            front='version',
+            back=os.getenv('WOTD_VERSION', os.getenv(GeneralEnv.ENV_WOTD_VERSION.value, '1.0.0')),
+            ts=now(),
+        )
+
+        AnkiConnectFetcher._create_decks_if_needed([anki_cards])
+        AnkiConnectFetcher._add_notes([anki_cards])
+        AnkiConnectFetcher.sync_anki_web()
+
+    @staticmethod
+    def reload_gui_deck_view() -> None:
+        app_log.debug('reloading gui deck view')
+        data = dataclasses.asdict(AnkiConnectRequestGuiDeckBrowser())
+        app_log.debug(f'anki connect gui deck browser request json: {data}')
+        plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseGuiDeckBrowser = AnkiConnectResponseGuiDeckBrowser(**plain_response)
+        app_log.debug(f'anki connect response for gui deck browser: {anki_connect_response}')
+
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            app_log.error(f'could not execute gui deck browser with anki web: {anki_connect_response}')
+
+

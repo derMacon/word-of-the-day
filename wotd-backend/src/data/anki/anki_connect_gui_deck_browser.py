@@ -4,12 +4,12 @@ from src.data.anki import ANKI_CONNECT_VERSION
 
 
 @dataclass(frozen=True)
-class AnkiConnectRequestSync:
-    action: str = 'sync'
+class AnkiConnectRequestGuiDeckBrowser:
+    action: str = 'guiDeckBrowser'
     version: int = ANKI_CONNECT_VERSION
 
 
 @dataclass(frozen=True)
-class AnkiConnectResponseSync:
+class AnkiConnectResponseGuiDeckBrowser:
     result: str
     error: str

@@ -1,5 +1,6 @@
 import filecmp
 import os
+import socket
 import time
 import uuid
 
@@ -9,12 +10,15 @@ from vncdotool import api
 from src.data.error.anki_vnc_error import AnkiVncError
 from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
-import socket
 
 LOGIN_MAX_RETRIES = 3
-NEED_TO_LOGIN_SCREENSHOT = 'res/vnc/expected-screens/need-to-download-collection-after-login.png'
+# TODO do we need these?
+NEED_TO_LOGIN_SCREENSHOT_01 = 'res/vnc/expected-screens/need-to-download-collection-after-login-01.png'
+NEED_TO_LOGIN_SCREENSHOT_02 = 'res/vnc/expected-screens/need-to-download-collection-after-login-02.png'
+NEED_TO_LOGIN_SCREENSHOT_03 = 'res/vnc/expected-screens/need-to-download-collection-after-login-03.png'
 INVALID_CREDENTIALS = 'res/vnc/expected-screens/invalid-credentials.png'
 ACCOUNT_REQUIRED = 'res/vnc/expected-screens/account-required-pop-up.png'
+EMPTY_COLLECTION = 'res/vnc/expected-screens/empty-collection.png'
 CURR_SCREENSHOT_PATH = 'res/vnc/screenshots-at-runtime/screenshot.png'
 
 
@@ -91,38 +95,41 @@ class VncService:
 
     def _login_anki_web(self, username, password):
         app_log.debug(f'login into anki web for user: {username}')
-        if not self._account_required_screen():
-            self._press_combination(['y'], delay_after_action=2)
+        self._press_combination(['y'], delay_after_action=2)
 
-        if self._account_required_screen():
-            app_log.debug('entering credentials')
-            self._click_mouse(450, 403)
-            self._type_str(username)
-            self._press_combination(['tab'])
-            self._type_str(password)
-            self._press_combination(['enter'], delay_after_action=2)
-            self._press_combination(['y'])
-            self._press_combination(['d'])
-            self._select_need_to_download_content_pop_up()
-        else:
-            app_log.debug('no account required screen shown')
+        app_log.debug('entering credentials')
+        self._click_mouse(450, 403, comment='click in textfield for credentials')
+        self._type_str(username)
+        self._press_combination(['tab'])
+        self._type_str(password)
+        self._press_combination(['enter'], delay_after_action=2)
+        self._press_combination(['y'])
+        self._press_combination(['d'])
+        self._select_need_to_download_content_pop_up()
 
         app_log.debug(f'after loging in for user: {username}')
 
-    def _press_combination(self, keys, repetitions=1, delay_after_action=.5):
+    def _press_combination(self, keys, repetitions=1, delay_after_action=.5, delay_between_actions=.3):
         for _ in range(repetitions):
             for curr_key in keys:
                 self._client.keyDown(curr_key)
             for curr_key in keys:
                 self._client.keyUp(curr_key)
+            if repetitions > 1:
+                time.sleep(delay_between_actions)
         time.sleep(delay_after_action)
 
+    def _click_mouse(self, x_pos: int, y_pos: int, delay_before_action=0, delay_after_action=0,
+                     comment: str | None = None):
+        if comment is not None:
+            app_log.debug(f'mouse click comment: {comment}')
 
-    def _click_mouse(self, x_pos: int, y_pos: int):
         app_log.debug(f'clicking mouse at: ({x_pos}, {y_pos})')
+        time.sleep(delay_before_action)
         self._client.mouseMove(x_pos, y_pos)
         self._client.mouseDown(1)
         self._client.mouseUp(1)
+        time.sleep(delay_after_action)
 
     def _type_str(self, content, delay_after_action=.5):
         for curr_char in content:
@@ -145,7 +152,7 @@ class VncService:
     def _select_need_to_download_content_pop_up(self):
         app_log.debug('before capturing screenshot')
         self._client.captureScreen(CURR_SCREENSHOT_PATH)
-        user_needs_to_select_remote_download = filecmp.cmp(CURR_SCREENSHOT_PATH, NEED_TO_LOGIN_SCREENSHOT)
+        user_needs_to_select_remote_download = filecmp.cmp(CURR_SCREENSHOT_PATH, NEED_TO_LOGIN_SCREENSHOT_01)
         app_log.debug(f'user needs to select remote download from pop up: {user_needs_to_select_remote_download}')
 
         if user_needs_to_select_remote_download:
@@ -162,8 +169,8 @@ class VncService:
         app_log.debug(f'user needs provided invalid credentials: {invalid_credentials}')
 
         if invalid_credentials:
-            self._press_combination(['enter']) # acknowledge invalid creds screen
-            self._click_mouse(560, 470) # cancel account required pop up
+            self._press_combination(['enter'])  # acknowledge invalid creds screen
+            self._click_mouse(560, 470)  # cancel account required pop up
 
         return invalid_credentials
 
@@ -173,3 +180,28 @@ class VncService:
         account_required = filecmp.cmp(CURR_SCREENSHOT_PATH, ACCOUNT_REQUIRED)
         app_log.debug(f'user needs to provide credentials: {account_required}')
         return account_required
+
+    def confirm_sync(self) -> None:
+        time.sleep(2)
+        # clicking 'download from anki web'
+        self._click_mouse(480, 510, delay_after_action=.5)
+        self._click_mouse(480, 510)
+
+        app_log.debug('confirming sync')
+        self._press_combination(['y'], delay_after_action=1)
+        self._click_mouse(635, 380, delay_after_action=.5)
+        self._click_mouse(635, 380, delay_after_action=.5)
+
+    def confirm_collection_upload(self) -> None:
+        self._click_mouse(590, 385,
+                          delay_before_action=1,
+                          comment='click confirm upload of local collection')
+
+    # TODO remove this
+    def _test(self) -> bool:
+        app_log.debug('test')
+        self._client.captureScreen(CURR_SCREENSHOT_PATH)
+        # account_required = filecmp.cmp(CURR_SCREENSHOT_PATH, EMPTY_COLLECTION)
+        # app_log.debug(f'out: {account_required}')
+        # return account_required
+        return True

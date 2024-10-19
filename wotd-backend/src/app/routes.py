@@ -1,6 +1,7 @@
 import dataclasses
 import io
 import json
+import os
 from datetime import datetime, time
 from typing import List
 from typing import Tuple
@@ -8,13 +9,14 @@ from typing import Tuple
 from flask import jsonify, request, Response, send_file
 
 from src.app import main
-from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX
+from src.controller.housekeeping_controller import trigger_housekeeping, MUTEX, trigger_complete_cycle
 from src.controller.web_controller import WebController, health_check_wrapper
 from src.data.anki.anki_login_request import AnkiLoginRequest
 from src.data.anki.token_type import HeaderType
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
 from src.data.dict_input.dict_options_item import DictOptionsItem
 from src.data.dict_input.dict_request import DictRequest
+from src.data.dict_input.env_collection import GeneralEnv
 from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDictLang
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.info_response_user_logged_in import InfoResponseUserLoggedIn
@@ -33,18 +35,16 @@ def health_check() -> Tuple[Response, int]:
 
 @main.route("/version")
 def version() -> Tuple[Response, int]:
-    return jsonify({'version': '1.0.1'}), 200
+    wotd_version = os.getenv(GeneralEnv.ENV_WOTD_VERSION.value, 'no version specified')
+    app_log.info(f'wotd version: {wotd_version}')
+    return jsonify({'version': wotd_version}), 200
 
 
 @main.route("/anki/login", methods=['POST'])
 def anki_login():
     with MUTEX:
         anki_login_request: AnkiLoginRequest = AnkiLoginRequest(**request.get_json())
-
-        uuid = VncService().login(
-            username=anki_login_request.username,
-            password=anki_login_request.password
-        )
+        uuid = WebController().login(anki_login_request)
 
         signed_header_obj = SignatureService().create_signed_header_dict(
             username=anki_login_request.username,
@@ -143,6 +143,16 @@ def manually_trigger_housekeeping():
     app_log.debug('manually triggering housekeeping')
     headers: UnsignedAuthHeaders = _extract_unsigned_headers()
     trigger_housekeeping(headers)
+    return '', 200
+
+@main.route("/anki/trigger-cycle")
+def manually_trigger_cycle():
+    """
+    difference to the individual housekeeping trigger: trigger housekeeping for all persisted auth headers
+    @return: empty http response
+    """
+    app_log.debug('manually trigger cycle')
+    trigger_complete_cycle()
     return '', 200
 
 

@@ -9,3 +9,4 @@ Requests==2.32.3
 singleton_decorator==1.0.0
 vncdotool==1.2.0
 more-itertools==10.5.0
+APScheduler==3.10.4

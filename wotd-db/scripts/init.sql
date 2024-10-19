@@ -33,3 +33,10 @@ CREATE TABLE IF NOT EXISTS dict_request (
   input VARCHAR(1000) NOT NULL,
   dict_request_ts timestamp NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS unsigned_auth_header (
+   header_pk SERIAL PRIMARY KEY,
+   username VARCHAR(100) NOT NULL,
+   uuid VARCHAR(100) NOT NULL,
+   CONSTRAINT unique_headers UNIQUE (username, uuid)
+);

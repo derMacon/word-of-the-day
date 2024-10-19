@@ -23,14 +23,27 @@ MAX_CONNECTION_TRIES = 3
 API_CONNECT_BATCH_SIZE = 10
 DB_BATCH_SIZE = 100
 FALLBACK_CSV_PATH = 'res/fallback-decks/csv'
-FALLBACK_DECK_NAME = 'wotd::fallback'
+ROOT_DECK_NAME = 'wotd'
+FALLBACK_DECK_NAME = f'{ROOT_DECK_NAME}::fallback'
 FALLBACK_CSV_DEFAULT_SEPERATOR = ';'
-FALLBACK_DECK_MAX_SIZE = 500
+FALLBACK_DECK_MAX_SIZE = int(os.getenv('FALLBACK_DECK_SIZE', 500))
 
 MUTEX = Lock()
 
 
+def trigger_complete_cycle():
+    app_log.info('triggering complete housekeeping cycle')
+    persistence_service_singleton: PersistenceService = PersistenceService()
+    for curr_header in persistence_service_singleton.get_all_auth_headers():
+        if AnkiConnectFetcher.check_if_profile_present(curr_header.uuid):
+            trigger_housekeeping(curr_header)
+        persistence_service_singleton.delete_auth_header(curr_header)
+    app_log.info('finished housekeeping cycle')
+
+
+# TODO do we need this threaded timer when using APScheduler?
 def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
+    app_log.debug(f'trigger housekeeping for: {auth_headers}')
     if auth_headers is None:
         raise MissingHeadersError('missing headers when syncing anki push')
 
@@ -64,7 +77,7 @@ def _wait_for_connection(housekeeping_interval):
 
 
 def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
-    app_log.debug('preparing data to push to anki connect')
+    app_log.debug(f'preparing data to push to anki connect: {auth_headers}')
     _push_fallback_decks(auth_headers)
     _push_dict_lookups(housekeeping_interval, auth_headers)
 
@@ -126,8 +139,7 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     # TODO flip and append cards to create more
     _sort_by_ts(cards_to_push)
     _push_anki_connect_in_batches(cards_to_push, auth_headers)
-    # _persist_anki_cards_in_batches(cards_to_push)
-    _delete_elems_in_batches(ids_to_delete)
+    _delete_persisted_elems_in_batches(ids_to_delete)
 
 
 def _find_pushed_duplicates(anki_cards: List[AnkiCard]) -> List[AnkiCard]:
@@ -239,6 +251,7 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
         item_ids = list(collapse([elem.item_ids for elem in card_batch]))
 
         push_response = AnkiConnectFetcher.api_push_cards(card_batch, auth_headers)
+        # VncService().confirm_sync()
         if push_response is not None and push_response.error is None:
 
             for (generated_id, anki_card) in zip(push_response.result, cards_to_push):
@@ -248,8 +261,10 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
         else:
             app_log.error(f"not able to push card batch {card_batch} - push response: {push_response}")
 
+    AnkiConnectFetcher.reload_gui_deck_view()
 
-def _delete_elems_in_batches(ids_to_delete: List[int]):
+
+def _delete_persisted_elems_in_batches(ids_to_delete: List[int]):
     # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
     for id_batch in chunked(ids_to_delete, DB_BATCH_SIZE):
         app_log.debug(f'id_to_delete: {id_batch}')

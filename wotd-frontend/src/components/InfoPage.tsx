@@ -89,7 +89,7 @@ export function InfoPage() {
                         alt="this slowpoke moves" className='w-75'/>
 
                     <h2 className='mt-4'>Version</h2>
-                    <p>Deployed version: 1.0.1</p>
+                    <p>Deployed version: {process.env.REACT_APP_WOTD_VERSION || 'no wotd version specified!'}</p>
 
                     <h2 className='mt-4'>Code</h2>
                     <p>The source code for this project is available on <a
