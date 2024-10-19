@@ -139,7 +139,7 @@ class PersistenceService:
             sql_insert = (
                 "INSERT INTO dict_options_item (username, deck, input, output, selected, status, option_response_ts) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s) "
-                "ON CONFLICT (deck, input, output) DO UPDATE SET status = %s "
+                "ON CONFLICT (username, deck, input, output) DO UPDATE SET status = %s "
                 "RETURNING dict_options_item_id;"
             )
             self._cursor.execute(sql_insert, (

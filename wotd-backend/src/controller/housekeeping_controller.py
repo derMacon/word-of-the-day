@@ -2,6 +2,7 @@ import copy
 import csv
 import os
 import threading
+import time
 from threading import Lock
 from time import sleep
 from typing import List, Tuple
@@ -22,6 +23,8 @@ from src.utils.logging_config import app_log
 MAX_CONNECTION_TRIES = 3
 API_CONNECT_BATCH_SIZE = 10
 DB_BATCH_SIZE = 100
+DB_BATCH_DELAY_SEC = .2
+CYCLE_DELAY_SEC = 2
 FALLBACK_CSV_PATH = 'res/fallback-decks/csv'
 ROOT_DECK_NAME = 'wotd'
 FALLBACK_DECK_NAME = f'{ROOT_DECK_NAME}::fallback'
@@ -38,6 +41,7 @@ def trigger_complete_cycle():
         if AnkiConnectFetcher.check_if_profile_present(curr_header.uuid):
             trigger_housekeeping(curr_header)
         persistence_service_singleton.delete_auth_header(curr_header)
+        time.sleep(CYCLE_DELAY_SEC)
     app_log.info('finished housekeeping cycle')
 
 
@@ -78,7 +82,7 @@ def _wait_for_connection(housekeeping_interval):
 
 def _push_data(housekeeping_interval, auth_headers: UnsignedAuthHeaders):
     app_log.debug(f'preparing data to push to anki connect: {auth_headers}')
-    _push_fallback_decks(auth_headers)
+    # _push_fallback_decks(auth_headers)
     _push_dict_lookups(housekeeping_interval, auth_headers)
 
 
@@ -126,7 +130,7 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
         auth_headers
     )
 
-    cards_to_push, ids_to_delete = _filter_elems_to_push(persisted_options)
+    cards_to_push, ids_to_delete = _filter_elems_to_push(persisted_options, auth_headers)
     _create_decks(cards_to_push)
     duplicate_remote_cards = _find_pushed_duplicates(cards_to_push)
     _delete_pushed_duplicates(duplicate_remote_cards)
@@ -161,15 +165,18 @@ def _delete_pushed_duplicates(duplicate_cards: List[AnkiCard]) -> None:
         AnkiConnectFetcher._delete_cards(curr_card_batch)
 
 
-def _filter_elems_to_push(persisted_options: List[DictOptionsItem]) -> Tuple[List[AnkiCard], List[int]]:
+def _filter_elems_to_push(persisted_options: List[DictOptionsItem], auth_headers: UnsignedAuthHeaders) -> Tuple[List[AnkiCard], List[int]]:
     cards_to_push: List[AnkiCard] = []
     ids_to_delete: List[int] = []
 
     for curr_option in persisted_options:
 
-        if curr_option.status == RequestStatus.OK and curr_option.selected:
+        if (curr_option.username == auth_headers.username
+                and curr_option.status == RequestStatus.OK
+                and curr_option.selected):
             app_log.debug(f"selected option with id '{curr_option.dict_options_item_id}' "
-                          f"with status {curr_option.status}")
+                          f"with status {curr_option.status} "
+                          f"for user {curr_option.username}")
 
             cards_to_push.append(
                 AnkiCard(
@@ -260,6 +267,8 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
             PersistenceService().update_items_status(item_ids, RequestStatus.SYNCED)
         else:
             app_log.error(f"not able to push card batch {card_batch} - push response: {push_response}")
+
+        time.sleep(DB_BATCH_DELAY_SEC)
 
     AnkiConnectFetcher.reload_gui_deck_view()
 
