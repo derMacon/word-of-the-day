@@ -13,6 +13,8 @@ from src.data.anki.anki_connect_delete_notes import AnkiConnectRequestDeleteNote
 from src.data.anki.anki_connect_find_cards import AnkiConnectRequestFindCards, AnkiConnectResponseFindCards
 from src.data.anki.anki_connect_get_deck_names import AnkiConnectRequestGetDeckNames, AnkiConnectResponseGetDeckNames
 from src.data.anki.anki_connect_get_profiles import AnkiConnectRequestGetProfiles, AnkiConnectResponseGetProfiles
+from src.data.anki.anki_connect_gui_deck_browser import AnkiConnectRequestGuiDeckBrowser, \
+    AnkiConnectResponseGuiDeckBrowser
 from src.data.anki.anki_connect_load_profile import AnkiConnectRequestLoadProfile
 from src.data.anki.anki_connect_notes_info import AnkiConnectRequestNotesInfo, AnkiConnectResponseNotesInfo
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
@@ -260,3 +262,17 @@ class AnkiConnectFetcher:
         AnkiConnectFetcher._create_decks_if_needed([anki_cards])
         AnkiConnectFetcher._add_notes([anki_cards])
         AnkiConnectFetcher.sync_anki_web()
+
+    @staticmethod
+    def reload_gui_deck_view() -> None:
+        app_log.debug('reloading gui deck view')
+        data = dataclasses.asdict(AnkiConnectRequestGuiDeckBrowser())
+        app_log.debug(f'anki connect gui deck browser request json: {data}')
+        plain_response = requests.post(url=AnkiConnectFetcher.ANKI_CONNECT_DATA_ADDRESS, json=data).json()
+        anki_connect_response: AnkiConnectResponseGuiDeckBrowser = AnkiConnectResponseGuiDeckBrowser(**plain_response)
+        app_log.debug(f'anki connect response for gui deck browser: {anki_connect_response}')
+
+        if anki_connect_response is None or anki_connect_response.error is not None:
+            app_log.error(f'could not execute gui deck browser with anki web: {anki_connect_response}')
+
+

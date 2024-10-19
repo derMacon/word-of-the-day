@@ -45,9 +45,11 @@ class WebController:
             password=anki_login_request.password
         )
         # check if no decks present - need to init with some cards in order to be able to sync later on
-        if len(AnkiConnectFetcher.get_all_deck_names()) < 2:
+        decknames = AnkiConnectFetcher.get_all_deck_names()
+        if len(decknames) == 1 and decknames[0] == 'Default':
             vnc_service.confirm_sync()
             AnkiConnectFetcher.create_init_sync()
+
         return uuid
 
     def dict_available_languages_cached(self):

@@ -41,6 +41,7 @@ def trigger_complete_cycle():
     app_log.info('finished housekeeping cycle')
 
 
+# TODO do we need this threaded timer when using APScheduler?
 def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
     app_log.debug(f'trigger housekeeping for: {auth_headers}')
     if auth_headers is None:
@@ -138,7 +139,7 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     # TODO flip and append cards to create more
     _sort_by_ts(cards_to_push)
     _push_anki_connect_in_batches(cards_to_push, auth_headers)
-    _delete_elems_in_batches(ids_to_delete)
+    _delete_persisted_elems_in_batches(ids_to_delete)
 
 
 def _find_pushed_duplicates(anki_cards: List[AnkiCard]) -> List[AnkiCard]:
@@ -260,8 +261,10 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
         else:
             app_log.error(f"not able to push card batch {card_batch} - push response: {push_response}")
 
+    AnkiConnectFetcher.reload_gui_deck_view()
 
-def _delete_elems_in_batches(ids_to_delete: List[int]):
+
+def _delete_persisted_elems_in_batches(ids_to_delete: List[int]):
     # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
     for id_batch in chunked(ids_to_delete, DB_BATCH_SIZE):
         app_log.debug(f'id_to_delete: {id_batch}')

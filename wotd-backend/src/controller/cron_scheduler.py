@@ -6,9 +6,8 @@ from apscheduler.triggers.cron import CronTrigger
 
 from src.controller.housekeeping_controller import trigger_complete_cycle
 from src.utils.logging_config import app_log
-import os
 
-CRON_EXPRESSION = os.getenv('WOTD_HOUSEKEEPING_CRON', '* * * * *')
+CRON_EXPRESSION = os.getenv('WOTD_HOUSEKEEPING_CRON', '0 4 * * *')  # default 4 am everyday
 
 
 def configure_housekeeping_background_scheduler():
