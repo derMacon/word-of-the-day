@@ -98,7 +98,7 @@ class VncService:
         self._press_combination(['y'], delay_after_action=2)
 
         app_log.debug('entering credentials')
-        self._click_mouse(450, 403)
+        self._click_mouse(450, 403, comment='click in textfield for credentials')
         self._type_str(username)
         self._press_combination(['tab'])
         self._type_str(password)
@@ -109,16 +109,23 @@ class VncService:
 
         app_log.debug(f'after loging in for user: {username}')
 
-    def _press_combination(self, keys, repetitions=1, delay_after_action=.5):
+    def _press_combination(self, keys, repetitions=1, delay_after_action=.5, delay_between_actions=.3):
         for _ in range(repetitions):
             for curr_key in keys:
                 self._client.keyDown(curr_key)
             for curr_key in keys:
                 self._client.keyUp(curr_key)
+            if repetitions > 1:
+                time.sleep(delay_between_actions)
         time.sleep(delay_after_action)
 
-    def _click_mouse(self, x_pos: int, y_pos: int, delay_after_action=0):
+    def _click_mouse(self, x_pos: int, y_pos: int, delay_before_action=0, delay_after_action=0,
+                     comment: str | None = None):
+        if comment is not None:
+            app_log.debug(f'mouse click comment: {comment}')
+
         app_log.debug(f'clicking mouse at: ({x_pos}, {y_pos})')
+        time.sleep(delay_before_action)
         self._client.mouseMove(x_pos, y_pos)
         self._client.mouseDown(1)
         self._client.mouseUp(1)
@@ -185,7 +192,12 @@ class VncService:
         self._click_mouse(635, 380, delay_after_action=.5)
         self._click_mouse(635, 380, delay_after_action=.5)
 
+    def confirm_collection_upload(self) -> None:
+        self._click_mouse(590, 385,
+                          delay_before_action=1,
+                          comment='click confirm upload of local collection')
 
+    # TODO remove this
     def _test(self) -> bool:
         app_log.debug('test')
         self._client.captureScreen(CURR_SCREENSHOT_PATH)

@@ -20,7 +20,7 @@ from src.data.anki.anki_connect_notes_info import AnkiConnectRequestNotesInfo, A
 from src.data.anki.anki_connect_sync import AnkiConnectRequestSync, AnkiConnectResponseSync
 from src.data.dict_input import now
 from src.data.dict_input.anki_login_response_headers import UnsignedAuthHeaders
-from src.data.dict_input.env_collection import ConnectionEnv
+from src.data.dict_input.env_collection import ConnectionEnv, GeneralEnv
 from src.data.error.anki_connect_error import AnkiConnectError
 from src.utils.logging_config import app_log
 
@@ -255,7 +255,7 @@ class AnkiConnectFetcher:
         anki_cards: AnkiCard = AnkiCard(
             deck=deck,
             front='version',
-            back=os.getenv('WOTD_VERSION', '1.0.0'),
+            back=os.getenv('WOTD_VERSION', os.getenv(GeneralEnv.ENV_WOTD_VERSION.value, '1.0.0')),
             ts=now(),
         )
 

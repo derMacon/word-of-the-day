@@ -49,6 +49,7 @@ class WebController:
         if len(decknames) == 1 and decknames[0] == 'Default':
             vnc_service.confirm_sync()
             AnkiConnectFetcher.create_init_sync()
+            vnc_service.confirm_collection_upload()
 
         return uuid
 
