@@ -55,7 +55,7 @@ services:
       ANKI_CONNECT_HOST: 'anki_connect'
       ANKI_CONNECT_DATA_PORT: '8765'
       ANKI_CONNECT_LOGIN_PORT: '5900'
-      DEBUG_DISABLE_CRON: True # TODO remove this
+      DEBUG_DISABLE_CRON: False
     ports:
       - "5000:5000"
     networks:
