@@ -17,8 +17,6 @@ from src.data.error.lang_not_found_error import LangNotFoundError
 from src.utils.logging_config import app_log, sql_log
 
 
-# TODO use singleton decorator in other services / controllers
-
 @singleton
 class PersistenceService:
     _conn = None
@@ -38,7 +36,6 @@ class PersistenceService:
                 or (SensitiveEnv.ENV_USER.value not in os.environ) \
                 or (SensitiveEnv.ENV_DB_NAME.value not in os.environ):
             app_log.error('invalid environment - shutting down')
-            # TODO handle this differently
             exit(1)
 
         try:
@@ -70,7 +67,7 @@ class PersistenceService:
         return self._cursor is not None
 
     # src: https://stackoverflow.com/questions/1263451/python-decorators-in-classes
-    def _database_error_decorator(foo):  # TODO rename to 'instance' or something like that
+    def _database_error_decorator(foo):
         def decorate(self, *args, **kwargs):
             with self._lock:
 
@@ -88,7 +85,6 @@ class PersistenceService:
 
         return decorate
 
-    # TODO use this
     def teardown(self):
         self._conn.commit()
         self._cursor.close()
@@ -172,7 +168,6 @@ class PersistenceService:
         selected_state = not self._cursor.fetchone()[0]
         app_log.debug(f"new selected state of item with id {item_id}: {selected_state}")
 
-        # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "
                       f"SET selected = {selected_state} "
                       f"WHERE dict_options_item_id = {item_id};")
@@ -190,7 +185,6 @@ class PersistenceService:
 
         self._conn.commit()
 
-        # TODO use wildcard pattern instead of format string - do this everywhere
         sql_update = (f"UPDATE dict_options_item "
                       f"SET status = '{status}' "
                       f"WHERE dict_options_item_id IN {id_placeholder};")
@@ -272,21 +266,3 @@ class PersistenceService:
             auth_header.uuid,
         ))
         self._conn.commit()
-
-        # if self._auth_header_exists(auth_header):
-        #     app_log.debug(f"deleting auth header: {auth_header}")
-        # else:
-        #     app_log.error(f"header should be deleted but does not exist: {auth_header}")
-
-    # @_database_error_decorator
-    # def _auth_header_exists(self, auth_header: UnsignedAuthHeaders) -> bool:
-    #     app_log.debug(f"checking if auth header with pk exists: {auth_header}")
-    #     sql = "SELECT * FROM unsigned_auth_header WHERE username=%s and uuid=%s;"
-    #     self._cursor.execute(sql, (
-    #         auth_header.username,
-    #         auth_header.uuid,
-    #     ))
-    #     res = self._cursor.fetchall()
-    #     header_exist = res is not None or len(res) > 0
-    #     app_log.debug(f'auth header exists: {header_exist} - {auth_header}')
-    #     return header_exist

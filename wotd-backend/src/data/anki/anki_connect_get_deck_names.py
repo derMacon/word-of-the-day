@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List
 
 from src.data.anki import ANKI_CONNECT_VERSION
 

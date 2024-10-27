@@ -1,12 +1,14 @@
 import os
+
 from flask import Blueprint
 from flask import Flask
 from flask_cors import CORS
 
-# TODO comment out when using the debugger
-
 if not os.getenv('DEBUG_SERVER', False):
+    # to be able to use the debugger in the routes of the
+    # server this must be disabled
     from gevent import monkey
+
     monkey.patch_all()
 
 main = Blueprint('main', __name__, url_prefix='/api/v1')

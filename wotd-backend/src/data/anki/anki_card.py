@@ -40,7 +40,7 @@ class AnkiCard:
 
     def merge_cards(self, other_cards) -> 'AnkiCard':
         if other_cards is None:
-            raise LogicError(f'anki card merge error - cannot merge null pointer')
+            raise LogicError('anki card merge error - cannot merge null pointer')
 
         if len(other_cards) == 0:
             return self

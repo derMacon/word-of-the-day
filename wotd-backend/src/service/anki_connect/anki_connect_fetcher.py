@@ -274,5 +274,3 @@ class AnkiConnectFetcher:
 
         if anki_connect_response is None or anki_connect_response.error is not None:
             app_log.error(f'could not execute gui deck browser with anki web: {anki_connect_response}')
-
-

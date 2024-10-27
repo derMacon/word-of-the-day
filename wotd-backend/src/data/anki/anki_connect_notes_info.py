@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import Dict
 
 from src.data.anki import ANKI_CONNECT_VERSION
-from src.data.anki.anki_card import AnkiCard
 
 
 @dataclass

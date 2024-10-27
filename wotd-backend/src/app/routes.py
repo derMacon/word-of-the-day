@@ -21,7 +21,6 @@ from src.data.dict_input.info_request_avail_dict_lang import InfoResponseAvailDi
 from src.data.dict_input.info_response_housekeeping import InfoResponseHousekeeping
 from src.data.dict_input.info_response_user_logged_in import InfoResponseUserLoggedIn
 from src.data.dict_input.option_select_request import OptionSelectRequest
-from src.service.anki_connect.vnc_service import VncService
 from src.service.serialization.signature_service import SignatureService
 from src.utils.logging_config import app_log
 
@@ -68,7 +67,6 @@ def dict_available_languages() -> Tuple[Response, int]:
     return jsonify(InfoResponseAvailDictLang(available_lang)), 200
 
 
-# TODO aren't we doing this already with the socket event handler? Isn't this a duplicate?
 @main.route("/dict/autocomplete-option", methods=['POST'])
 def autocomplete_word_options() -> Tuple[Response, int]:
     request_data = request.get_json()
@@ -144,6 +142,7 @@ def manually_trigger_housekeeping():
     headers: UnsignedAuthHeaders = _extract_unsigned_headers()
     trigger_housekeeping(headers)
     return '', 200
+
 
 @main.route("/anki/trigger-cycle")
 def manually_trigger_cycle():

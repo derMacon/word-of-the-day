@@ -12,7 +12,6 @@ from src.service.anki_connect.anki_connect_fetcher import AnkiConnectFetcher
 from src.utils.logging_config import app_log
 
 LOGIN_MAX_RETRIES = 3
-# TODO do we need these?
 NEED_TO_LOGIN_SCREENSHOT_01 = 'res/vnc/expected-screens/need-to-download-collection-after-login-01.png'
 NEED_TO_LOGIN_SCREENSHOT_02 = 'res/vnc/expected-screens/need-to-download-collection-after-login-02.png'
 NEED_TO_LOGIN_SCREENSHOT_03 = 'res/vnc/expected-screens/need-to-download-collection-after-login-03.png'
@@ -58,13 +57,9 @@ class VncService:
         )
 
     def login(self, username: str, password: str) -> str:
-        # TODO mutex with housekeeping so no connection gets interrupted?
         self.reset_connection()
-
         app_log.debug(f"user '{username}' tries to login")
-
         profile_name = str(uuid.uuid4())
-        # profile_name = 'test-profile-01'
 
         if AnkiConnectFetcher.check_if_profile_present(profile_name):
             raise AnkiVncError('anki profile already present - should not be the case since we want to create '
@@ -136,19 +131,6 @@ class VncService:
             self._client.keyPress(curr_char)
         time.sleep(delay_after_action)
 
-    # def api_push_card(self, anki_card: AnkiCard, headers: AnkiLoginResponseHeaders) -> bool:
-    #     app_log.debug(f'push anki card: {str(anki_card)}')
-    #     url = self.ANKI_API_BASE + '/add-card'
-    #     data = asdict(anki_card)
-    #     app_log.debug(f"push data '{data}' to url '{url}' with headers '{headers}'")
-    #     return requests.get(url, json=data, headers=headers.to_map()).ok
-
-    # def _sync_credentials_were_confirmed(self):
-    #     app_log.debug('before capturing screenshot')
-    #     self._client.captureScreen(CURR_SCREENSHOT_PATH)
-    #     # user_needs_to_select_remote_download = filecmp.cmp(CURR_SCREENSHOT_PATH, NEED_TO_LOGIN_SCREENSHOT)
-    #     # app_log.debug(f'user needs to select remote download from pop up: {user_needs_to_select_remote_download}')
-
     def _select_need_to_download_content_pop_up(self):
         app_log.debug('before capturing screenshot')
         self._client.captureScreen(CURR_SCREENSHOT_PATH)
@@ -157,9 +139,6 @@ class VncService:
 
         if user_needs_to_select_remote_download:
             app_log.debug('user clicking button download button')
-            # self._client.mouseMove(480, 510)
-            # self._client.mouseDown(1)
-            # self._client.mouseUp(1)
             self._click_mouse(480, 510)
 
     def _invalid_credentials(self) -> bool:
@@ -196,12 +175,3 @@ class VncService:
         self._click_mouse(590, 385,
                           delay_before_action=1,
                           comment='click confirm upload of local collection')
-
-    # TODO remove this
-    def _test(self) -> bool:
-        app_log.debug('test')
-        self._client.captureScreen(CURR_SCREENSHOT_PATH)
-        # account_required = filecmp.cmp(CURR_SCREENSHOT_PATH, EMPTY_COLLECTION)
-        # app_log.debug(f'out: {account_required}')
-        # return account_required
-        return True

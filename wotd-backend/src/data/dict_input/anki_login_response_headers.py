@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from src.data.anki.token_type import HeaderType
 
 
-# TODO delete this - it not used
 @dataclass
 class UnsignedAuthHeaders:
     username: str

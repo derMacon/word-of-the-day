@@ -45,7 +45,6 @@ def trigger_complete_cycle():
     app_log.info('finished housekeeping cycle')
 
 
-# TODO do we need this threaded timer when using APScheduler?
 def trigger_housekeeping(auth_headers: UnsignedAuthHeaders):
     app_log.debug(f'trigger housekeeping for: {auth_headers}')
     if auth_headers is None:
@@ -140,7 +139,6 @@ def _push_dict_lookups(housekeeping_interval, auth_headers: UnsignedAuthHeaders)
     _delete_exact_duplicates(cards_to_push)
     _merge_duplicate_fronts(cards_to_push)
 
-    # TODO flip and append cards to create more
     _sort_by_ts(cards_to_push)
     _push_anki_connect_in_batches(cards_to_push, auth_headers)
     _delete_persisted_elems_in_batches(ids_to_delete)
@@ -158,14 +156,12 @@ def _find_pushed_duplicates(anki_cards: List[AnkiCard]) -> List[AnkiCard]:
 
 
 def _delete_pushed_duplicates(duplicate_cards: List[AnkiCard]) -> None:
-    # TODO also persist in db before deleting them remote - in selectable items db table
-
-    # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
     for curr_card_batch in chunked(duplicate_cards, API_CONNECT_BATCH_SIZE):
         AnkiConnectFetcher._delete_cards(curr_card_batch)
 
 
-def _filter_elems_to_push(persisted_options: List[DictOptionsItem], auth_headers: UnsignedAuthHeaders) -> Tuple[List[AnkiCard], List[int]]:
+def _filter_elems_to_push(persisted_options: List[DictOptionsItem], auth_headers: UnsignedAuthHeaders) -> Tuple[
+    List[AnkiCard], List[int]]:
     cards_to_push: List[AnkiCard] = []
     ids_to_delete: List[int] = []
 
@@ -231,12 +227,6 @@ def _unmerge_backsides(cards_to_push: List[AnkiCard]) -> None:
 
 
 def _merge_duplicate_fronts(cards_to_push: List[AnkiCard]) -> None:
-    # used_decks = list(set([card.deck for card in cards_to_push]))
-    # deck_mapping = {}
-    # for deckname in used_decks:
-    #     cards_from_deck = [card for card in cards_to_push if card.deck == deckname]
-    #     deck_mapping.setdefault(deckname, []).append(cards_from_deck)
-
     mapping: dict[str, List[AnkiCard]] = {}
     for card in cards_to_push:
         tuple_key_identifier = (card.deck, card.front)
@@ -274,7 +264,6 @@ def _push_anki_connect_in_batches(cards_to_push: List[AnkiCard], auth_headers: U
 
 
 def _delete_persisted_elems_in_batches(ids_to_delete: List[int]):
-    # TODO wouldn't it be nice to have this batching mechanism in the called method itself?
     for id_batch in chunked(ids_to_delete, DB_BATCH_SIZE):
         app_log.debug(f'id_to_delete: {id_batch}')
         PersistenceService().delete_items_with_ids(id_batch)

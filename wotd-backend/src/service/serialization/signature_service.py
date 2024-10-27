@@ -1,6 +1,5 @@
 import os
 
-from flask import Response
 from itsdangerous import Signer
 from singleton_decorator import singleton
 
@@ -20,10 +19,8 @@ class SignatureService:
             HeaderType.SIGNED_UUID.value: self.sign(uuid)
         }
 
-
     def sign(self, input: str) -> str:
         return self.signer.sign(input).decode('utf-8')
 
     def unsign(self, signed_value) -> bool:
         return self.signer.unsign(signed_value).decode('utf-8')
-
